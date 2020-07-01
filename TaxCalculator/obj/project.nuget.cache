@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "DSre/Pu8quis7CgygeBQJWGh387tqFqfD9T4jfljXULMgwrFQVbjFXxuC9H0xOmURdYSUyJMiV5GAyzcAYs7cg==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Dale\\RiderProjects\\PersonalFinance\\TaxCalculator\\TaxCalculator.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Dale\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\Dale\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

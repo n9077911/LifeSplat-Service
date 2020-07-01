@@ -1,0 +1,5 @@
+C:\Users\Dale\RiderProjects\InterviewRevision\PersonalFinanceDB2\bin\Debug\PersonalFinanceDB2.dacpac
+C:\Users\Dale\RiderProjects\InterviewRevision\PersonalFinanceDB2\bin\Debug\PersonalFinanceDB2.dll
+C:\Users\Dale\RiderProjects\InterviewRevision\PersonalFinanceDB2\bin\Debug\PersonalFinanceDB2.pdb
+C:\Users\Dale\RiderProjects\InterviewRevision\PersonalFinanceDB2\obj\Debug\PersonalFinanceDB2.dll
+C:\Users\Dale\RiderProjects\InterviewRevision\PersonalFinanceDB2\obj\Debug\PersonalFinanceDB2.pdb
