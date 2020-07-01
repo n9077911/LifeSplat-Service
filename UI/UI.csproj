@@ -78,6 +78,10 @@
     <Compile Include="ViewModels\IncomeTaxViewModel.cs" />
     <Compile Include="ViewModels\CurrentWealthViewModel.cs" />
     <Compile Include="ViewModels\ShellViewModel.cs" />
+    <Compile Include="Models\TaxDescription.cs" />
+    <Compile Include="Views\IncomeTaxView.xaml.cs">
+      <DependentUpon>IncomeTaxView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\CurrentWealthView.xaml.cs">
       <DependentUpon>CurrentWealthView.xaml</DependentUpon>
     </Compile>
@@ -120,6 +124,10 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Page Include="Views\IncomeTaxView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Views\CurrentWealthView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
