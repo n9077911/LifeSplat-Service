@@ -26,9 +26,9 @@
         <!-- row1 -->
         <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="5">
             <Button x:Name="LoadIncomeTaxPage">Income Tax</Button>
+            <Button x:Name="LoadCurrentWealthPage" Margin="2,0,0,0">Current Wealth</Button>
         </StackPanel>
-        <ContentControl Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" 
-                        x:Name="ActiveItem" />
+        <ContentControl Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" x:Name="ActiveItem" />
        
     </Grid>
 </Window>

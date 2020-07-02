@@ -16,5 +16,9 @@ namespace UI.ViewModels
         {
             ActivateItem(new IncomeTaxViewModel());
         }
+        public void LoadCurrentWealthPage()
+        {
+            ActivateItem(new CurrentWealthViewModel());
+        }
     }
 }
