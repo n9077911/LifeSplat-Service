@@ -1,10 +1,11 @@
 ﻿using System;
+using TaxCalculator.ExternalInterface;
 
 namespace TaxCalculator
 {
-    public class IncomeTaxCalculator
+    public class IncomeTaxCalculator : IIncomeTaxCalculator
     {
-        public static TaxResult TaxFor(int payeSalary)
+        public TaxResult TaxFor(int payeSalary)
         {
             var result = new TaxResult();
 

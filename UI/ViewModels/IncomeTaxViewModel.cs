@@ -41,7 +41,7 @@ namespace UI.ViewModels
         {
             TaxDescriptions.Clear();
             var salary = Int32.Parse(_paye);
-            var taxResult = IncomeTaxCalculator.TaxFor(salary);
+            var taxResult = new IncomeTaxCalculator().TaxFor(salary);
             TaxDescriptions.Add(new TaxDescription { Description = "Income Tax:", Amount = taxResult.IncomeTax });
             TaxDescriptions.Add(new TaxDescription { Description = "N.I.:", Amount = taxResult.NationalInsurance });
             TaxDescriptions.Add(new TaxDescription { Description = "Take Home:", Amount = salary - taxResult.IncomeTax - taxResult.NationalInsurance });
