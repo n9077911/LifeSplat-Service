@@ -61,15 +61,23 @@
     <Folder Include="dbo\Stored Procedures" />
     <Folder Include="dbo\Tables" />
     <Folder Include="dbo\Views" />
+    <Folder Include="dbo\Scripts" />
   </ItemGroup>
   <ItemGroup>
-    <Build Include="dbo\Tables\User.sql" />
+    <Build Include="dbo\Tables\Player.sql" />
     <Build Include="dbo\Tables\PAYE.sql" />
+    <Build Include="dbo\Tables\PrivatePension.sql" />
+    <Build Include="dbo\Tables\RentalProperty.sql" />
+    <Build Include="dbo\Stored Procedures\InsertUserIfNotAlreadyAdded.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="PersonalFinanceDB.refactorlog" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PublishLocations\PersonalFinanceDB.publish.xml" />
+    <None Include="Analysis.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="dbo\Scripts\Script.PostDeployment.sql" />
   </ItemGroup>
 </Project>

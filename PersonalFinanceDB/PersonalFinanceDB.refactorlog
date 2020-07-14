@@ -14,4 +14,32 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="Amount" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="43123e89-e235-420f-bdcd-735df8cd466d" ChangeDateTime="07/13/2020 15:32:50">
+    <Property Name="ElementName" Value="[dbo].[PAYE].[UserId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[PAYE]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="PlayerId" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4d05ab0e-1126-468c-9828-55cd4f5b64ff" ChangeDateTime="07/13/2020 15:33:14">
+    <Property Name="ElementName" Value="[dbo].[PrivatePension].[User_Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[PrivatePension]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Player_Id" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7d04f1b9-5ebf-4429-8625-c4d05c815220" ChangeDateTime="07/13/2020 15:33:30">
+    <Property Name="ElementName" Value="[dbo].[PAYE].[PlayerId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[PAYE]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="[Player_Id]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="88f47a0b-d965-4fd6-99bf-35901b1aaeea" ChangeDateTime="07/13/2020 15:33:40">
+    <Property Name="ElementName" Value="[dbo].[RentalProperty].[UserId]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[RentalProperty]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="Player_Id" />
+  </Operation>
 </Operations>
