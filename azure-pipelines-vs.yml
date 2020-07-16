@@ -21,29 +21,20 @@ steps:
   inputs:
     restoreSolution: '$(solution)'
 
+#Build publishes to the artifacts directory.. but this is not the same as publishing an artifact.. see task: PublishBuildArtifacts@1
 - task: VSBuild@1
   inputs:
     solution: '$(solution)'
     msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
+    
+- task: VSTest@2
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
 
-
-#- task: DotNetCoreCLI@2
-#  displayName: Build
-#  inputs:
-#    command: build
-#    projects: '**/*.csproj'
-#    arguments: '--configuration $(buildConfiguration)' # Update this to match your need
-
-#- task: DotNetCoreCLI@2
-#  inputs:
-#    command: publish
-#    publishWebProjects: True
-#    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
-#    zipAfterPublish: True
-
-# this code takes all the files in $(Build.ArtifactStagingDirectory) and uploads them as an artifact of your build.
+#this takes the artifact from the artifact directory and publishes it
 - task: PublishBuildArtifacts@1
   inputs:
     pathtoPublish: '$(Build.ArtifactStagingDirectory)' 
