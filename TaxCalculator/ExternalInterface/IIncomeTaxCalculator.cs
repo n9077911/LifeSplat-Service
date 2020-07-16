@@ -2,6 +2,6 @@
 {
     public interface IIncomeTaxCalculator
     {
-        TaxResult TaxFor(int payeSalary);
+        ITaxResult TaxFor(int payeSalary);
     }
 }

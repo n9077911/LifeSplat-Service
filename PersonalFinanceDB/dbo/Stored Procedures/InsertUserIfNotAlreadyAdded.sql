@@ -5,8 +5,8 @@
 AS
 	DECLARE @dale_count INT
     SELECT @dale_count = count(*) 
-    FROM player
-    WHERE player.UserName = @userName
+    FROM Player
+    WHERE Player.UserName = @userName
 
 IF @dale_count < 1
     BEGIN
@@ -17,7 +17,7 @@ IF @dale_count < 1
     DECLARE @dale_id INT
     SELECT @dale_id = Id
     FROM Player
-    WHERE player.UserName = @userName
+    WHERE Player.UserName = @userName
 
     INSERT INTO PAYE (Player_Id, Amount)
     VALUES (@dale_id, @payeAmount)

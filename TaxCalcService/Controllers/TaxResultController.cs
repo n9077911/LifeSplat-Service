@@ -16,90 +16,11 @@ namespace TaxCalcService.Controllers
             _taxCalculator = taxCalculator;
         }
 
-        // GET: api/ToDoItems
+        // GET: api/TaxResults
         [HttpGet("{amount}")]
         public async Task<ActionResult<TaxResultDto>> GetTaxResult(int amount)
         {
             return await Task.Run(() => _taxCalculator.TaxFor(amount));
         }
-
-        // // GET: api/ToDoItems/5
-        // [HttpGet("{id}")]
-        // public async Task<ActionResult<ToDoItem>> GetToDoItem(long id)
-        // {
-        //     var toDoItem = await _context.ToDoItems.FindAsync(id);
-        //
-        //     if (toDoItem == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //
-        //     return toDoItem;
-        // }
-        //
-        // // PUT: api/ToDoItems/5
-        // // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        // [HttpPut("{id}")]
-        // public async Task<IActionResult> PutToDoItem(long id, ToDoItem toDoItem)
-        // {
-        //     if (id != toDoItem.Id)
-        //     {
-        //         return BadRequest();
-        //     }
-        //
-        //     _context.Entry(toDoItem).State = EntityState.Modified;
-        //
-        //     try
-        //     {
-        //         await _context.SaveChangesAsync();
-        //     }
-        //     catch (DbUpdateConcurrencyException)
-        //     {
-        //         if (!ToDoItemExists(id))
-        //         {
-        //             return NotFound();
-        //         }
-        //         else
-        //         {
-        //             throw;
-        //         }
-        //     }
-        //
-        //     return NoContent();
-        // }
-        //
-        // // POST: api/ToDoItems
-        // // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        // [HttpPost]
-        // public async Task<ActionResult<ToDoItem>> PostToDoItem(ToDoItem toDoItem)
-        // {
-        //     _context.ToDoItems.Add(toDoItem);
-        //     await _context.SaveChangesAsync();
-        //
-        //     return CreatedAtAction(nameof(GetToDoItem), new { id = toDoItem.Id }, toDoItem);
-        // }
-        //
-        // // DELETE: api/ToDoItems/5
-        // [HttpDelete("{id}")]
-        // public async Task<ActionResult<ToDoItem>> DeleteToDoItem(long id)
-        // {
-        //     var toDoItem = await _context.ToDoItems.FindAsync(id);
-        //     if (toDoItem == null)
-        //     {
-        //         return NotFound();
-        //     }
-        //
-        //     _context.ToDoItems.Remove(toDoItem);
-        //     await _context.SaveChangesAsync();
-        //
-        //     return toDoItem;
-        // }
-        //
-        // private bool ToDoItemExists(long id)
-        // {
-        //     return _context.ToDoItems.Any(e => e.Id == id);
-        // }
     }
 }

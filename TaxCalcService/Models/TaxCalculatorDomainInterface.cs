@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using TaxCalcService.Models.DTO;
-using TaxCalculator;
 using TaxCalculator.ExternalInterface;
 
 namespace TaxCalcService.Models
@@ -18,8 +17,9 @@ namespace TaxCalcService.Models
         {
             var taxResult = _taxCalculator.TaxFor(payeSalary);
             var calcIncomeTax = new TaxResultDto();
-            calcIncomeTax.TaxResultItems.Add(new TaxResultItemDto(){Amount = taxResult.IncomeTax.ToString(CultureInfo.InvariantCulture), Description = "Income Tax"});
-            calcIncomeTax.TaxResultItems.Add(new TaxResultItemDto(){Amount = taxResult.NationalInsurance.ToString(CultureInfo.InvariantCulture), Description = "N.I."});
+            calcIncomeTax.TaxResultItems.Add(new TaxResultItemDto {Amount = taxResult.IncomeTax.ToString(CultureInfo.InvariantCulture), Description = "Income Tax"});
+            calcIncomeTax.TaxResultItems.Add(new TaxResultItemDto {Amount = taxResult.NationalInsurance.ToString(CultureInfo.InvariantCulture), Description = "National Ins."});
+            calcIncomeTax.TaxResultItems.Add(new TaxResultItemDto {Amount = taxResult.Total.ToString(CultureInfo.InvariantCulture), Description = "Total", IsTotal = true});
 
             return calcIncomeTax;
         }

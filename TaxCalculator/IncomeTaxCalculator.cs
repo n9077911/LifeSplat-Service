@@ -5,7 +5,7 @@ namespace TaxCalculator
 {
     public class IncomeTaxCalculator : IIncomeTaxCalculator
     {
-        public TaxResult TaxFor(int payeSalary)
+        public ITaxResult TaxFor(int payeSalary)
         {
             var result = new TaxResult();
 
@@ -24,15 +24,14 @@ namespace TaxCalculator
             if (payeSalary > lowerBound)
             {
                 var lowerRatePay = Math.Min(midBound, payeSalary);
-                result.AddNationalInsurance(((lowerRatePay - lowerBound)*.12m));
+                result.AddNationalInsurance(((lowerRatePay - lowerBound) * .12m));
             }
-            
+
             if (payeSalary > midBound)
             {
                 var midRatePay = Math.Min(upperBound, payeSalary);
-                result.AddNationalInsurance(((midRatePay - midBound)*.02m));
+                result.AddNationalInsurance(((midRatePay - midBound) * .02m));
             }
-
         }
 
         private static void AddIncomeTax(int payeSalary, TaxResult result)
@@ -65,22 +64,6 @@ namespace TaxCalculator
                 var amount = payeSalary - 150_000;
                 result.AddIncomeTax(amount * .45m);
             }
-        }
-    }
-
-    public class TaxResult
-    {
-        public decimal IncomeTax { get; private set; }
-        public decimal NationalInsurance { get; private set; }
-
-        public void AddIncomeTax(decimal incomeTax)
-        {
-            IncomeTax += incomeTax;
-        }
-
-        public void AddNationalInsurance(decimal nationalInsurance)
-        {
-            NationalInsurance += nationalInsurance;
         }
     }
 }
