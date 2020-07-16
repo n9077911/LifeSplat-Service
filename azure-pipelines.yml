@@ -11,6 +11,7 @@ pool:
 
 variables:
   imageName: 'pipelines-javascript-docker'
+  System.Debug: true
 
 steps:
 - task: Docker@2
