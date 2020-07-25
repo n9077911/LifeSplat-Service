@@ -1,9 +1,9 @@
 ﻿using NUnit.Framework;
 using TaxCalculator;
-using TaxCalculator.ExternalInterface;
 
-namespace TaxCalculatorTests
+namespace CoreTests
 {
+    [TestFixture]
     public class TaxCalculatorTests
     {
         [Test]

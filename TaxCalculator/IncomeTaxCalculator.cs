@@ -7,7 +7,7 @@ namespace TaxCalculator
     {
         public ITaxResult TaxFor(int payeSalary)
         {
-            var result = new TaxResult();
+            var result = new TaxResult(payeSalary);
 
             AddIncomeTax(payeSalary, result);
             AddNationalInsurance(payeSalary, result);

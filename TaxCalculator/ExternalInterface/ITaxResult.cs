@@ -5,5 +5,6 @@ namespace TaxCalculator.ExternalInterface
         decimal IncomeTax { get; }
         decimal NationalInsurance { get; }
         decimal Total { get; }
+        decimal Remainder { get; }
     }
 }
