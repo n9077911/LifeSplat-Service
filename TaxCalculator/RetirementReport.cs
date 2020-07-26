@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TaxCalculator.ExternalInterface;
 
 namespace TaxCalculator
@@ -8,13 +9,15 @@ namespace TaxCalculator
         public RetirementReport()
         {
             TimeToRetirement = new DateAmount(DateTime.Now, DateTime.Now); //null object pattern
+            Steps = new List<Step>();
         }
 
+        public DateTime StateRetirementDate { get; set; }
         public DateTime RetirementDate { get; set; }
         public int TargetSavings { get; set; }
         public int RetirementAge { get; set; }
-        public int YearsToRetirement { get; set; }
         public DateAmount TimeToRetirement { get; set; }
+        public List<Step> Steps { get; set; }
     }
 
     //An amount of time specified in years, month and days
@@ -31,8 +34,13 @@ namespace TaxCalculator
             }
         }
 
-        public int Years { get; }
-        public int Months { get; }
+        private int Years { get; }
+        private int Months { get; }
+
+        public int TotalMonths()
+        {
+            return (Years * 12) + Months;
+        }
 
         public override string ToString()
         {

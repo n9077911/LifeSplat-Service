@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace TaxCalculator.ExternalInterface
 {
     public interface IRetirementReport
     {
         int TargetSavings { get; }
-        DateTime RetirementDate { get; set; }
-        int RetirementAge { get; set; }
-        int YearsToRetirement { get; set; }
+        DateTime RetirementDate { get; }
+        int RetirementAge { get; }
         DateAmount TimeToRetirement { get; }
+        List<Step> Steps { get; }
     }
 }
