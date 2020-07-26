@@ -6,8 +6,10 @@ namespace TaxCalculator.ExternalInterface
     public interface IRetirementReport
     {
         int TargetSavings { get; }
-        DateTime RetirementDate { get; }
         int RetirementAge { get; }
+        int StateRetirementAge { get; }
+        DateTime RetirementDate { get; }
+        DateTime StateRetirementDate { get; }
         DateAmount TimeToRetirement { get; }
         List<Step> Steps { get; }
     }

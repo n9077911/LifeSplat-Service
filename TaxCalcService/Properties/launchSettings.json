@@ -29,7 +29,7 @@
     "RetirementService": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/Retirement/Report?salary=100000&spending=40000&dob=1981-05-30",
+      "launchUrl": "api/Retirement/Report?salary=100000&spending=40000&dob=1981-05-30&female=false",
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

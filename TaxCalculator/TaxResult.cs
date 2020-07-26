@@ -21,7 +21,6 @@ namespace TaxCalculator
             IncomeTax += incomeTax;
             Total += incomeTax;
             Remainder = _payeSalary - Total;
-
         }
 
         public void AddNationalInsurance(decimal nationalInsurance)

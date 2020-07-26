@@ -24,7 +24,9 @@ namespace TaxCalcService
             services.AddSingleton<IIncomeTaxCalculator, IncomeTaxCalculator>();
             services.AddSingleton<ITaxCalculatorDomainInterface, TaxCalculatorDomainInterface>();
             services.AddSingleton<IDateProvider, DateProvider>();
-            services.AddSingleton<IRetirementCalculator, RetirementCalculator>();
+            services.AddSingleton<IPensionAgeCalc, PensionAgeCalc>();
+            services.AddSingleton<IAssumptions, SafeWithdrawlNoInflationAssumptions>();
+            services.AddSingleton<IRetirementCalculator, RetirementIncrementalApproachCalculator>();
             services.AddSingleton<IRetirementDomainInterface, RetirementDomainInterface>();
             services.AddControllers();
         }

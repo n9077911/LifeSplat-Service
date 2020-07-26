@@ -1,6 +1,7 @@
 using System;
+using TaxCalculator;
 
-namespace TaxCalculator
+namespace TaxCalculatorTests.Stubs
 {
     public class StubPensionAgeCalc : IPensionAgeCalc
     {
@@ -13,12 +14,12 @@ namespace TaxCalculator
             _privatePensionAge = privatePensionAge;
         }
 
-        public DateTime StatePensionDate(DateTime personStatusDob)
+        public DateTime StatePensionDate(DateTime dob, Sex sex)
         {
             return _statePensionAge;
         }
 
-        public DateTime PrivatePensionDate()
+        public DateTime PrivatePensionDate(DateTime dob, Sex sex)
         {
             return _privatePensionAge ?? _statePensionAge;
         }

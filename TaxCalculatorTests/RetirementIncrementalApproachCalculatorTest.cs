@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using TaxCalculator;
 using TaxCalculator.ExternalInterface;
+using TaxCalculatorTests.Stubs;
 
 namespace TaxCalculatorTests
 {
@@ -10,7 +11,7 @@ namespace TaxCalculatorTests
     public class RetirementIncrementalApproachCalculatorTest
     {
         private readonly FixedDateProvider _fixedDateProvider = new FixedDateProvider(new DateTime(2020, 1, 1));
-        private readonly SafeWithDrawlNoInflationAssumptions _assumptions = new SafeWithDrawlNoInflationAssumptions();
+        private readonly SafeWithdrawlNoInflationAssumptions _assumptions = new SafeWithdrawlNoInflationAssumptions();
         private readonly StubPensionAgeCalc _pensionAgeCalc = new StubPensionAgeCalc(new DateTime(2049, 05, 30));
 
         [Test]

@@ -20,9 +20,9 @@ namespace TaxCalcService.Controllers
         // GET api/Retirement/Report?salary=20000&spending=19000&dob=1981-30-05
         [HttpGet("Report")]
         public async Task<RetirementReportDto> GetReport([FromQuery] int salary, [FromQuery] int spending,
-            [FromQuery] DateTime dob)
+            [FromQuery] DateTime dob, [FromQuery] bool female)
         {
-            return await Task.Run(() => _retirement.RetirementReportFor(salary, spending, dob));
+            return await Task.Run(() => _retirement.RetirementReportFor(salary, spending, dob, female));
         }
     }
 }

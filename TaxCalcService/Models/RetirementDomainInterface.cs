@@ -15,9 +15,16 @@ namespace TaxCalcService.Models
             _retirementCalculator = retirementCalculator;
         }
 
-        public RetirementReportDto RetirementReportFor(int payeSalary, int spending, DateTime dob)
+        public RetirementReportDto RetirementReportFor(int payeSalary, int spending, DateTime dob, bool female)
         {
-            var retirementReport = _retirementCalculator.ReportFor(new PersonStatus {Dob = dob, Salary = payeSalary, Spending = spending, StatePensionAge = 68, Amount = 6_000});
+            var retirementReport = _retirementCalculator.ReportFor(new PersonStatus
+            {
+                Dob = dob, 
+                Salary = payeSalary, 
+                Spending = spending, 
+                Sex = female ? Sex.Female : Sex.Male,
+                Amount = 9_000
+            });
 
             return new RetirementReportDto(retirementReport);
         }

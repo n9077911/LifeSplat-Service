@@ -4,7 +4,7 @@ namespace TaxCalculator
 {
     public interface IPensionAgeCalc
     {
-        DateTime StatePensionDate(DateTime personStatusDob);
-        DateTime PrivatePensionDate();
+        DateTime StatePensionDate(DateTime dob, Sex sex);
+        DateTime PrivatePensionDate(DateTime dob, Sex sex);
     }
 }
