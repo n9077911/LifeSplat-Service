@@ -6,20 +6,21 @@ namespace TaxCalculator
     public class RetirementIncrementalApproachCalculator : IRetirementCalculator
     {
         private readonly IPensionAgeCalc _pensionAgeCalc;
+        private readonly IStatePensionAmountCalculator _statePensionAmountCalculator;
         private readonly int _monthly = 12;
         private readonly DateTime _now;
         private readonly int _estimatedDeath;
         private readonly decimal _growthRate;
-        private readonly decimal _statePensionAmount;
 
         public RetirementIncrementalApproachCalculator(IDateProvider dateProvider,
-            IAssumptions assumptions, IPensionAgeCalc pensionAgeCalc)
+            IAssumptions assumptions, IPensionAgeCalc pensionAgeCalc,
+            IStatePensionAmountCalculator statePensionAmountCalculator)
         {
             _pensionAgeCalc = pensionAgeCalc;
+            _statePensionAmountCalculator = statePensionAmountCalculator;
             _now = dateProvider.Now();
             _estimatedDeath = assumptions.EstimatedDeath;
             _growthRate = ConvertAnnualRateToMonthly(assumptions.GrowthRate);
-            _statePensionAmount = assumptions.StatePension;
         }
 
         private decimal ConvertAnnualRateToMonthly(decimal rate)
@@ -33,37 +34,47 @@ namespace TaxCalculator
             var statePensionDate = _pensionAgeCalc.StatePensionDate(personStatus.Dob, personStatus.Sex);
 
             var minimumCash = 0;
-            var monthlySpareCash = MonthlySpareCash(personStatus);
-            monthlySpareCash = MonthlyAfterTax(personStatus);
+            var monthlyAfterTaxSalary = MonthlyAfterTax(personStatus);
             var monthlySpending = personStatus.Spending / _monthly;
 
-
             var previousStep = new Step {Date = _now, Cash = 0};
+
             result.Steps.Add(previousStep);
             var calcdRetirementDate = false;
 
             for (var month = 1; month <= MonthsToDeath(personStatus.Dob, _now); month++)
             {
                 var stepDate = previousStep.Date.AddMonths(1);
+                var stepStatePensionAmount = calcdRetirementDate ? result.StatePensionAmount : _statePensionAmountCalculator.Calculate(personStatus, stepDate);
+                var step = new Step { Date = stepDate };
 
+                
                 var amount = previousStep.Cash - monthlySpending;
 
-                amount += previousStep.Cash * _growthRate;
+                var growth = amount * _growthRate;
+                step.Growth = growth;
+                amount += growth;
 
                 if (!calcdRetirementDate)
-                    amount += monthlySpareCash;
-                if(stepDate > statePensionDate)
-                    amount += _statePensionAmount / _monthly;
+                {
+                    amount += monthlyAfterTaxSalary;
+                    step.AfterTaxSalary = monthlyAfterTaxSalary;
+                }
                 
+                if (stepDate > statePensionDate)
+                {
+                    amount += stepStatePensionAmount / _monthly;
+                    step.StatePension = stepStatePensionAmount;
+                }
 
-                
-                var step = new Step { Date = stepDate, Cash = amount };
+                step.Cash = amount;
                 result.Steps.Add(step);
                 previousStep = step;
 
                 if (!calcdRetirementDate &&
-                    IsThatEnoughTillDeath(step.Cash, step.Date, minimumCash, personStatus, statePensionDate))
+                    IsThatEnoughTillDeath(step.Cash, step.Date, minimumCash, personStatus, statePensionDate, stepStatePensionAmount))
                 {
+                    result.StatePensionAmount = stepStatePensionAmount;
                     result.RetirementDate = step.Date;
                     calcdRetirementDate = true;
                 }
@@ -78,18 +89,19 @@ namespace TaxCalculator
         }
 
         private bool IsThatEnoughTillDeath(decimal cash, DateTime now, int minimumCash,
-            PersonStatus personStatus, DateTime stateRetirementDate)
+            PersonStatus personStatus, DateTime statePensionDate, decimal statePensionAmount)
         {
             var monthsToDeath = MonthsToDeath(personStatus.Dob, now);
             var monthlySpending = personStatus.Spending / _monthly;
-            var monthlyStatePension = _statePensionAmount / _monthly;
+            var monthlyStatePension = statePensionAmount / _monthly;
 
             decimal runningCash = cash;
             for (int month = 1; month <= monthsToDeath; month++)
             {
-                runningCash = runningCash + runningCash*_growthRate - monthlySpending;
+                runningCash -= monthlySpending; 
+                runningCash += runningCash*_growthRate;
 
-                if (stateRetirementDate < now.AddMonths(month))
+                if(now.AddMonths(month) > statePensionDate)
                     runningCash += monthlyStatePension;
 
                 if (runningCash < minimumCash)
@@ -105,12 +117,6 @@ namespace TaxCalculator
             return dateAmount.TotalMonths();
         }
 
-        private decimal MonthlySpareCash(PersonStatus personStatus)
-        {
-            var afterTaxSalary = new IncomeTaxCalculator().TaxFor(personStatus.Salary).Remainder;
-            return (afterTaxSalary - personStatus.Spending) / _monthly;
-        }
-        
         private decimal MonthlyAfterTax(PersonStatus personStatus)
         {
             var afterTaxSalary = new IncomeTaxCalculator().TaxFor(personStatus.Salary).Remainder;

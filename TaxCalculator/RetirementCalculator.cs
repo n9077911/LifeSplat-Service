@@ -50,19 +50,20 @@ namespace TaxCalculator
     {
         int EstimatedDeath { get; }
         decimal GrowthRate { get; }
-        decimal StatePension { get; }
     }
 
-    public class SafeWithdrawlNoInflationAssumptions : IAssumptions
+    public class SafeWithdrawalNoInflationAssumptions : IAssumptions
     {
         public int EstimatedDeath => 100;
         public decimal GrowthRate => 0.04m;
-        public decimal StatePension => 9110.4m;
     }
 
     public class Step
     {
         public DateTime Date { get; set; }
         public decimal Cash { get; set; }
+        public decimal StatePension { get; set; }
+        public decimal AfterTaxSalary { get; set; }
+        public decimal Growth { get; set; }
     }
 }

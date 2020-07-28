@@ -17,6 +17,7 @@ namespace TaxCalculator
         public int TargetSavings { get; set; }
         public int RetirementAge { get; set; }
         public int StateRetirementAge { get; set; }
+        public decimal StatePensionAmount { get; set; }
         public DateAmount TimeToRetirement { get; set; }
         public List<Step> Steps { get; set; }
     }

@@ -1,5 +1,4 @@
 ﻿using System;
-using Microsoft.AspNetCore.Identity;
 using TaxCalcService.Models.DTO;
 using TaxCalculator;
 using TaxCalculator.ExternalInterface;
@@ -23,7 +22,6 @@ namespace TaxCalcService.Models
                 Salary = payeSalary, 
                 Spending = spending, 
                 Sex = female ? Sex.Female : Sex.Male,
-                Amount = 9_000
             });
 
             return new RetirementReportDto(retirementReport);
