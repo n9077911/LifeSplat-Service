@@ -64,7 +64,7 @@ namespace TaxCalculator
                 if (stepDate > statePensionDate)
                 {
                     amount += stepStatePensionAmount / _monthly;
-                    step.StatePension = stepStatePensionAmount;
+                    step.StatePension = stepStatePensionAmount / _monthly;
                 }
 
                 step.Cash = amount;

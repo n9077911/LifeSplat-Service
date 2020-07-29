@@ -18,6 +18,7 @@ namespace TaxCalcService.Controllers
         }
 
         // GET api/Retirement/Report?salary=20000&spending=19000&dob=1981-30-05
+        //https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report?salary=100000&spending=40000&dob=1981-05-30&female=false
         [HttpGet("Report")]
         public async Task<RetirementReportDto> GetReport([FromQuery] int salary, [FromQuery] int spending,
             [FromQuery] DateTime dob, [FromQuery] bool female)
