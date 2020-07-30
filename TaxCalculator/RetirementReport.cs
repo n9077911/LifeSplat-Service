@@ -8,16 +8,19 @@ namespace TaxCalculator
     {
         public RetirementReport()
         {
-            TimeToRetirement = new DateAmount(DateTime.Now, DateTime.Now); //null object pattern
+            TimeToRetirement = new DateAmount(DateTime.MinValue, DateTime.MinValue); //null object pattern
             Steps = new List<Step>();
         }
 
         public DateTime StateRetirementDate { get; set; }
+        public int NationalInsuranceBill { get; set; }
+        public int IncomeTaxBill { get; set; }
         public DateTime RetirementDate { get; set; }
         public int TargetSavings { get; set; }
         public int RetirementAge { get; set; }
         public int StateRetirementAge { get; set; }
-        public decimal StatePensionAmount { get; set; }
+        public int AnnualStatePension { get; set; }
+        public int AfterTaxSalary { get; set; }
         public DateAmount TimeToRetirement { get; set; }
         public List<Step> Steps { get; set; }
     }

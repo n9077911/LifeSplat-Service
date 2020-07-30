@@ -12,6 +12,10 @@ namespace TaxCalcService.Models.DTO
         public DateTime RetirementDate { get; }
         public DateTime StateRetirementDate { get; }
         public string TimeToRetirementDescription { get; }
+        public int AfterTaxSalary{ get; }
+        public int AnnualStatePension{ get; }
+        public int NationalInsuranceBill{ get; }
+        public int IncomeTaxBill{ get; }
         public List<string> StepsHeaders { get; }
         public List<List<object>> Steps { get; }
 
@@ -23,6 +27,10 @@ namespace TaxCalcService.Models.DTO
             RetirementDate = retirementReport.RetirementDate;
             StateRetirementDate = retirementReport.StateRetirementDate;
             TimeToRetirementDescription = retirementReport.TimeToRetirement.ToString();
+            AfterTaxSalary = retirementReport.AfterTaxSalary;
+            NationalInsuranceBill = retirementReport.NationalInsuranceBill;
+            IncomeTaxBill = retirementReport.IncomeTaxBill;
+            AnnualStatePension = retirementReport.AnnualStatePension;
             
             StepsHeaders = new List<string> {"Date", "Cash", "StatePension", "AfterTaxSalary", "Growth"};
             Steps = new List<List<object>>();

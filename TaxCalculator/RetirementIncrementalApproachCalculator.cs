@@ -34,7 +34,8 @@ namespace TaxCalculator
             var statePensionDate = _pensionAgeCalc.StatePensionDate(personStatus.Dob, personStatus.Sex);
 
             var minimumCash = 0;
-            var monthlyAfterTaxSalary = MonthlyAfterTax(personStatus);
+            var taxResult = new IncomeTaxCalculator().TaxFor(personStatus.Salary);
+            var monthlyAfterTaxSalary = taxResult.Remainder / _monthly;
             var monthlySpending = personStatus.Spending / _monthly;
 
             var previousStep = new Step {Date = _now, Cash = 0};
@@ -45,7 +46,7 @@ namespace TaxCalculator
             for (var month = 1; month <= MonthsToDeath(personStatus.Dob, _now); month++)
             {
                 var stepDate = previousStep.Date.AddMonths(1);
-                var stepStatePensionAmount = calcdRetirementDate ? result.StatePensionAmount : _statePensionAmountCalculator.Calculate(personStatus, stepDate);
+                var stepStatePensionAmount = calcdRetirementDate ? result.AnnualStatePension : _statePensionAmountCalculator.Calculate(personStatus, stepDate);
                 var step = new Step { Date = stepDate };
 
                 
@@ -74,7 +75,7 @@ namespace TaxCalculator
                 if (!calcdRetirementDate &&
                     IsThatEnoughTillDeath(step.Cash, step.Date, minimumCash, personStatus, statePensionDate, stepStatePensionAmount))
                 {
-                    result.StatePensionAmount = stepStatePensionAmount;
+                    result.AnnualStatePension = Convert.ToInt32(stepStatePensionAmount);
                     result.RetirementDate = step.Date;
                     calcdRetirementDate = true;
                 }
@@ -84,7 +85,10 @@ namespace TaxCalculator
             result.TimeToRetirement = new DateAmount(_now, result.RetirementDate);
             result.RetirementAge = AgeCalc.Age(personStatus.Dob, result.RetirementDate);
             result.StateRetirementAge = AgeCalc.Age(personStatus.Dob, result.StateRetirementDate);
-          
+            result.AfterTaxSalary = Convert.ToInt32(taxResult.Remainder);
+            result.NationalInsuranceBill = Convert.ToInt32(taxResult.NationalInsurance);
+            result.IncomeTaxBill = Convert.ToInt32(taxResult.IncomeTax);
+            
             return result;
         }
 
@@ -115,12 +119,6 @@ namespace TaxCalculator
         {
             var dateAmount = new DateAmount(now, dob.AddYears(_estimatedDeath));
             return dateAmount.TotalMonths();
-        }
-
-        private decimal MonthlyAfterTax(PersonStatus personStatus)
-        {
-            var afterTaxSalary = new IncomeTaxCalculator().TaxFor(personStatus.Salary).Remainder;
-            return afterTaxSalary / _monthly;
         }
     }
 }
