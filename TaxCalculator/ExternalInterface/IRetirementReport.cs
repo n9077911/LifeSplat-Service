@@ -10,6 +10,7 @@ namespace TaxCalculator.ExternalInterface
         int StateRetirementAge { get; }
         int AnnualStatePension { get; }
         int AfterTaxSalary { get; }
+        int Spending { get; }
         int NationalInsuranceBill { get; }
         int IncomeTaxBill { get; }
         DateTime RetirementDate { get; }

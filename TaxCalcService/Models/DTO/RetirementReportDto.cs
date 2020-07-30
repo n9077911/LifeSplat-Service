@@ -13,6 +13,7 @@ namespace TaxCalcService.Models.DTO
         public DateTime StateRetirementDate { get; }
         public string TimeToRetirementDescription { get; }
         public int AfterTaxSalary{ get; }
+        public int Spending{ get; }
         public int AnnualStatePension{ get; }
         public int NationalInsuranceBill{ get; }
         public int IncomeTaxBill{ get; }
@@ -28,6 +29,7 @@ namespace TaxCalcService.Models.DTO
             StateRetirementDate = retirementReport.StateRetirementDate;
             TimeToRetirementDescription = retirementReport.TimeToRetirement.ToString();
             AfterTaxSalary = retirementReport.AfterTaxSalary;
+            Spending = retirementReport.Spending;
             NationalInsuranceBill = retirementReport.NationalInsuranceBill;
             IncomeTaxBill = retirementReport.IncomeTaxBill;
             AnnualStatePension = retirementReport.AnnualStatePension;

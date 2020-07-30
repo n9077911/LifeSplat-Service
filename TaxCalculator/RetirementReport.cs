@@ -21,6 +21,7 @@ namespace TaxCalculator
         public int StateRetirementAge { get; set; }
         public int AnnualStatePension { get; set; }
         public int AfterTaxSalary { get; set; }
+        public int Spending { get; set; }
         public DateAmount TimeToRetirement { get; set; }
         public List<Step> Steps { get; set; }
     }

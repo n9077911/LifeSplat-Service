@@ -88,6 +88,7 @@ namespace TaxCalculator
             result.AfterTaxSalary = Convert.ToInt32(taxResult.Remainder);
             result.NationalInsuranceBill = Convert.ToInt32(taxResult.NationalInsurance);
             result.IncomeTaxBill = Convert.ToInt32(taxResult.IncomeTax);
+            result.Spending = personStatus.Spending;
             
             return result;
         }
