@@ -38,7 +38,7 @@ namespace TaxCalculator
             var monthlyAfterTaxSalary = taxResult.Remainder / _monthly;
             var monthlySpending = personStatus.Spending / _monthly;
 
-            var previousStep = new Step {Date = _now, Cash = 0};
+            var previousStep = new Step {Date = _now, Savings = personStatus.ExistingSavings};
 
             result.Steps.Add(previousStep);
             var calcdRetirementDate = false;
@@ -50,30 +50,30 @@ namespace TaxCalculator
                 var step = new Step { Date = stepDate };
 
                 
-                var amount = previousStep.Cash - monthlySpending;
+                var savings = previousStep.Savings - monthlySpending;
 
-                var growth = amount * _growthRate;
+                var growth = savings * _growthRate;
                 step.Growth = growth;
-                amount += growth;
+                savings += growth;
 
                 if (!calcdRetirementDate)
                 {
-                    amount += monthlyAfterTaxSalary;
+                    savings += monthlyAfterTaxSalary;
                     step.AfterTaxSalary = monthlyAfterTaxSalary;
                 }
                 
                 if (stepDate > statePensionDate)
                 {
-                    amount += stepStatePensionAmount / _monthly;
+                    savings += stepStatePensionAmount / _monthly;
                     step.StatePension = stepStatePensionAmount / _monthly;
                 }
 
-                step.Cash = amount;
+                step.Savings = savings;
                 result.Steps.Add(step);
                 previousStep = step;
 
                 if (!calcdRetirementDate &&
-                    IsThatEnoughTillDeath(step.Cash, step.Date, minimumCash, personStatus, statePensionDate, stepStatePensionAmount))
+                    IsThatEnoughTillDeath(step.Savings, step.Date, minimumCash, personStatus, statePensionDate, stepStatePensionAmount))
                 {
                     result.AnnualStatePension = Convert.ToInt32(stepStatePensionAmount);
                     result.RetirementDate = step.Date;

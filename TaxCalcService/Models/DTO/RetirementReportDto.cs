@@ -39,7 +39,7 @@ namespace TaxCalcService.Models.DTO
             foreach (var step in retirementReport.Steps)
             {
                 Steps.Add(new List<object>{step.Date.ToString("yyyy-MM-dd"), 
-                    Decimal.Round(step.Cash),
+                    Decimal.Round(step.Savings),
                     Decimal.Round(step.StatePension),
                     Decimal.Round(step.AfterTaxSalary),
                     Decimal.Round(step.Growth)});

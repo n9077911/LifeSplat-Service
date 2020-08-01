@@ -17,13 +17,13 @@ namespace TaxCalcService.Controllers
             _retirement = retirement;
         }
 
-        // GET api/Retirement/Report?salary=20000&spending=19000&dob=1981-30-05
-        //https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report?salary=100000&spending=40000&dob=1981-05-30&female=false
+        // GET api/Retirement/Report?salary=20000&spending=19000&dob=1981-30-05&female=false&existingSavings=20000
+        //https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report?salary=100000&spending=40000&dob=1981-05-30&female=false&existingSavings=20000
         [HttpGet("Report")]
         public async Task<RetirementReportDto> GetReport([FromQuery] int salary, [FromQuery] int spending,
-            [FromQuery] DateTime dob, [FromQuery] bool female)
+            [FromQuery] DateTime dob, [FromQuery] bool female, [FromQuery] int existingSavings)
         {
-            return await Task.Run(() => _retirement.RetirementReportFor(salary, spending, dob, female));
+            return await Task.Run(() => _retirement.RetirementReportFor(salary, spending, dob, female, existingSavings));
         }
     }
 }
