@@ -8,9 +8,11 @@ namespace TaxCalcService.Models.DTO
     {
         public int RetirementAge { get; }
         public int StateRetirementAge { get; }
+        public int PrivateRetirementAge { get; }
         public int TargetSavings { get; }
         public DateTime RetirementDate { get; }
         public DateTime StateRetirementDate { get; }
+        public DateTime PrivateRetirementDate { get; }
         public string TimeToRetirementDescription { get; }
         public int AfterTaxSalary{ get; }
         public int Spending{ get; }
@@ -24,9 +26,11 @@ namespace TaxCalcService.Models.DTO
         {
             RetirementAge = retirementReport.RetirementAge;
             StateRetirementAge = retirementReport.StateRetirementAge;
+            PrivateRetirementAge = retirementReport.PrivateRetirementAge;
             TargetSavings = retirementReport.TargetSavings;
             RetirementDate = retirementReport.RetirementDate;
             StateRetirementDate = retirementReport.StateRetirementDate;
+            PrivateRetirementDate = retirementReport.PrivateRetirementDate;
             TimeToRetirementDescription = retirementReport.TimeToRetirement.ToString();
             AfterTaxSalary = retirementReport.AfterTaxSalary;
             Spending = retirementReport.Spending;
@@ -42,7 +46,10 @@ namespace TaxCalcService.Models.DTO
                     Decimal.Round(step.Savings),
                     Decimal.Round(step.StatePension),
                     Decimal.Round(step.AfterTaxSalary),
-                    Decimal.Round(step.Growth)});
+                    Decimal.Round(step.Growth),
+                    Decimal.Round(step.PrivatePensionAmount),
+                    Decimal.Round(step.PrivatePensionGrowth)}
+                );
             }
         }
     }

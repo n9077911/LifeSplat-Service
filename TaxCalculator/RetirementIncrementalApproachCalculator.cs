@@ -73,15 +73,15 @@ namespace TaxCalculator
                 var privatePensionGrowth = privatePensionAmount * _growthRate;
                 privatePensionAmount += privatePensionGrowth;
 
-                step.StatePrivatePensionGrowth = privatePensionGrowth;
-                step.StatePrivatePensionAmount = privatePensionAmount;
+                step.PrivatePensionGrowth = privatePensionGrowth;
+                step.PrivatePensionAmount = privatePensionAmount;
 
                 step.Savings = savings;
                 result.Steps.Add(step);
                 previousStep = step;
 
                 if (!calcdRetirementDate &&
-                    IsThatEnoughTillDeath(step.Savings, step.Date, minimumCash, personStatus, statePensionDate, stepStatePensionAmount, privatePensionDate, step.StatePrivatePensionAmount))
+                    IsThatEnoughTillDeath(step.Savings, step.Date, minimumCash, personStatus, statePensionDate, stepStatePensionAmount, privatePensionDate, step.PrivatePensionAmount))
                 {
                     result.AnnualStatePension = Convert.ToInt32(stepStatePensionAmount);
                     result.RetirementDate = step.Date;
