@@ -73,11 +73,11 @@ namespace TaxCalculatorTests
             var report = calc.ReportFor(new PersonStatus
                 {ExistingSavings = 50_000, Salary = 30_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingPrivatePension = 30_000});
 
-            Assert.That(report.RetirementDate, Is.EqualTo(new DateTime(2035, 03, 01)));
-            Assert.That(report.RetirementAge, Is.EqualTo(53));
+            Assert.That(report.RetirementDate, Is.EqualTo(new DateTime(2040, 07, 01)));
+            Assert.That(report.RetirementAge, Is.EqualTo(59));
             Assert.That(report.PrivateRetirementAge, Is.EqualTo(58));
             Assert.That(report.PrivateRetirementDate, Is.EqualTo(new DateTime(2039, 05, 30)));
-            Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("15 Years and 2 Months"));
+            Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("20 Years and 6 Months"));
         }
     }
 }

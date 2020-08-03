@@ -121,7 +121,7 @@ namespace TaxCalculator
 
                 var pensionGrowth = privatePensionAmount * _growthRate;
                 if(now.AddMonths(month) > privatePensionDate)
-                    runningCash += monthlyStatePension;
+                    runningCash += pensionGrowth;
                 else
                     privatePensionAmount += pensionGrowth;
 
