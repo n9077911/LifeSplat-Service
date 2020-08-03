@@ -5,7 +5,7 @@ namespace TaxCalculator.ExternalInterface
     public class PersonStatus
     {
         public int ExistingSavings { get; set; }
-        public int ExistingPension { get; set; }
+        public int ExistingPrivatePension { get; set; }
         public int ExistingEmployeeContribution { get; set; }
         public int ExistingEmployerContribution { get; set; }
         public int Salary { get; set; }

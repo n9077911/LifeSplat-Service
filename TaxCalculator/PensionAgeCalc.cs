@@ -131,10 +131,11 @@ namespace TaxCalculator
             return null;
         }
 
-        public DateTime PrivatePensionDate(DateTime dob, Sex sex)
+        public DateTime PrivatePensionDate(DateTime statePensionDate)
         {
-            //TODO: is this Private pension age confirmed as state-10? same for men and women?
-            return StatePensionDate(dob, sex).AddYears(-10);
+            //There is a legal question mark as to whether this blanket rule applies.
+            //For those with a state pension age of 68 its not been confirmed that the private pension age is 58.
+            return statePensionDate.AddYears(-10);
         }
 
         private static void PrepareLookupTables()

@@ -8,6 +8,7 @@ namespace TaxCalculator.ExternalInterface
         int TargetSavings { get; }
         int RetirementAge { get; }
         int StateRetirementAge { get; }
+        int PrivateRetirementAge { get; }
         int AnnualStatePension { get; }
         int AfterTaxSalary { get; }
         int Spending { get; }
@@ -15,6 +16,7 @@ namespace TaxCalculator.ExternalInterface
         int IncomeTaxBill { get; }
         DateTime RetirementDate { get; }
         DateTime StateRetirementDate { get; }
+        DateTime PrivateRetirementDate { get; }
         DateAmount TimeToRetirement { get; }
         List<Step> Steps { get; }
     }

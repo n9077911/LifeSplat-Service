@@ -13,12 +13,14 @@ namespace TaxCalculator
         }
 
         public DateTime StateRetirementDate { get; set; }
+        public DateTime PrivateRetirementDate { get; set; }
         public int NationalInsuranceBill { get; set; }
         public int IncomeTaxBill { get; set; }
         public DateTime RetirementDate { get; set; }
         public int TargetSavings { get; set; }
         public int RetirementAge { get; set; }
         public int StateRetirementAge { get; set; }
+        public int PrivateRetirementAge { get; set; }
         public int AnnualStatePension { get; set; }
         public int AfterTaxSalary { get; set; }
         public int Spending { get; set; }

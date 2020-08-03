@@ -14,7 +14,8 @@ namespace TaxCalcService.Models
             _retirementCalculator = retirementCalculator;
         }
 
-        public RetirementReportDto RetirementReportFor(int payeSalary, int spending, DateTime dob, bool female, int existingSavings)
+        public RetirementReportDto RetirementReportFor(int payeSalary, int spending, DateTime dob, bool female,
+            int existingSavings, int existingPrivatePension)
         {
             var retirementReport = _retirementCalculator.ReportFor(new PersonStatus
             {
@@ -23,6 +24,7 @@ namespace TaxCalcService.Models
                 Spending = spending, 
                 Sex = female ? Sex.Female : Sex.Male,
                 ExistingSavings = existingSavings,
+                ExistingPrivatePension = existingPrivatePension,
             });
 
             return new RetirementReportDto(retirementReport);

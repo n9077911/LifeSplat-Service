@@ -65,5 +65,7 @@ namespace TaxCalculator
         public decimal StatePension { get; set; }
         public decimal AfterTaxSalary { get; set; }
         public decimal Growth { get; set; }
+        public decimal StatePrivatePensionGrowth { get; set; }
+        public decimal StatePrivatePensionAmount { get; set; }
     }
 }

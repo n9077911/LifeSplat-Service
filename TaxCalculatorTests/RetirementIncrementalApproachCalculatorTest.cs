@@ -65,5 +65,19 @@ namespace TaxCalculatorTests
             Assert.That(report.StateRetirementDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("22 Years and 10 Months"));
         }
+        
+        [Test]
+        public void ConsidersPrivatePensionSavings()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _fixedStatePensionAmountCalculator);
+            var report = calc.ReportFor(new PersonStatus
+                {ExistingSavings = 50_000, Salary = 30_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingPrivatePension = 30_000});
+
+            Assert.That(report.RetirementDate, Is.EqualTo(new DateTime(2035, 03, 01)));
+            Assert.That(report.RetirementAge, Is.EqualTo(53));
+            Assert.That(report.PrivateRetirementAge, Is.EqualTo(58));
+            Assert.That(report.PrivateRetirementDate, Is.EqualTo(new DateTime(2039, 05, 30)));
+            Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("15 Years and 2 Months"));
+        }
     }
 }

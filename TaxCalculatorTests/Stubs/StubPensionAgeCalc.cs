@@ -19,9 +19,9 @@ namespace TaxCalculatorTests.Stubs
             return _statePensionAge;
         }
 
-        public DateTime PrivatePensionDate(DateTime dob, Sex sex)
+        public DateTime PrivatePensionDate(DateTime statePensionAge)
         {
-            return _privatePensionAge ?? _statePensionAge;
+            return _privatePensionAge ?? _statePensionAge.AddYears(-10);
         }
     }
 }
