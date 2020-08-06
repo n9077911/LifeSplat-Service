@@ -4,9 +4,9 @@ namespace TaxCalculator
 {
     public class TaxResult : ITaxResult
     {
-        private readonly int _payeSalary;
+        private readonly decimal _payeSalary;
 
-        public TaxResult(int payeSalary)
+        public TaxResult(decimal payeSalary)
         {
             _payeSalary = payeSalary;
         }

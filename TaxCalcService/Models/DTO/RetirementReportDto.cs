@@ -14,11 +14,15 @@ namespace TaxCalcService.Models.DTO
         public DateTime StateRetirementDate { get; }
         public DateTime PrivateRetirementDate { get; }
         public string TimeToRetirementDescription { get; }
-        public int AfterTaxSalary{ get; }
-        public int Spending{ get; }
-        public int AnnualStatePension{ get; }
-        public int NationalInsuranceBill{ get; }
-        public int IncomeTaxBill{ get; }
+        public int AfterTaxSalary { get; }
+        public int Spending { get; }
+        public int AnnualStatePension { get; }
+        public int PrivatePensionPot { get; }
+        public int PrivatePensionSafeWithdrawal { get; }
+        public int SavingsAtPrivatePensionAge { get; }
+        public int SavingsAtStatePensionAge { get; }
+        public int NationalInsuranceBill { get; }
+        public int IncomeTaxBill { get; }
         public List<string> StepsHeaders { get; }
         public List<List<object>> Steps { get; }
 
@@ -28,7 +32,7 @@ namespace TaxCalcService.Models.DTO
             StateRetirementAge = retirementReport.StateRetirementAge;
             PrivateRetirementAge = retirementReport.PrivateRetirementAge;
             TargetSavings = retirementReport.TargetSavings;
-            RetirementDate = retirementReport.RetirementDate;
+            RetirementDate = retirementReport.MinimumPossibleRetirementDate;
             StateRetirementDate = retirementReport.StateRetirementDate;
             PrivateRetirementDate = retirementReport.PrivateRetirementDate;
             TimeToRetirementDescription = retirementReport.TimeToRetirement.ToString();
@@ -37,18 +41,30 @@ namespace TaxCalcService.Models.DTO
             NationalInsuranceBill = retirementReport.NationalInsuranceBill;
             IncomeTaxBill = retirementReport.IncomeTaxBill;
             AnnualStatePension = retirementReport.AnnualStatePension;
+            PrivatePensionPot = retirementReport.PrivatePensionPot;
             
-            StepsHeaders = new List<string> {"Date", "Cash", "StatePension", "AfterTaxSalary", "Growth"};
+            PrivatePensionSafeWithdrawal = retirementReport.PrivatePensionSafeWithdrawal;
+            SavingsAtPrivatePensionAge = retirementReport.SavingsAtPrivatePensionAge;
+            SavingsAtStatePensionAge = retirementReport.SavingsAtStatePensionAge;
+
+            StepsHeaders = new List<string>
+            {
+                "Date", "Cash", "StatePension", "AfterTaxSalary", "Growth", "PrivatePensionGrowth",
+                "PrivatePensionAmount"
+            };
             Steps = new List<List<object>>();
             foreach (var step in retirementReport.Steps)
             {
-                Steps.Add(new List<object>{step.Date.ToString("yyyy-MM-dd"), 
-                    Decimal.Round(step.Savings),
-                    Decimal.Round(step.StatePension),
-                    Decimal.Round(step.AfterTaxSalary),
-                    Decimal.Round(step.Growth),
-                    Decimal.Round(step.PrivatePensionAmount),
-                    Decimal.Round(step.PrivatePensionGrowth)}
+                Steps.Add(new List<object>
+                    {
+                        step.Date.ToString("yyyy-MM-dd"),
+                        Decimal.Round(step.Savings),
+                        Decimal.Round(step.StatePension),
+                        Decimal.Round(step.AfterTaxSalary),
+                        Decimal.Round(step.Growth),
+                        Decimal.Round(step.PrivatePensionGrowth),
+                        Decimal.Round(step.PrivatePensionAmount),
+                    }
                 );
             }
         }

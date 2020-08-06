@@ -2,6 +2,6 @@
 {
     public interface IIncomeTaxCalculator
     {
-        ITaxResult TaxFor(int payeSalary);
+        ITaxResult TaxFor(decimal payeSalary);
     }
 }

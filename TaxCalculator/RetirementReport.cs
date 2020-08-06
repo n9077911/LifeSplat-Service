@@ -16,7 +16,7 @@ namespace TaxCalculator
         public DateTime PrivateRetirementDate { get; set; }
         public int NationalInsuranceBill { get; set; }
         public int IncomeTaxBill { get; set; }
-        public DateTime RetirementDate { get; set; }
+        public DateTime MinimumPossibleRetirementDate { get; set; }
         public int TargetSavings { get; set; }
         public int RetirementAge { get; set; }
         public int StateRetirementAge { get; set; }
@@ -26,6 +26,10 @@ namespace TaxCalculator
         public int Spending { get; set; }
         public DateAmount TimeToRetirement { get; set; }
         public List<Step> Steps { get; set; }
+        public int PrivatePensionPot { get; set; }
+        public int SavingsAtPrivatePensionAge { get; set; }
+        public int SavingsAtStatePensionAge { get; set; }
+        public int PrivatePensionSafeWithdrawal { get; set; }
     }
 
     //An amount of time specified in years, month and days
@@ -52,7 +56,9 @@ namespace TaxCalculator
 
         public override string ToString()
         {
-            return $"{Years} Years and {Months} Months";
+            var pluralYears = Years == 1 ? "" : "s";
+            var pluralMonths = Months == 1 ? "" : "s";
+            return $"{Years} Year{pluralYears} and {Months} Month{pluralMonths}";
         }
     }
 }

@@ -5,7 +5,7 @@ namespace TaxCalculator
 {
     public class IncomeTaxCalculator : IIncomeTaxCalculator
     {
-        public ITaxResult TaxFor(int payeSalary)
+        public ITaxResult TaxFor(decimal payeSalary)
         {
             var result = new TaxResult(payeSalary);
 
@@ -15,7 +15,7 @@ namespace TaxCalculator
             return result;
         }
 
-        private static void AddNationalInsurance(int payeSalary, TaxResult result)
+        private static void AddNationalInsurance(decimal payeSalary, TaxResult result)
         {
             int lowerBound = 9_500;
             int midBound = 50_000;
@@ -34,13 +34,15 @@ namespace TaxCalculator
             }
         }
 
-        private static void AddIncomeTax(int payeSalary, TaxResult result)
+        private static void AddIncomeTax(decimal payeSalary, TaxResult result)
         {
-            var personalAllowance = 12_509;
+            var personalAllowance = 12_509m;
             var lowerBand = 37_500;
 
             if (payeSalary > 100_000)
-                personalAllowance = Math.Max(0, personalAllowance - ((payeSalary - 100_000) / 2));
+            {
+                personalAllowance = Math.Max(0m, personalAllowance - (payeSalary - 100_000) / 2);
+            }
 
             if (payeSalary <= personalAllowance)
             {

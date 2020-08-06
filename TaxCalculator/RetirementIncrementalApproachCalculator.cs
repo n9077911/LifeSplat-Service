@@ -7,7 +7,7 @@ namespace TaxCalculator
     {
         private readonly IPensionAgeCalc _pensionAgeCalc;
         private readonly IStatePensionAmountCalculator _statePensionAmountCalculator;
-        private readonly int _monthly = 12;
+        private readonly decimal _monthly = 12;
         private readonly DateTime _now;
         private readonly int _estimatedDeath;
         private readonly decimal _growthRate;
@@ -25,22 +25,26 @@ namespace TaxCalculator
 
         private decimal ConvertAnnualRateToMonthly(decimal rate)
         {
-            return (decimal)Math.Pow((double)(1+rate),((double)1/_monthly))-1;
+            return (decimal)Math.Pow((double)(1+rate), 1/(double)_monthly)-1;
         }
 
-        public IRetirementReport ReportFor(PersonStatus personStatus)
+        public IRetirementReport ReportFor(PersonStatus personStatus, int? retirementAge = null)
         {
             var result = new RetirementReport();
             var statePensionDate = _pensionAgeCalc.StatePensionDate(personStatus.Dob, personStatus.Sex);
             var privatePensionDate = _pensionAgeCalc.PrivatePensionDate(statePensionDate);
             var privatePensionAmount = (decimal)personStatus.ExistingPrivatePension;
-            
+
+            var calcTillRetirementDate = retirementAge.HasValue;
+            var givenRetirementDate = retirementAge.HasValue ? personStatus.Dob.AddYears(retirementAge.Value) : (DateTime?)null;
+
             var minimumCash = 0;
-            var taxResult = new IncomeTaxCalculator().TaxFor(personStatus.Salary);
+            var taxResult = new IncomeTaxCalculator().TaxFor(personStatus.Salary*(1-personStatus.EmployeeContribution));
             var monthlyAfterTaxSalary = taxResult.Remainder / _monthly;
             var monthlySpending = personStatus.Spending / _monthly;
 
-            var previousStep = new Step {Date = _now, Savings = personStatus.ExistingSavings};
+            var previousStep = new Step {Date = _now, Savings = personStatus.ExistingSavings, 
+                PrivatePensionAmount = personStatus.ExistingPrivatePension, PrivatePensionGrowth = personStatus.ExistingPrivatePension*_growthRate};
 
             result.Steps.Add(previousStep);
             var calcdRetirementDate = false;
@@ -48,22 +52,16 @@ namespace TaxCalculator
             for (var month = 1; month <= MonthsToDeath(personStatus.Dob, _now); month++)
             {
                 var stepDate = previousStep.Date.AddMonths(1);
-                var stepStatePensionAmount = calcdRetirementDate ? result.AnnualStatePension : _statePensionAmountCalculator.Calculate(personStatus, stepDate);
+                var stepStatePensionAmount = (calcTillRetirementDate && givenRetirementDate<stepDate) || !calcdRetirementDate 
+                    ? _statePensionAmountCalculator.Calculate(personStatus, stepDate) : result.AnnualStatePension;
                 var step = new Step { Date = stepDate };
 
-                
                 var savings = previousStep.Savings - monthlySpending;
 
                 var growth = savings * _growthRate;
                 step.Growth = growth;
                 savings += growth;
 
-                if (!calcdRetirementDate)
-                {
-                    savings += monthlyAfterTaxSalary;
-                    step.AfterTaxSalary = monthlyAfterTaxSalary;
-                }
-                
                 if (stepDate > statePensionDate)
                 {
                     savings += stepStatePensionAmount / _monthly;
@@ -71,8 +69,19 @@ namespace TaxCalculator
                 }
 
                 var privatePensionGrowth = privatePensionAmount * _growthRate;
-                privatePensionAmount += privatePensionGrowth;
 
+                if (stepDate >= privatePensionDate)
+                    savings += privatePensionGrowth;
+                else
+                    privatePensionAmount += privatePensionGrowth;
+                
+                if ((!calcTillRetirementDate && !calcdRetirementDate)  || (calcTillRetirementDate && stepDate<givenRetirementDate))
+                {
+                    savings += monthlyAfterTaxSalary;
+                    step.AfterTaxSalary = monthlyAfterTaxSalary;
+                    privatePensionAmount += (personStatus.Salary / _monthly) * (personStatus.EmployeeContribution + personStatus.EmployerContribution);
+                }
+                
                 step.PrivatePensionGrowth = privatePensionGrowth;
                 step.PrivatePensionAmount = privatePensionAmount;
 
@@ -83,24 +92,45 @@ namespace TaxCalculator
                 if (!calcdRetirementDate &&
                     IsThatEnoughTillDeath(step.Savings, step.Date, minimumCash, personStatus, statePensionDate, stepStatePensionAmount, privatePensionDate, step.PrivatePensionAmount))
                 {
-                    result.AnnualStatePension = Convert.ToInt32(stepStatePensionAmount);
-                    result.RetirementDate = step.Date;
+                    if(!calcTillRetirementDate)
+                        result.AnnualStatePension = Convert.ToInt32(stepStatePensionAmount);
+                    result.MinimumPossibleRetirementDate = step.Date;
                     calcdRetirementDate = true;
+                }
+                
+                if(calcTillRetirementDate && givenRetirementDate<stepDate)
+                    result.AnnualStatePension = Convert.ToInt32(stepStatePensionAmount);
+
+                if (stepDate >= privatePensionDate && stepDate.AddMonths(-1) < privatePensionDate)
+                {
+                    result.PrivatePensionPot = Convert.ToInt32(privatePensionAmount);
+                    result.SavingsAtPrivatePensionAge = Convert.ToInt32(step.Savings);
+                }
+                
+                if (stepDate >= statePensionDate && stepDate.AddMonths(-1) < statePensionDate)
+                {
+                    result.SavingsAtStatePensionAge = Convert.ToInt32(step.Savings);
                 }
             }
 
+            result.PrivatePensionSafeWithdrawal = Convert.ToInt32(result.PrivatePensionPot * 0.04);
             result.StateRetirementDate = statePensionDate;
             result.PrivateRetirementDate = privatePensionDate;
-            result.TimeToRetirement = new DateAmount(_now, result.RetirementDate);
-            result.RetirementAge = AgeCalc.Age(personStatus.Dob, result.RetirementDate);
+            result.TimeToRetirement = new DateAmount(_now, result.MinimumPossibleRetirementDate);
+            result.RetirementAge = retirementAge ?? AgeCalc.Age(personStatus.Dob, result.MinimumPossibleRetirementDate);
             result.StateRetirementAge = AgeCalc.Age(personStatus.Dob, result.StateRetirementDate);
             result.PrivateRetirementAge = AgeCalc.Age(personStatus.Dob, result.PrivateRetirementDate);
-            result.AfterTaxSalary = Convert.ToInt32(taxResult.Remainder);
+            result.AfterTaxSalary = Convert.ToInt32(taxResult.Remainder*(1-personStatus.EmployeeContribution));
             result.NationalInsuranceBill = Convert.ToInt32(taxResult.NationalInsurance);
             result.IncomeTaxBill = Convert.ToInt32(taxResult.IncomeTax);
-            result.Spending = personStatus.Spending;
+            result.Spending = Convert.ToInt32(personStatus.Spending / _monthly);
             
             return result;
+        }
+
+        private static bool PassedRetirementDate(bool calcdRetirementDate)
+        {
+            return calcdRetirementDate;
         }
 
         private bool IsThatEnoughTillDeath(decimal cash, DateTime now, int minimumCash,

@@ -11,6 +11,8 @@ namespace TaxCalcService
 {
     public class Startup
     {
+        private const string EnabledOrigins = "enabledOrigins";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -21,6 +23,15 @@ namespace TaxCalcService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: EnabledOrigins,
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:3000");
+                    });
+            });
+            
             services.AddSingleton<IIncomeTaxCalculator, IncomeTaxCalculator>();
             services.AddSingleton<ITaxCalculatorDomainInterface, TaxCalculatorDomainInterface>();
             services.AddSingleton<IDateProvider, DateProvider>();
@@ -43,6 +54,8 @@ namespace TaxCalcService
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            
+            app.UseCors(EnabledOrigins);
 
             app.UseAuthorization();
 
