@@ -18,7 +18,7 @@ namespace TaxCalcService.Models
             int existingSavings, int existingPrivatePension, decimal employerContribution, decimal employeeContribution,
             int? targetRetirementAge)
         {
-            var retirementReport = _retirementCalculator.ReportFor(new PersonStatus
+            var retirementReport = _retirementCalculator.ReportForTargetAge(new PersonStatus
             {
                 Dob = dob, 
                 Salary = payeSalary, 
@@ -30,7 +30,8 @@ namespace TaxCalcService.Models
                 EmployeeContribution = employeeContribution/100,
             }, targetRetirementAge);
 
-            return new RetirementReportDto(retirementReport);
+            var result = new RetirementReportDto(retirementReport);
+            return result;
         }
     }
 }

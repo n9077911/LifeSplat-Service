@@ -4,6 +4,7 @@ namespace TaxCalculator.ExternalInterface
 {
     public interface IRetirementCalculator
     {
-        IRetirementReport ReportFor(PersonStatus personStatus, int? retirementAge = null);
+        IRetirementReport ReportForTargetAge(PersonStatus personStatus, int? retirementAge = null);
+        IRetirementReport ReportFor(PersonStatus personStatus, DateTime? givenRetirementDate = null);
     }
 }

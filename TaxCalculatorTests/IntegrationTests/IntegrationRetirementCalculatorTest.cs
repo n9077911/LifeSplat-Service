@@ -29,7 +29,7 @@ namespace TaxCalculatorTests.IntegrationTests
                 });
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2034, 01, 01)));
-            Assert.That(report.RetirementAge, Is.EqualTo(52));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(52));
             Assert.That(report.StateRetirementAge, Is.EqualTo(68));
             Assert.That(report.PrivateRetirementAge, Is.EqualTo(58));
             Assert.That(report.StateRetirementDate, Is.EqualTo(new DateTime(2049, 05, 30)));

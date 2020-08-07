@@ -17,18 +17,22 @@ namespace TaxCalculator
         public int NationalInsuranceBill { get; set; }
         public int IncomeTaxBill { get; set; }
         public DateTime MinimumPossibleRetirementDate { get; set; }
-        public int TargetSavings { get; set; }
-        public int RetirementAge { get; set; }
+        public int MinimumPossibleRetirementAge { get; set; }
+        public DateTime? TargetRetirementDate { get; set; }
+        public int? TargetRetirementAge { get; set; }
         public int StateRetirementAge { get; set; }
         public int PrivateRetirementAge { get; set; }
         public int AnnualStatePension { get; set; }
+        public int QualifyingStatePensionYears { get; set; }
         public int AfterTaxSalary { get; set; }
         public int Spending { get; set; }
         public DateAmount TimeToRetirement { get; set; }
-        public List<Step> Steps { get; set; }
+        public List<Step> Steps { get; }
         public int PrivatePensionPot { get; set; }
         public int SavingsAtPrivatePensionAge { get; set; }
         public int SavingsAtStatePensionAge { get; set; }
+        public int SavingsAtMinimumPossiblePensionAge { get; set; }
+        public int SavingsAt100 { get; set; }
         public int PrivatePensionSafeWithdrawal { get; set; }
     }
 

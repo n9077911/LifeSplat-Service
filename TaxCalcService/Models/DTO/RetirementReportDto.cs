@@ -6,11 +6,12 @@ namespace TaxCalcService.Models.DTO
 {
     public class RetirementReportDto
     {
-        public int RetirementAge { get; }
+        public int MinimumPossibleRetirementAge { get; }
+        public int? TargetRetirementAge { get; }
         public int StateRetirementAge { get; }
         public int PrivateRetirementAge { get; }
-        public int TargetSavings { get; }
-        public DateTime RetirementDate { get; }
+        public DateTime MinimumPossibleRetirementDate{ get; }
+        public DateTime? TargetRetirementDate{ get; }
         public DateTime StateRetirementDate { get; }
         public DateTime PrivateRetirementDate { get; }
         public string TimeToRetirementDescription { get; }
@@ -28,11 +29,12 @@ namespace TaxCalcService.Models.DTO
 
         public RetirementReportDto(IRetirementReport retirementReport)
         {
-            RetirementAge = retirementReport.RetirementAge;
+            MinimumPossibleRetirementAge = retirementReport.MinimumPossibleRetirementAge;
             StateRetirementAge = retirementReport.StateRetirementAge;
             PrivateRetirementAge = retirementReport.PrivateRetirementAge;
-            TargetSavings = retirementReport.TargetSavings;
-            RetirementDate = retirementReport.MinimumPossibleRetirementDate;
+            MinimumPossibleRetirementDate = retirementReport.MinimumPossibleRetirementDate;
+            TargetRetirementAge = retirementReport.TargetRetirementAge;
+            TargetRetirementDate = retirementReport.TargetRetirementDate;
             StateRetirementDate = retirementReport.StateRetirementDate;
             PrivateRetirementDate = retirementReport.PrivateRetirementDate;
             TimeToRetirementDescription = retirementReport.TimeToRetirement.ToString();
