@@ -140,7 +140,7 @@ namespace TaxCalculatorTests
         }
 
         [Test]
-        public void ReconcileRetirementAgeGivenMode_WithCalcMinimumMode()
+        public void Reconcile_RetirementAgeGivenMode_With_CalcMinimumMode_WhenMinimumComesBeforeTarget()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 new StatePensionAmountCalculator());
@@ -152,12 +152,31 @@ namespace TaxCalculatorTests
 
             var report = calc.ReportForTargetAge(status, 50);
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
 
             var report2 = calc.ReportFor(status);
             Assert.That(report2.SavingsAt100, Is.EqualTo(1_612));
             Assert.That(report2.MinimumPossibleRetirementDate, Is.EqualTo(report.MinimumPossibleRetirementDate));
+            Assert.That(report2.MinimumPossibleRetirementAge, Is.EqualTo(report.MinimumPossibleRetirementAge));
             Assert.That(report2.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(report.SavingsAtMinimumPossiblePensionAge));
+        }
+        
+        [Test]
+        public void CalcsMinimumPossibleRetirementDate_WhenMinimumComesAfterTarget()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
+                new StatePensionAmountCalculator());
+            var status = new PersonStatus
+            {
+                ExistingSavings = 50_000, Salary = 100_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30),
+                ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
+            };
+
+            var report = calc.ReportForTargetAge(status, 42);
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
+            Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
         }
     }
 }
