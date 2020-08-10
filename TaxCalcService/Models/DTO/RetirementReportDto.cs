@@ -22,6 +22,7 @@ namespace TaxCalcService.Models.DTO
         public int PrivatePensionSafeWithdrawal { get; }
         public int SavingsAtPrivatePensionAge { get; }
         public int SavingsAtStatePensionAge { get; }
+        public DateTime BankruptDate { get; }
         public int NationalInsuranceBill { get; }
         public int IncomeTaxBill { get; }
         public List<string> StepsHeaders { get; }
@@ -48,12 +49,14 @@ namespace TaxCalcService.Models.DTO
             PrivatePensionSafeWithdrawal = retirementReport.PrivatePensionSafeWithdrawal;
             SavingsAtPrivatePensionAge = retirementReport.SavingsAtPrivatePensionAge;
             SavingsAtStatePensionAge = retirementReport.SavingsAtStatePensionAge;
+            BankruptDate = retirementReport.BankruptDate;
 
             StepsHeaders = new List<string>
             {
                 "Date", "Cash", "StatePension", "AfterTaxSalary", "Growth", "PrivatePensionGrowth",
                 "PrivatePensionAmount"
             };
+            
             Steps = new List<List<object>>();
             foreach (var step in retirementReport.Steps)
             {

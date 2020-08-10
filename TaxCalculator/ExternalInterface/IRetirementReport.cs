@@ -26,6 +26,7 @@ namespace TaxCalculator.ExternalInterface
         int SavingsAtMinimumPossiblePensionAge { get; }
         int SavingsAt100 { get; }
         DateAmount TimeToRetirement { get; }
+        DateTime BankruptDate { get; }
         List<Step> Steps { get; }
     }
 }

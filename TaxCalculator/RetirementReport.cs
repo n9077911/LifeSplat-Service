@@ -27,6 +27,7 @@ namespace TaxCalculator
         public int AfterTaxSalary { get; set; }
         public int Spending { get; set; }
         public DateAmount TimeToRetirement { get; set; }
+        public DateTime BankruptDate { get; set; } = DateTime.MaxValue;
         public List<Step> Steps { get; }
         public int PrivatePensionPot { get; set; }
         public int SavingsAtPrivatePensionAge { get; set; }

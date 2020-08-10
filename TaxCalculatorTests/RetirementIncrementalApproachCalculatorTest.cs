@@ -27,6 +27,9 @@ namespace TaxCalculatorTests
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2020, 02, 1)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(38));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("0 Years and 1 Month"));
+            Assert.That(report.SavingsAt100, Is.EqualTo(577_990));
+            //Knows when someone will not go bankrupt
+            Assert.That(report.BankruptDate, Is.EqualTo(DateTime.MaxValue));
         }
 
         [Test]
@@ -40,6 +43,7 @@ namespace TaxCalculatorTests
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2021, 12, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(40));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("1 Year and 11 Months"));
+            Assert.That(report.SavingsAt100, Is.EqualTo(429_008));
         }
 
         [Test]
@@ -55,6 +59,7 @@ namespace TaxCalculatorTests
             Assert.That(report.StateRetirementAge, Is.EqualTo(68));
             Assert.That(report.StateRetirementDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("28 Years and 7 Months"));
+            Assert.That(report.SavingsAt100, Is.EqualTo(3_518));
         }
 
         [Test]
@@ -70,6 +75,7 @@ namespace TaxCalculatorTests
             Assert.That(report.StateRetirementAge, Is.EqualTo(68));
             Assert.That(report.StateRetirementDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("22 Years and 11 Months"));
+            Assert.That(report.SavingsAt100, Is.EqualTo(7_282));
         }
 
         [Test]
@@ -89,6 +95,7 @@ namespace TaxCalculatorTests
             Assert.That(report.PrivateRetirementDate, Is.EqualTo(new DateTime(2039, 05, 30)));
             Assert.That(report.PrivatePensionPot, Is.EqualTo(133_551));
             Assert.That(report.PrivatePensionSafeWithdrawal, Is.EqualTo(5_342));
+            Assert.That(report.SavingsAt100, Is.EqualTo(7_526));
         }
         
         [Test]
@@ -151,6 +158,7 @@ namespace TaxCalculatorTests
             };
 
             var report = calc.ReportForTargetAge(status, 50);
+            Assert.That(report.SavingsAt100, Is.EqualTo(3_245_457));
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
@@ -177,6 +185,39 @@ namespace TaxCalculatorTests
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
+            Assert.That(report.SavingsAt100, Is.EqualTo(-525943));
+        }
+
+        [Test]
+        public void KnowsWhenSomeoneWillGoBankrupt_WhenCalculatingMinimum()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
+                _fixedStatePensionAmountCalculator);
+            var status = new PersonStatus
+            {
+                Salary = 20_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30),
+            };
+
+            var report = calc.ReportForTargetAge(status);
+
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2072, 08, 01)));
+            Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2020, 02, 01)));
+        }
+        
+        [Test]
+        public void KnowsWhenSomeoneWillGoBankrupt_WhenTargetDateGiven()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
+                _fixedStatePensionAmountCalculator);
+            var status = new PersonStatus
+            {
+                Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30),
+            };
+
+            var report = calc.ReportForTargetAge(status, 42);
+
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2034, 06, 01)));
+            Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2026, 09, 01)));
         }
     }
 }

@@ -42,8 +42,7 @@ namespace TaxCalculator
             PersonStatus personStatus,
             DateTime statePensionDate)
         {
-            decimal statePensionAmount;
-            statePensionAmount = !Retired() ? statePensionAmountCalculator.Calculate(personStatus, Date) : _previousStep.PredictedStatePensionAnnual;
+            var statePensionAmount = Retired() ? _previousStep.PredictedStatePensionAnnual : statePensionAmountCalculator.Calculate(personStatus, Date);
 
             PredictedStatePensionAnnual = Convert.ToInt32(statePensionAmount);
 
@@ -63,7 +62,7 @@ namespace TaxCalculator
 
         public void UpdateGrowth(decimal growthRate)
         {
-            var growth = Savings * growthRate; //should min on 0
+            var growth = Math.Max(Savings * growthRate, 0m);
             Growth = growth;
             Savings += growth;
         }

@@ -84,7 +84,7 @@ namespace TaxCalculator
                     result.SavingsAtMinimumPossiblePensionAge = Convert.ToInt32(step.Savings);
                     calcdMinimum = true;
                 }
-
+                
                 result.Steps.Add(targetDateGiven ? stepTargetDate : step);
                 
                 previousStep = step;
@@ -113,9 +113,14 @@ namespace TaxCalculator
 
         private static void UpdateResultsBasedOnSetDates(RetirementReport result, DateTime privatePensionDate, DateTime statePensionDate)
         {
-            var (privatePensionSet, statePensionSet) = (false, false);
+            var (privatePensionSet, statePensionSet, bankrupt) = (false, false, false);
             foreach (var step in result.Steps)
             {
+                if (step.Savings < 0 && !bankrupt)
+                {
+                    bankrupt = true;
+                    result.BankruptDate = step.Date;
+                }
                 if (step.Date >= privatePensionDate && !privatePensionSet) //TODO: assumes does not work past private pension date 
                 {
                     privatePensionSet = true;
