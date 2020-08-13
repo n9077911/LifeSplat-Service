@@ -31,7 +31,7 @@ namespace TaxCalculator
 
         public IRetirementReport ReportForTargetAge(PersonStatus personStatus, int? retirementAge = null)
         {
-            return ReportFor(personStatus, retirementAge.HasValue ? personStatus.Dob.AddYears(retirementAge.Value) : (DateTime?)null);
+            return ReportFor(personStatus, retirementAge.HasValue && retirementAge.Value != 0 ? personStatus.Dob.AddYears(retirementAge.Value) : (DateTime?)null);
         }
 
         public IRetirementReport ReportFor(PersonStatus personStatus, DateTime? givenRetirementDate = null)

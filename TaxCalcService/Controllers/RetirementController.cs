@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using TaxCalcService.Models;
@@ -16,16 +16,13 @@ namespace TaxCalcService.Controllers
         {
             _retirement = retirement;
         }
-
-        // GET api/Retirement/Report?salary=20000&spending=19000&dob=1981-30-05&female=false&existingSavings=20000
-        //https://sctaxcalcservice.azurewebsites.net/api/Retirement/Report?salary=100000&spending=40000&dob=1981-05-30&female=false&existingSavings=20000
-        [HttpGet("Report")]
-        public async Task<RetirementReportDto> GetReport([FromQuery] int salary, [FromQuery] int spending,
-            [FromQuery] DateTime dob, [FromQuery] bool female, [FromQuery] int existingSavings, [FromQuery] int existingPension, 
-            [FromQuery] decimal employerContribution, [FromQuery] decimal employeeContribution, [FromQuery] int? targetRetirementAge)
+        
+        [HttpPost("Report")]
+        public async Task<RetirementReportDto> Report([FromBody] string body)
         {
-            return await Task.Run(() => _retirement.RetirementReportFor(salary, spending, dob, female, existingSavings, 
-                existingPension, employerContribution, employeeContribution, targetRetirementAge));
+            var options = new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
+            var request = JsonSerializer.Deserialize<RetirementReportRequestDto>(body, options);
+            return await Task.Run(() => _retirement.RetirementReportFor(request.Spending, request.TargetRetirementAge, request.Persons));
         }
     }
 }
