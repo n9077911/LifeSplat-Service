@@ -8,7 +8,7 @@ namespace TaxCalculator.ExternalInterface
         public FamilyStatus(IEnumerable<PersonStatus> personStatuses)
         {
             Persons.AddRange(personStatuses);
-            Spending = PrimaryPerson.Spending; //TODO: refactor spending out of person status? or perhaps family should be able to specify individual spending?
+            Spending = Persons.Select(p => p.Spending).Sum();
         }
 
         public int Spending { get; }

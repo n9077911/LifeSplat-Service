@@ -73,7 +73,7 @@ namespace TaxCalculator
                     foreach (var stepDescription in person.StepDescriptions)
                     {
                         stepDescription.NewStep(calcdMinimum, givenRetirementDate);
-                        stepDescription.UpdateSpending(result.MonthlySpending);
+                        stepDescription.UpdateSpending(person.MonthlySpending);
                         stepDescription.UpdateGrowth(_growthRate);
                         stepDescription.UpdateStatePensionAmount(_statePensionAmountCalculator);
                         stepDescription.UpdatePrivatePension(_growthRate);

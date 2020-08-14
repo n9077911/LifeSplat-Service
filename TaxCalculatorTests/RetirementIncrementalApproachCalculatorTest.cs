@@ -7,7 +7,9 @@ using TaxCalculatorTests.Stubs;
 namespace TaxCalculatorTests
 {
     //TODO: TEST what happen if ran on 31st, 20th, or 29th of the month! does month logic fail?
-    
+    //todo: support paying tax from pension income
+    //todo: support not earning enough for pension contribution
+
     [TestFixture]
     public class RetirementIncrementalApproachCalculatorTest
     {
@@ -50,21 +52,68 @@ namespace TaxCalculatorTests
         }
 
         [Test]
-        public void KnowsWhenTwoPeopleCanRetire()
+        public void KnowsWhenTwoSimpleWorkingPeopleCanRetire()
+        {
+            
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
+                _fixedStatePensionAmountCalculator);
+
+            var person1 = new PersonStatus {Salary = 15_000, Spending = 10_000, Dob = new DateTime(1981, 05, 30)};
+            var person2 = new PersonStatus {Salary = 15_000, Spending = 10_000, Dob = new DateTime(1981, 05, 30)};
+
+            var report = calc.ReportFor(new[] {person1, person2});
+        
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2038, 04, 01)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(56));
+            Assert.That(report.SavingsAt100, Is.EqualTo(5_455));
+        }
+
+        [Test]
+        public void KnowsWhenTwoComplexWorkingPeopleCanRetire()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
 
-            var person1 = new PersonStatus {Salary = 30_000, Spending = 2_500, Dob = new DateTime(1981, 05, 30)};
-            var person2 = new PersonStatus {Salary = 30_000, Spending = 2_500, Dob = new DateTime(1981, 05, 30)};
-            var report = calc.ReportFor(new []{person1, person2});
+            var person1 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                EmployeeContribution = 5, EmployerContribution = 3};
+            var person2 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                EmployeeContribution = 5, EmployerContribution = 3};
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2021, 12, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(40));
-            Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("1 Year and 11 Months"));
-            Assert.That(report.SavingsAt100, Is.EqualTo(429_008));
+            var report = calc.ReportFor(new[] {person1, person2});
+        
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2040, 02, 01)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(58));
+            //below can not be correct
+            Assert.That(report.SavingsAt100, Is.EqualTo(93699789));
         }
         
+        [Test]
+        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_WithTargetRetirementDate()
+        {
+        fill me in
+        }
+        
+        [Test]
+        public void KnowsWhenTwoIdenticalPeopleCanRetire()
+        {
+            //two identical people should be able to retire at the same time as an identical individualS
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
+                _fixedStatePensionAmountCalculator);
+
+            var person1 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                    EmployeeContribution = 5, EmployerContribution = 3};
+            var person2 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                    EmployeeContribution = 5, EmployerContribution = 3};
+
+            var couple = calc.ReportFor(new[] {person1, person2});
+            var single = calc.ReportFor(new[] {person1});
+
+            Assert.That(couple.MinimumPossibleRetirementDate, Is.EqualTo(single.MinimumPossibleRetirementDate));
+            Assert.That(couple.MinimumPossibleRetirementAge, Is.EqualTo(single.MinimumPossibleRetirementAge));
+            Assert.That(couple.TimeToRetirement.ToString(), Is.EqualTo(single.TimeToRetirement.ToString()));
+            Assert.That(couple.SavingsAt100, Is.EqualTo(single.SavingsAt100 * 2).Within(1));
+        }
+
         [Test]
         public void KnowsWhenASalariedWorkerCanRetire_CloseToStatePensionAge()
         {
@@ -116,7 +165,7 @@ namespace TaxCalculatorTests
             Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(5_342));
             Assert.That(report.SavingsAt100, Is.EqualTo(7_526));
         }
-        
+
         [Test]
         public void CalculatesReportBasedOnFixedRetirementDate()
         {
@@ -156,7 +205,7 @@ namespace TaxCalculatorTests
             Assert.That(report.PrimaryPerson.PrivatePensionPot, Is.EqualTo(150_664));
             Assert.That(report.PrimaryPerson.AnnualStatePension, Is.EqualTo(5_987));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
-            
+
             //validate earliest possible retirement date
             var report2 = calc.ReportFor(status, report.MinimumPossibleRetirementDate);
             Assert.That(report2.SavingsAt100, Is.EqualTo(report.SavingsAt100));
@@ -188,7 +237,7 @@ namespace TaxCalculatorTests
             Assert.That(report2.MinimumPossibleRetirementAge, Is.EqualTo(report.MinimumPossibleRetirementAge));
             Assert.That(report2.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(report.SavingsAtMinimumPossiblePensionAge));
         }
-        
+
         [Test]
         public void CalcsMinimumPossibleRetirementDate_WhenMinimumComesAfterTarget()
         {
@@ -222,7 +271,7 @@ namespace TaxCalculatorTests
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2072, 08, 01)));
             Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2020, 02, 01)));
         }
-        
+
         [Test]
         public void KnowsWhenSomeoneWillGoBankrupt_WhenTargetDateGiven()
         {
