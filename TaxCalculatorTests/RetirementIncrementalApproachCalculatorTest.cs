@@ -6,6 +6,8 @@ using TaxCalculatorTests.Stubs;
 
 namespace TaxCalculatorTests
 {
+    //TODO: TEST what happen if ran on 31st, 20th, or 29th of the month! does month logic fail?
+    
     [TestFixture]
     public class RetirementIncrementalApproachCalculatorTest
     {
@@ -47,6 +49,21 @@ namespace TaxCalculatorTests
         }
 
         [Test]
+        public void KnowsWhenTwoPeopleCanRetire()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
+                _fixedStatePensionAmountCalculator);
+            
+            var status = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30)};
+            var status2 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30)};
+
+            var report = calc.ReportForTargetAge(new[]{status, status2}, 42);
+
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2034, 06, 01)));
+            Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2026, 09, 01)));            
+        }
+        
+        [Test]
         public void KnowsWhenASalariedWorkerCanRetire_CloseToStatePensionAge()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
@@ -57,7 +74,7 @@ namespace TaxCalculatorTests
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2048, 08, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(67));
             Assert.That(report.StateRetirementAge, Is.EqualTo(68));
-            Assert.That(report.StateRetirementDate, Is.EqualTo(new DateTime(2049, 05, 30)));
+            Assert.That(report.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("28 Years and 7 Months"));
             Assert.That(report.SavingsAt100, Is.EqualTo(3_518));
         }
@@ -73,7 +90,7 @@ namespace TaxCalculatorTests
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2042, 12, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(61));
             Assert.That(report.StateRetirementAge, Is.EqualTo(68));
-            Assert.That(report.StateRetirementDate, Is.EqualTo(new DateTime(2049, 05, 30)));
+            Assert.That(report.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("22 Years and 11 Months"));
             Assert.That(report.SavingsAt100, Is.EqualTo(7_282));
         }
@@ -92,7 +109,7 @@ namespace TaxCalculatorTests
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2039, 06, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(58));
             Assert.That(report.PrivateRetirementAge, Is.EqualTo(58));
-            Assert.That(report.PrivateRetirementDate, Is.EqualTo(new DateTime(2039, 05, 30)));
+            Assert.That(report.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
             Assert.That(report.PrivatePensionPot, Is.EqualTo(133_551));
             Assert.That(report.PrivatePensionSafeWithdrawal, Is.EqualTo(5_342));
             Assert.That(report.SavingsAt100, Is.EqualTo(7_526));

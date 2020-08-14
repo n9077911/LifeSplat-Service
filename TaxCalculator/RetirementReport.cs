@@ -6,14 +6,29 @@ namespace TaxCalculator
 {
     public class RetirementReport : IRetirementReport
     {
-        public RetirementReport()
+        private const decimal Monthly = 12m;
+        
+        public RetirementReport(IPensionAgeCalc pensionAgeCalc, PersonStatus personStatus)
         {
             TimeToRetirement = new DateAmount(DateTime.MinValue, DateTime.MinValue); //null object pattern
             Steps = new List<Step>();
+            
+            StatePensionDate = pensionAgeCalc.StatePensionDate(personStatus.Dob, personStatus.Sex);
+            PrivatePensionDate = pensionAgeCalc.PrivatePensionDate(StatePensionDate);
+            var taxResult = new IncomeTaxCalculator().TaxFor(personStatus.Salary*(1-personStatus.EmployeeContribution));
+            MonthlyAfterTaxSalary = taxResult.Remainder / Monthly;
+            MonthlySpending = personStatus.Spending / Monthly;
+            
+            AfterTaxSalary = Convert.ToInt32(taxResult.Remainder*(1-personStatus.EmployeeContribution));
+            NationalInsuranceBill = Convert.ToInt32(taxResult.NationalInsurance);
+            IncomeTaxBill = Convert.ToInt32(taxResult.IncomeTax);
         }
 
-        public DateTime StateRetirementDate { get; set; }
-        public DateTime PrivateRetirementDate { get; set; }
+        public decimal MonthlyAfterTaxSalary { get; }
+        public decimal MonthlySpending { get; }
+        
+        public DateTime StatePensionDate { get; set; }
+        public DateTime PrivatePensionDate { get; set; }
         public int NationalInsuranceBill { get; set; }
         public int IncomeTaxBill { get; set; }
         public DateTime MinimumPossibleRetirementDate { get; set; }

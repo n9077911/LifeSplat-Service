@@ -32,8 +32,8 @@ namespace TaxCalculatorTests.IntegrationTests
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(52));
             Assert.That(report.StateRetirementAge, Is.EqualTo(68));
             Assert.That(report.PrivateRetirementAge, Is.EqualTo(58));
-            Assert.That(report.StateRetirementDate, Is.EqualTo(new DateTime(2049, 05, 30)));
-            Assert.That(report.PrivateRetirementDate, Is.EqualTo(new DateTime(2039, 05, 30)));
+            Assert.That(report.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
+            Assert.That(report.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
             Assert.That(report.PrivatePensionPot, Is.EqualTo(397_123));
             Assert.That(report.PrivatePensionSafeWithdrawal, Is.EqualTo(15_885));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("14 Years and 0 Months"));

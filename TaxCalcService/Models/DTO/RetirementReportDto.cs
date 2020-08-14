@@ -36,8 +36,8 @@ namespace TaxCalcService.Models.DTO
             MinimumPossibleRetirementDate = retirementReport.MinimumPossibleRetirementDate;
             TargetRetirementAge = retirementReport.TargetRetirementAge;
             TargetRetirementDate = retirementReport.TargetRetirementDate;
-            StateRetirementDate = retirementReport.StateRetirementDate;
-            PrivateRetirementDate = retirementReport.PrivateRetirementDate;
+            StateRetirementDate = retirementReport.StatePensionDate;
+            PrivateRetirementDate = retirementReport.PrivatePensionDate;
             TimeToRetirementDescription = retirementReport.TimeToRetirement.ToString();
             AfterTaxSalary = retirementReport.AfterTaxSalary;
             Spending = retirementReport.Spending;

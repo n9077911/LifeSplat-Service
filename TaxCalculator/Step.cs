@@ -4,8 +4,21 @@ using TaxCalculator.ExternalInterface;
 
 namespace TaxCalculator
 {
+    public interface IStepUpdater
+    {
+        void UpdateStatePensionAmount(
+            IStatePensionAmountCalculator statePensionAmountCalculator, 
+            PersonStatus personStatus,
+            DateTime statePensionDate);
+
+        void UpdateGrowth(decimal growthRate);
+        void UpdatePrivatePension(decimal growthRate, DateTime privatePensionDate);
+        void UpdateSalary(decimal monthlyAfterTaxSalary);
+        void UpdateSpending(decimal monthlySpending);
+    }
+
     [DebuggerDisplay("{Date} : {Savings}")]
-    public class Step
+    public class Step : IStepUpdater
     {
         private readonly Step _previousStep;
         private readonly PersonStatus _personStatus;
@@ -76,6 +89,7 @@ namespace TaxCalculator
                 Savings += PrivatePensionGrowth;
             else
                 PrivatePensionAmount += PrivatePensionGrowth;
+            
             if (!Retired())
                 PrivatePensionAmount += (_personStatus.Salary / _monthly) * (_personStatus.EmployeeContribution + _personStatus.EmployerContribution);
         }

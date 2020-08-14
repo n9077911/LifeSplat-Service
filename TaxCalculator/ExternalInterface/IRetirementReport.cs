@@ -19,8 +19,8 @@ namespace TaxCalculator.ExternalInterface
         DateTime MinimumPossibleRetirementDate { get; }
         DateTime? TargetRetirementDate { get; }
         int? TargetRetirementAge { get; }
-        DateTime StateRetirementDate { get; }
-        DateTime PrivateRetirementDate { get; }
+        DateTime StatePensionDate { get; }
+        DateTime PrivatePensionDate { get; }
         int SavingsAtPrivatePensionAge { get; }
         int SavingsAtStatePensionAge { get; }
         int SavingsAtMinimumPossiblePensionAge { get; }
