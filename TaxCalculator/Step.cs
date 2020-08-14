@@ -7,12 +7,10 @@ namespace TaxCalculator
     public interface IStepUpdater
     {
         void UpdateStatePensionAmount(
-            IStatePensionAmountCalculator statePensionAmountCalculator, 
-            PersonStatus personStatus,
-            DateTime statePensionDate);
+            IStatePensionAmountCalculator statePensionAmountCalculator);
 
         void UpdateGrowth(decimal growthRate);
-        void UpdatePrivatePension(decimal growthRate, DateTime privatePensionDate);
+        void UpdatePrivatePension(decimal growthRate);
         void UpdateSalary(decimal monthlyAfterTaxSalary);
         void UpdateSpending(decimal monthlySpending);
     }
@@ -51,15 +49,13 @@ namespace TaxCalculator
         public decimal PrivatePensionAmount { get; set; }
 
         public void UpdateStatePensionAmount(
-            IStatePensionAmountCalculator statePensionAmountCalculator, 
-            PersonStatus personStatus,
-            DateTime statePensionDate)
+            IStatePensionAmountCalculator statePensionAmountCalculator)
         {
-            var statePensionAmount = Retired() ? _previousStep.PredictedStatePensionAnnual : statePensionAmountCalculator.Calculate(personStatus, Date);
+            var statePensionAmount = Retired() ? _previousStep.PredictedStatePensionAnnual : statePensionAmountCalculator.Calculate(_personStatus, Date);
 
             PredictedStatePensionAnnual = Convert.ToInt32(statePensionAmount);
 
-            if (Date > statePensionDate)
+            if (Date > _personStatus.StatePensionDate)
             {
                 Savings += PredictedStatePensionAnnual / _monthly;
                 StatePension = PredictedStatePensionAnnual / _monthly;
@@ -80,12 +76,12 @@ namespace TaxCalculator
             Savings += growth;
         }
 
-        public void UpdatePrivatePension(decimal growthRate, DateTime privatePensionDate)
+        public void UpdatePrivatePension(decimal growthRate)
         {
             PrivatePensionGrowth = PrivatePensionAmount * growthRate;
 
             //TODO: needs to consider if you work past private pension age.
-            if (Date >= privatePensionDate) //and retired
+            if (Date >= _personStatus.PrivatePensionDate) //and retired
                 Savings += PrivatePensionGrowth;
             else
                 PrivatePensionAmount += PrivatePensionGrowth;

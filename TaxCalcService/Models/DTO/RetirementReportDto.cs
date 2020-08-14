@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using TaxCalculator.ExternalInterface;
+using TaxCalculator;
 
 namespace TaxCalcService.Models.DTO
 {
@@ -31,22 +31,22 @@ namespace TaxCalcService.Models.DTO
         public RetirementReportDto(IRetirementReport retirementReport)
         {
             MinimumPossibleRetirementAge = retirementReport.MinimumPossibleRetirementAge;
-            StateRetirementAge = retirementReport.StateRetirementAge;
-            PrivateRetirementAge = retirementReport.PrivateRetirementAge;
+            StateRetirementAge = retirementReport.PrimaryPerson.StateRetirementAge;
+            PrivateRetirementAge = retirementReport.PrimaryPerson.PrivateRetirementAge;
             MinimumPossibleRetirementDate = retirementReport.MinimumPossibleRetirementDate;
             TargetRetirementAge = retirementReport.TargetRetirementAge;
             TargetRetirementDate = retirementReport.TargetRetirementDate;
-            StateRetirementDate = retirementReport.StatePensionDate;
-            PrivateRetirementDate = retirementReport.PrivatePensionDate;
+            StateRetirementDate = retirementReport.PrimaryPerson.StatePensionDate;
+            PrivateRetirementDate = retirementReport.PrimaryPerson.PrivatePensionDate;
             TimeToRetirementDescription = retirementReport.TimeToRetirement.ToString();
-            AfterTaxSalary = retirementReport.AfterTaxSalary;
+            AfterTaxSalary = retirementReport.PrimaryPerson.AfterTaxSalary;
             Spending = retirementReport.Spending;
-            NationalInsuranceBill = retirementReport.NationalInsuranceBill;
-            IncomeTaxBill = retirementReport.IncomeTaxBill;
-            AnnualStatePension = retirementReport.AnnualStatePension;
-            PrivatePensionPot = retirementReport.PrivatePensionPot;
+            NationalInsuranceBill = retirementReport.PrimaryPerson.NationalInsuranceBill;
+            IncomeTaxBill = retirementReport.PrimaryPerson.IncomeTaxBill;
+            AnnualStatePension = retirementReport.PrimaryPerson.AnnualStatePension;
+            PrivatePensionPot = retirementReport.PrimaryPerson.PrivatePensionPot.Value;
             
-            PrivatePensionSafeWithdrawal = retirementReport.PrivatePensionSafeWithdrawal;
+            PrivatePensionSafeWithdrawal = retirementReport.PrimaryPerson.PrivatePensionSafeWithdrawal;
             SavingsAtPrivatePensionAge = retirementReport.SavingsAtPrivatePensionAge;
             SavingsAtStatePensionAge = retirementReport.SavingsAtStatePensionAge;
             BankruptDate = retirementReport.BankruptDate;

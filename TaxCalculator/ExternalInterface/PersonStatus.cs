@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace TaxCalculator.ExternalInterface
 {
@@ -12,5 +13,12 @@ namespace TaxCalculator.ExternalInterface
         public int Spending { get; set; }
         public DateTime Dob { get; set; }
         public Sex Sex { get; set; }
+
+        //Added after initial creation// TODO: factor out to a separate object?
+        public DateTime StatePensionDate { get; set; }
+        public DateTime PrivatePensionDate { get; set; }
+        public List<StepDescription> StepDescriptions => new List<StepDescription>(){CalcMinimumSteps, TargetSteps};
+        public StepDescription CalcMinimumSteps { get; set; }
+        public StepDescription TargetSteps { get; set; }
     }
 }
