@@ -1,28 +1,24 @@
 using System;
 using System.Collections.Generic;
-using TaxCalculator.ExternalInterface;
 
 namespace TaxCalculator
 {
     public interface IRetirementReport
     {
-        decimal MonthlySpending { get; }
-        int Spending { get; set; }
-        DateAmount TimeToRetirement { get; set; }
-        DateTime BankruptDate { get; set; }
-        List<Step> Steps { get; }
-        Dictionary<PersonStatus, List<Step>> StepsDict { get; }
-        Dictionary<PersonStatus, PersonReport> PersonReports { get; }
-        DateTime MinimumPossibleRetirementDate { get; set; }
-        int MinimumPossibleRetirementAge { get; set; }
-        DateTime? TargetRetirementDate { get; set; }
-        int? TargetRetirementAge { get; set; }
-        int SavingsAtPrivatePensionAge { get; set; }
-        int SavingsAtStatePensionAge { get; set; }
-        int SavingsAtMinimumPossiblePensionAge { get; set; }
-        int SavingsAt100 { get; set; }
+        int Spending { get; }
+        DateAmount TimeToRetirement { get; }
+        DateTime BankruptDate { get; }
+        DateTime MinimumPossibleRetirementDate { get; }
+        int MinimumPossibleRetirementAge { get; }
+        DateTime? TargetRetirementDate { get; }
+        int? TargetRetirementAge { get; }
+        int SavingsAtPrivatePensionAge { get; }
+        int SavingsAtStatePensionAge { get; }
+        int SavingsAtMinimumPossiblePensionAge { get; }
+        int SavingsAt100 { get; }
         PersonReport PrimaryPerson { get; }
-        int PrivatePensionPotAtPrivatePensionAge { get; set; }
-        int PrivatePensionPotAtStatePensionAge { get; set; }
+        int PrivatePensionPotAtPrivatePensionAge { get; }
+        int PrivatePensionPotAtStatePensionAge { get; }
+        List<PersonReport> Persons { get; }
     }
 }

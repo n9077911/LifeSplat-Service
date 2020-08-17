@@ -37,13 +37,6 @@ namespace TaxCalculatorTests.IntegrationTests
             Assert.That(report.PrimaryPerson.PrivatePensionPot, Is.EqualTo(397_123));
             Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(15_885));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("14 Years and 0 Months"));
-            
-            //TODO: delete, used for debugging, once steps calculation stabilises this should be converted to an assert.
-            var steps = report.Steps.Where((step, i) => i % 12 == 0).ToList();
-            for (int i = 0; i < steps.Count; i++)
-            {
-                Console.WriteLine($"{i} : {steps[i].Savings}");
-            }
         }    
     }
 }

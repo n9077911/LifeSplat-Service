@@ -35,10 +35,10 @@ namespace TaxCalcService.Models.DTO
             PrivatePensionPotAtStatePensionAge = retirementReport.PrivatePensionPotAtStatePensionAge;
             BankruptDate = retirementReport.BankruptDate;
 
-            foreach (var personReport in retirementReport.PersonReports)
+            foreach (var personReport in retirementReport.Persons)
             {
                 var steps = new List<List<object>>();
-                foreach (var step in retirementReport.StepsDict[personReport.Key])
+                foreach (var step in personReport.PrimarySteps.Steps)
                 {
                     steps.Add(new List<object>
                         {
@@ -55,15 +55,15 @@ namespace TaxCalcService.Models.DTO
                 
                 Person.Add(new PersonReportDto
                 {
-                    StateRetirementAge = personReport.Value.StateRetirementAge,
-                    PrivateRetirementAge = personReport.Value.PrivateRetirementAge,
-                    StateRetirementDate = personReport.Value.StatePensionDate,
-                    PrivateRetirementDate = personReport.Value.PrivatePensionDate,
-                    NationalInsuranceBill = personReport.Value.NationalInsuranceBill,
-                    IncomeTaxBill = personReport.Value.IncomeTaxBill,
-                    AnnualStatePension = personReport.Value.AnnualStatePension,
-                    PrivatePensionPot = personReport.Value.PrivatePensionPot.Value,
-                    PrivatePensionSafeWithdrawal = personReport.Value.PrivatePensionSafeWithdrawal,
+                    StateRetirementAge = personReport.StateRetirementAge,
+                    PrivateRetirementAge = personReport.PrivateRetirementAge,
+                    StateRetirementDate = personReport.StatePensionDate,
+                    PrivateRetirementDate = personReport.PrivatePensionDate,
+                    NationalInsuranceBill = personReport.NationalInsuranceBill,
+                    IncomeTaxBill = personReport.IncomeTaxBill,
+                    AnnualStatePension = personReport.AnnualStatePension,
+                    PrivatePensionPot = personReport.PrivatePensionPot.Value,
+                    PrivatePensionSafeWithdrawal = personReport.PrivatePensionSafeWithdrawal,
                     AfterTaxSalary = retirementReport.PrimaryPerson.AfterTaxSalary,
                     Steps = steps,
                 });

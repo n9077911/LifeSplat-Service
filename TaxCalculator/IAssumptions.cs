@@ -2,7 +2,8 @@ namespace TaxCalculator
 {
     public interface IAssumptions
     {
-        int EstimatedDeath { get; }
-        decimal GrowthRate { get; }
+        int EstimatedDeathAge { get; }
+        decimal AnnualGrowthRate { get; }
+        decimal MonthlyGrowthRate { get; }
     }
 }

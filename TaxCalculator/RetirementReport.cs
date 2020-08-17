@@ -7,92 +7,77 @@ namespace TaxCalculator
 {
     public class RetirementReport : IRetirementReport
     {
-        private readonly FamilyStatus _family;
-        private const decimal Monthly = 12m;
+        private readonly IAssumptions _assumptions;
 
-        public RetirementReport(IPensionAgeCalc pensionAgeCalc, FamilyStatus family)
+        public RetirementReport(IPensionAgeCalc pensionAgeCalc, FamilyStatus family, DateTime now, bool targetDateGiven, IAssumptions assumptions)
         {
-            _family = family;
+            _assumptions = assumptions;
             TimeToRetirement = new DateAmount(DateTime.MinValue, DateTime.MinValue); //null object pattern
-            StepsDict = new Dictionary<PersonStatus, List<Step>>();
-            PersonReports = new Dictionary<PersonStatus, PersonReport>();
             foreach (var person in family.Persons)
-            {
-                StepsDict.Add(person, new List<Step>());
-                var personReport = new PersonReport(pensionAgeCalc, person);
-                PersonReports.Add(person, personReport);
-            }
+                Persons.Add(new PersonReport(pensionAgeCalc, person, now, targetDateGiven, _assumptions));
 
-            MonthlySpending = family.Spending / Monthly;
+            Spending = family.Spending;
         }
 
-        public decimal MonthlySpending { get; }
-        public int Spending { get; set; }
+        public int Spending { get; }
         public DateAmount TimeToRetirement { get; set; }
-        public DateTime BankruptDate { get; set; } = DateTime.MaxValue;
-        public List<Step> Steps => StepsDict[_family.PrimaryPerson];
-        public Dictionary<PersonStatus, List<Step>> StepsDict { get; }
-        public Dictionary<PersonStatus, PersonReport> PersonReports { get; }
+        public DateTime BankruptDate { get; private set; } = DateTime.MaxValue;
 
         public DateTime MinimumPossibleRetirementDate { get; set; }
         public int MinimumPossibleRetirementAge { get; set; }
         public DateTime? TargetRetirementDate { get; set; }
         public int? TargetRetirementAge { get; set; }
-        public int SavingsAtPrivatePensionAge { get; set; }
-        public int SavingsAtStatePensionAge { get; set; }
         public int SavingsAtMinimumPossiblePensionAge { get; set; }
-        public int SavingsAt100 { get; set; }
+        public int SavingsAtPrivatePensionAge { get; private set; }
+        public int SavingsAtStatePensionAge { get; private set; }
+        public int SavingsAt100 { get; private set; }
 
-        public int PrivatePensionPotAtPrivatePensionAge { get; set; }
-        public int PrivatePensionPotAtStatePensionAge { get; set; }
+        public int PrivatePensionPotAtPrivatePensionAge { get; private set; }
+        public int PrivatePensionPotAtStatePensionAge { get; private set; }
 
-        public PersonReport PrimaryPerson => PersonReports[_family.PrimaryPerson];
+        public PersonReport PrimaryPerson => Persons.First();
+        
 
-        public void CurrentSteps(FamilyStatus family, bool targetDateGiven)
-        {
-            foreach (var person in family.Persons)
-                StepsDict[person].Add(targetDateGiven ? person.TargetSteps.CurrentStep : person.CalcMinimumSteps.CurrentStep);
-        }
+        public List<PersonReport> Persons { get; } = new List<PersonReport>();
 
         public void UpdatePersonResults()
         {
-            foreach (var person in _family.Persons)
+            foreach (var personReport in Persons)
             {
-                var personReport = PersonReports[person];
-                personReport.PrivatePensionSafeWithdrawal = Convert.ToInt32(personReport.PrivatePensionPot * 0.04); //todo: refactor 
-                personReport.AnnualStatePension = Convert.ToInt32(StepsDict[person].Last().PredictedStatePensionAnnual);
-                personReport.StatePensionDate = person.StatePensionDate;
-                personReport.PrivatePensionDate = person.PrivatePensionDate;
+                personReport.PrivatePensionSafeWithdrawal = Convert.ToInt32(personReport.PrivatePensionPot * _assumptions.AnnualGrowthRate); 
+                personReport.AnnualStatePension = Convert.ToInt32(personReport.PrimarySteps.Steps.Last().PredictedStatePensionAnnual);
+                personReport.StatePensionDate = personReport.StatePensionDate;
+                personReport.PrivatePensionDate = personReport.PrivatePensionDate;
             
-                personReport.StateRetirementAge = AgeCalc.Age(person.Dob, person.StatePensionDate);
-                personReport.PrivateRetirementAge = AgeCalc.Age(person.Dob, person.PrivatePensionDate);
+                personReport.StateRetirementAge = AgeCalc.Age(personReport.Status.Dob, personReport.StatePensionDate);
+                personReport.PrivateRetirementAge = AgeCalc.Age(personReport.Status.Dob, personReport.PrivatePensionDate);
             }
         }
         
         public void UpdateResultsBasedOnSetDates()
         {
             var (privatePensionSet, statePensionSet, bankrupt) = (false, false, false);
-            for (int i = 0; i < _family.PrimaryPerson.CalcMinimumSteps.Steps.Count; i++)
+            for (int i = 0; i < PrimaryPerson.CalcMinimumSteps.Steps.Count; i++)
             {
-                var stepDate = _family.PrimaryPerson.CalcMinimumSteps.Steps[i].Date;
-                if (StepsDict.Values.Select(list => list[i].Savings).Sum() < 0 && !bankrupt)
+                var stepDate = PrimaryPerson.CalcMinimumSteps.Steps[i].Date;
+                if (Persons.Select(p => p.PrimarySteps.Steps[i].Savings).Sum() < 0 && !bankrupt)
                 {
                     bankrupt = true;
                     BankruptDate = stepDate;
                 }
 
-                if (stepDate >= _family.PrimaryPerson.PrivatePensionDate && !privatePensionSet) //TODO: assumes does not work past private pension date 
+                if (stepDate >= PrimaryPerson.PrivatePensionDate && !privatePensionSet) //TODO: assumes does not work past private pension date 
                 {
                     privatePensionSet = true;
                     SavingsAtPrivatePensionAge = Convert.ToInt32(SavingsForIthStep(i));
                     PrivatePensionPotAtPrivatePensionAge = Convert.ToInt32(PrivatePensionPotForIthStep(i));
                 }
 
-                foreach (var person in _family.Persons)
-                    if (stepDate >= person.PrivatePensionDate && !PersonReports[person].PrivatePensionPot.HasValue)
-                        PersonReports[person].PrivatePensionPot = Convert.ToInt32(StepsDict[person][i].PrivatePensionAmount);
+                foreach (var person in Persons)
+                    if (stepDate >= person.PrivatePensionDate && !person.PrivatePensionPot.HasValue)
+                        person.PrivatePensionPot = Convert.ToInt32(person.PrimarySteps.Steps[i].PrivatePensionAmount);
 
-                if (stepDate >= _family.PrimaryPerson.StatePensionDate && !statePensionSet)
+                if (stepDate >= PrimaryPerson.StatePensionDate && !statePensionSet)
                 {
                     statePensionSet = true;
                     SavingsAtStatePensionAge = Convert.ToInt32(SavingsForIthStep(i));
@@ -100,77 +85,29 @@ namespace TaxCalculator
                 }
             }
 
-            SavingsAt100 = Convert.ToInt32(SavingsForIthStep(_family.PrimaryPerson.CalcMinimumSteps.Steps.Count-1));
+            SavingsAt100 = Convert.ToInt32(SavingsForIthStep(PrimaryPerson.CalcMinimumSteps.Steps.Count-1));
         }
 
         private decimal SavingsForIthStep(int i)
         {
-            return StepsDict.Values.Select(steps => steps[i].Savings).Sum();
+            return Persons.Select(p => p.PrimarySteps.Steps[i].Savings).Sum();
         }
         
         private decimal PrivatePensionPotForIthStep(int i)
         {
-            return StepsDict.Values.Select(steps => steps[i].PrivatePensionAmount).Sum();
+            return Persons.Select(p => p.PrimarySteps.Steps[i].PrivatePensionAmount).Sum();
         }
-    }
-
-    public class PersonReport
-    {
-        private const int Monthly = 12;
-
-        public PersonReport(IPensionAgeCalc pensionAgeCalc, PersonStatus person)
+        
+        public void BalanceSavings()
         {
-            StatePensionDate = pensionAgeCalc.StatePensionDate(person.Dob, person.Sex);
-            PrivatePensionDate = pensionAgeCalc.PrivatePensionDate(StatePensionDate);
-            var taxResult = new IncomeTaxCalculator().TaxFor(person.Salary * (1 - person.EmployeeContribution));
-            MonthlyAfterTaxSalary = taxResult.Remainder / Monthly;
-
-            AfterTaxSalary = Convert.ToInt32(taxResult.Remainder * (1 - person.EmployeeContribution));
-            NationalInsuranceBill = Convert.ToInt32(taxResult.NationalInsurance);
-            IncomeTaxBill = Convert.ToInt32(taxResult.IncomeTax);
-        }
-
-        public decimal MonthlyAfterTaxSalary { get; }
-        public DateTime StatePensionDate { get; set; }
-        public DateTime PrivatePensionDate { get; set; }
-        public int NationalInsuranceBill { get; set; }
-        public int IncomeTaxBill { get; set; }
-        public int StateRetirementAge { get; set; }
-        public int PrivateRetirementAge { get; set; }
-        public int AnnualStatePension { get; set; }
-        public int QualifyingStatePensionYears { get; set; }
-        public int AfterTaxSalary { get; set; }
-        public int? PrivatePensionPot { get; set; } = null;
-        public int PrivatePensionSafeWithdrawal { get; set; }
-    }
-
-    //An amount of time specified in years, month and days
-    public class DateAmount
-    {
-        public DateAmount(DateTime dateStart, DateTime dateEnd)
-        {
-            Years = dateEnd.Year - dateStart.Year;
-            Months = dateEnd.Month - dateStart.Month;
-            if (dateStart.Month > dateEnd.Month)
+            var calcMinSavings = Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum();
+            var targetSavings = Persons.Select(p => p.TargetSteps.CurrentStep.Savings).Sum();
+            
+            foreach (var person in Persons)
             {
-                Years -= 1;
-                Months += 12;
+                person.CalcMinimumSteps.SetSavings(calcMinSavings / Persons.Count());
+                person.TargetSteps.SetSavings(targetSavings / Persons.Count());
             }
-        }
-
-        private int Years { get; }
-        private int Months { get; }
-
-        public int TotalMonths()
-        {
-            return (Years * 12) + Months;
-        }
-
-        public override string ToString()
-        {
-            var pluralYears = Years == 1 ? "" : "s";
-            var pluralMonths = Months == 1 ? "" : "s";
-            return $"{Years} Year{pluralYears} and {Months} Month{pluralMonths}";
         }
     }
 }

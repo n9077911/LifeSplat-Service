@@ -4,27 +4,17 @@ using TaxCalculator.ExternalInterface;
 
 namespace TaxCalculator
 {
-    public interface IStepUpdater
-    {
-        void UpdateStatePensionAmount(
-            IStatePensionAmountCalculator statePensionAmountCalculator);
-
-        void UpdateGrowth(decimal growthRate);
-        void UpdatePrivatePension(decimal growthRate);
-        void UpdateSalary(decimal monthlyAfterTaxSalary);
-        void UpdateSpending(decimal monthlySpending);
-    }
-
     [DebuggerDisplay("{Date} : {Savings}")]
     public class Step : IStepUpdater
     {
         private readonly Step _previousStep;
         private readonly PersonStatus _personStatus;
         private readonly bool _calcdMinimum;
+        private readonly IAssumptions _assumptions;
         private readonly DateTime? _givenRetirementDate;
         private decimal _monthly = 12m;
 
-        public Step(Step previousStep, PersonStatus personStatus, bool calcdMinimum = false, DateTime? givenRetirementDate = null)
+        public Step(Step previousStep, PersonStatus personStatus, bool calcdMinimum, IAssumptions assumptions, DateTime? givenRetirementDate = null)
         {
             Date = previousStep.Date.AddMonths(1);
             Savings = previousStep.Savings;
@@ -32,30 +22,34 @@ namespace TaxCalculator
             _previousStep = previousStep;
             _personStatus = personStatus;
             _calcdMinimum = calcdMinimum;
+            _assumptions = assumptions;
             _givenRetirementDate = givenRetirementDate;
         }
         
-        public Step()
+        public Step(DateTime now, int existingSavings, int existingPrivatePension, decimal existingPensionGrowth)
         {
+            Date = now;
+            Savings = existingSavings;
+            PrivatePensionAmount = existingPrivatePension;
+            PrivatePensionGrowth = existingPensionGrowth; //todo: why is growth added here? this is for the initial step
         }
 
-        public DateTime Date { get; set; }
-        public decimal StatePension { get; set; }
-        public decimal PredictedStatePensionAnnual { get; set; }
-        public decimal Growth { get; set; }
-        public decimal AfterTaxSalary { get; set; }
-        public decimal Savings { get; set; }
-        public decimal PrivatePensionGrowth { get; set; }
-        public decimal PrivatePensionAmount { get; set; }
+        public DateTime Date { get; private set; }
+        public decimal StatePension { get; private set; }
+        public decimal PredictedStatePensionAnnual { get; private set; }
+        public decimal Growth { get; private set; }
+        public decimal AfterTaxSalary { get; private set; }
+        public decimal Savings { get; private set; }
+        public decimal PrivatePensionGrowth { get; private set; }
+        public decimal PrivatePensionAmount { get; private set; }
 
-        public void UpdateStatePensionAmount(
-            IStatePensionAmountCalculator statePensionAmountCalculator)
+        public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate)
         {
             var statePensionAmount = Retired() ? _previousStep.PredictedStatePensionAnnual : statePensionAmountCalculator.Calculate(_personStatus, Date);
 
             PredictedStatePensionAnnual = Convert.ToInt32(statePensionAmount);
 
-            if (Date > _personStatus.StatePensionDate)
+            if (Date > personStatePensionDate)
             {
                 Savings += PredictedStatePensionAnnual / _monthly;
                 StatePension = PredictedStatePensionAnnual / _monthly;
@@ -69,19 +63,19 @@ namespace TaxCalculator
             return _calcdMinimum;
         }
 
-        public void UpdateGrowth(decimal growthRate)
+        public void UpdateGrowth()
         {
-            var growth = Math.Max(Savings * growthRate, 0m);
+            var growth = Math.Max(Savings * _assumptions.MonthlyGrowthRate, 0m);
             Growth = growth;
             Savings += growth;
         }
 
-        public void UpdatePrivatePension(decimal growthRate)
+        public void UpdatePrivatePension(DateTime privatePensionDate)
         {
-            PrivatePensionGrowth = PrivatePensionAmount * growthRate;
+            PrivatePensionGrowth = PrivatePensionAmount * _assumptions.MonthlyGrowthRate;
 
             //TODO: needs to consider if you work past private pension age.
-            if (Date >= _personStatus.PrivatePensionDate) //and retired
+            if (Date >= privatePensionDate) //and retired
                 Savings += PrivatePensionGrowth;
             else
                 PrivatePensionAmount += PrivatePensionGrowth;
@@ -102,6 +96,11 @@ namespace TaxCalculator
         public void UpdateSpending(decimal monthlySpending)
         {
             Savings -= monthlySpending;
+        }
+
+        public void SetSavings(decimal savings)
+        {
+            Savings = savings;
         }
     }
 }
