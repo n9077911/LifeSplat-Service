@@ -6,6 +6,6 @@ namespace TaxCalcService.Models
 {
     public interface IRetirementDomainInterface
     {
-        RetirementReportDto RetirementReportFor(int spending, int targetRetirementAge, IEnumerable<PersonDto> persons);
+        RetirementReportDto RetirementReportFor(int targetRetirementAge, IEnumerable<PersonDto> persons);
     }
 }

@@ -16,23 +16,29 @@ namespace TaxCalcService.Models
             _retirementCalculator = retirementCalculator;
         }
 
-        public RetirementReportDto RetirementReportFor(int spending, int targetRetirementAge, IEnumerable<PersonDto> persons)
+        public RetirementReportDto RetirementReportFor(int targetRetirementAge, IEnumerable<PersonDto> persons)
         {
-            var personDto = persons.First();
-            var retirementReport = _retirementCalculator.ReportForTargetAge(new PersonStatus
-            {
-                Dob = personDto.Dob, 
-                Salary = personDto.Salary, 
-                Spending = spending, 
-                Sex = personDto.Female ? Sex.Female : Sex.Male,
-                ExistingSavings = personDto.Savings,
-                ExistingPrivatePension = personDto.Pension,
-                EmployerContribution = personDto.EmployerContribution/100m,
-                EmployeeContribution = personDto.EmployeeContribution/100m,
-            }, targetRetirementAge);
+            var personsStatuses = persons.Select(PersonStatus);
+            var retirementReport = _retirementCalculator.ReportForTargetAge(personsStatuses, targetRetirementAge);
 
             var result = new RetirementReportDto(retirementReport);
             return result;
+        }
+
+        private static PersonStatus PersonStatus(PersonDto dto)
+        {
+            var personStatus = new PersonStatus
+            {
+                Dob = dto.Dob,
+                Salary = dto.Salary,
+                Spending = dto.Spending,
+                Sex = dto.Female ? Sex.Female : Sex.Male,
+                ExistingSavings = dto.Savings,
+                ExistingPrivatePension = dto.Pension,
+                EmployerContribution = dto.EmployerContribution / 100m,
+                EmployeeContribution = dto.EmployeeContribution / 100m,
+            };
+            return personStatus;
         }
     }
 }

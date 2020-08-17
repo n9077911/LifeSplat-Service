@@ -20,9 +20,12 @@ namespace TaxCalcService.Controllers
         [HttpPost("Report")]
         public async Task<RetirementReportDto> Report([FromBody] string body)
         {
-            var options = new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
-            var request = JsonSerializer.Deserialize<RetirementReportRequestDto>(body, options);
-            return await Task.Run(() => _retirement.RetirementReportFor(request.Spending, request.TargetRetirementAge, request.Persons));
+            return await Task.Run(() =>
+            {
+                var options = new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
+                var request = JsonSerializer.Deserialize<RetirementReportRequestDto>(body, options);
+                return _retirement.RetirementReportFor(request.TargetRetirementAge, request.Persons);
+            });
         }
     }
 }

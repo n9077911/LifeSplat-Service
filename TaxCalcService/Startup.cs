@@ -32,7 +32,8 @@ namespace TaxCalcService
                         builder.WithOrigins("http://localhost:3000", "https://localhost:3000");
                     });
             });
-
+            services.AddControllers().AddNewtonsoftJson();
+            
             services.AddSingleton<IIncomeTaxCalculator, IncomeTaxCalculator>();
             services.AddSingleton<ITaxCalculatorDomainInterface, TaxCalculatorDomainInterface>();
             services.AddSingleton<IDateProvider, DateProvider>();
