@@ -10,12 +10,14 @@ namespace TaxCalculator
         private readonly PersonStatus _personStatus;
         private readonly StepType _stepType;
         private readonly IAssumptions _assumptions;
+        private readonly DateTime _privatePensionDate;
 
-        public StepsReport(PersonStatus personStatus, StepType stepType, DateTime now, IAssumptions assumptions)
+        public StepsReport(PersonStatus personStatus, StepType stepType, DateTime now, IAssumptions assumptions, DateTime privatePensionDate)
         {
             _personStatus = personStatus;
             _stepType = stepType;
             _assumptions = assumptions;
+            _privatePensionDate = privatePensionDate;
             Steps.Add(new Step(now, personStatus.ExistingSavings, personStatus.ExistingPrivatePension, personStatus.ExistingPrivatePension * assumptions.MonthlyGrowthRate));
         }
 
@@ -26,8 +28,8 @@ namespace TaxCalculator
         public void NewStep(bool calcdMinimum, DateTime? givenRetirementDate)
         {
             Steps.Add(_stepType == StepType.CalcMinimum 
-                ? new Step(CurrentStep, _personStatus, calcdMinimum, _assumptions) 
-                : new Step(CurrentStep, _personStatus, false, _assumptions, givenRetirementDate)); 
+                ? new Step(CurrentStep, _personStatus, calcdMinimum, _assumptions, _privatePensionDate) 
+                : new Step(CurrentStep, _personStatus, false, _assumptions, _privatePensionDate, givenRetirementDate)); 
         }
 
         public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate)
@@ -40,9 +42,9 @@ namespace TaxCalculator
             CurrentStep.UpdateGrowth();
         }
 
-        public void UpdatePrivatePension(DateTime privatePensionDate)
+        public void UpdatePrivatePension(DateTime? givenRetirementDate)
         {
-            CurrentStep.UpdatePrivatePension(privatePensionDate);
+            CurrentStep.UpdatePrivatePension(givenRetirementDate);
         }
 
         public void UpdateSalary(decimal monthlyAfterTaxSalary)

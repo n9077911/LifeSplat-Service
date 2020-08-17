@@ -55,14 +55,14 @@ namespace TaxCalcService.Models.DTO
                 
                 Person.Add(new PersonReportDto
                 {
-                    StateRetirementAge = personReport.StateRetirementAge,
-                    PrivateRetirementAge = personReport.PrivateRetirementAge,
+                    StateRetirementAge = personReport.StatePensionAge,
+                    PrivateRetirementAge = personReport.PrivatePensionAge,
                     StateRetirementDate = personReport.StatePensionDate,
                     PrivateRetirementDate = personReport.PrivatePensionDate,
                     NationalInsuranceBill = personReport.NationalInsuranceBill,
                     IncomeTaxBill = personReport.IncomeTaxBill,
                     AnnualStatePension = personReport.AnnualStatePension,
-                    PrivatePensionPot = personReport.PrivatePensionPot.Value,
+                    PrivatePensionPot = personReport.PrivatePensionPotAtPrivatePensionAge,
                     PrivatePensionSafeWithdrawal = personReport.PrivatePensionSafeWithdrawal,
                     AfterTaxSalary = retirementReport.PrimaryPerson.AfterTaxSalary,
                     Steps = steps,

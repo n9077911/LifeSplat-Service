@@ -78,7 +78,7 @@ namespace TaxCalculatorTests
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2048, 08, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(67));
-            Assert.That(report.PrimaryPerson.StateRetirementAge, Is.EqualTo(68));
+            Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
             Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("28 Years and 7 Months"));
             Assert.That(report.SavingsAt100, Is.EqualTo(3_518));
@@ -94,7 +94,7 @@ namespace TaxCalculatorTests
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2042, 12, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(61));
-            Assert.That(report.PrimaryPerson.StateRetirementAge, Is.EqualTo(68));
+            Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
             Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("22 Years and 11 Months"));
             Assert.That(report.SavingsAt100, Is.EqualTo(7_282));
@@ -113,9 +113,9 @@ namespace TaxCalculatorTests
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2039, 06, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(58));
-            Assert.That(report.PrimaryPerson.PrivateRetirementAge, Is.EqualTo(58));
+            Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
             Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
-            Assert.That(report.PrimaryPerson.PrivatePensionPot, Is.EqualTo(133_551));
+            Assert.That(report.PrimaryPerson.PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(133_551));
             Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(5_342));
             Assert.That(report.SavingsAt100, Is.EqualTo(7_526));
         }
@@ -137,7 +137,7 @@ namespace TaxCalculatorTests
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
             Assert.That(report.PrimaryPerson.AnnualStatePension, Is.EqualTo(5_987));
-            Assert.That(report.PrimaryPerson.PrivatePensionPot, Is.EqualTo(159_647));
+            Assert.That(report.PrimaryPerson.PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(159_647));
             Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(288_832));
             Assert.That(report.SavingsAt100, Is.EqualTo(410_947));
         }
@@ -156,14 +156,14 @@ namespace TaxCalculatorTests
             var report = calc.ReportFor(status);
             Assert.That(report.SavingsAt100, Is.EqualTo(1_612));
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
-            Assert.That(report.PrimaryPerson.PrivatePensionPot, Is.EqualTo(150_664));
+            Assert.That(report.PrimaryPerson.PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(150_664));
             Assert.That(report.PrimaryPerson.AnnualStatePension, Is.EqualTo(5_987));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
 
             //validate earliest possible retirement date
             var report2 = calc.ReportFor(status, report.MinimumPossibleRetirementDate);
             Assert.That(report2.SavingsAt100, Is.EqualTo(report.SavingsAt100));
-            Assert.That(report2.PrimaryPerson.PrivatePensionPot, Is.EqualTo(report.PrimaryPerson.PrivatePensionPot));
+            Assert.That(report2.PrimaryPerson.PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(report.PrimaryPerson.PrivatePensionPotAtPrivatePensionAge));
             Assert.That(report2.PrimaryPerson.AnnualStatePension, Is.EqualTo(report.PrimaryPerson.AnnualStatePension));
             Assert.That(report2.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(report.SavingsAtMinimumPossiblePensionAge));
         }
@@ -263,7 +263,7 @@ namespace TaxCalculatorTests
         }
 
         [Test]
-        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_WithTargetRetirementDate()
+        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_WhoChooseToRetire_After_PrivatePensionAge()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 new StatePensionAmountCalculator());
@@ -273,13 +273,41 @@ namespace TaxCalculatorTests
             var person2 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
 
-            var report = calc.ReportFor(new[] {person1, person2}, new DateTime(2040, 06, 01));
+            var report = calc.ReportFor(new[] {person1, person2}, new DateTime(2044, 06, 01));
         
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 06, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
-            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(1_138_298));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(1_517_449));
-            Assert.That(report.SavingsAt100, Is.EqualTo(5_044_845));
+            Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
+            Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
+            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(1_136_843));
+            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(1_805_256));
+            Assert.That(report.SavingsAt100, Is.EqualTo(6_381_802));
+            Assert.That(report.PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(446_625));
+            Assert.That(report.PrivatePensionPotAtStatePensionAge, Is.EqualTo(446_625));
+        }
+        
+        [Test]
+        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_WhoChooseToRetire_Before_PrivatePensionAge()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
+                new StatePensionAmountCalculator());
+
+            var person1 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
+            var person2 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
+
+            var report = calc.ReportFor(new[] {person1, person2}, new DateTime(2034, 06, 01));
+        
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 06, 01)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
+            Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
+            Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
+            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(741_724));
+            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(801_404));
+            Assert.That(report.SavingsAt100, Is.EqualTo(2_312_205));
+            Assert.That(report.PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(401_192));
+            Assert.That(report.PrivatePensionPotAtStatePensionAge, Is.EqualTo(401_192));
         }
         
         [Test]

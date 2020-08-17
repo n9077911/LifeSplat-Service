@@ -11,10 +11,11 @@ namespace TaxCalculator
         private readonly PersonStatus _personStatus;
         private readonly bool _calcdMinimum;
         private readonly IAssumptions _assumptions;
+        private readonly DateTime _privatePensionDate;
         private readonly DateTime? _givenRetirementDate;
         private decimal _monthly = 12m;
 
-        public Step(Step previousStep, PersonStatus personStatus, bool calcdMinimum, IAssumptions assumptions, DateTime? givenRetirementDate = null)
+        public Step(Step previousStep, PersonStatus personStatus, bool calcdMinimum, IAssumptions assumptions, DateTime privatePensionDate, DateTime? givenRetirementDate = null)
         {
             Date = previousStep.Date.AddMonths(1);
             Savings = previousStep.Savings;
@@ -23,6 +24,7 @@ namespace TaxCalculator
             _personStatus = personStatus;
             _calcdMinimum = calcdMinimum;
             _assumptions = assumptions;
+            _privatePensionDate = privatePensionDate;
             _givenRetirementDate = givenRetirementDate;
         }
         
@@ -70,12 +72,11 @@ namespace TaxCalculator
             Savings += growth;
         }
 
-        public void UpdatePrivatePension(DateTime privatePensionDate)
+        public void UpdatePrivatePension(DateTime? givenRetirementDate)
         {
             PrivatePensionGrowth = PrivatePensionAmount * _assumptions.MonthlyGrowthRate;
 
-            //TODO: needs to consider if you work past private pension age.
-            if (Date >= privatePensionDate) //and retired
+            if (Date >= _privatePensionDate &&  (!givenRetirementDate.HasValue || Date >= givenRetirementDate.Value))
                 Savings += PrivatePensionGrowth;
             else
                 PrivatePensionAmount += PrivatePensionGrowth;

@@ -6,10 +6,12 @@ namespace TaxCalculator
 {
     public class PersonReport
     {
+        private readonly DateTime? _givenRetirementDate;
         private const int Monthly = 12;
 
-        public PersonReport(IPensionAgeCalc pensionAgeCalc, PersonStatus person, DateTime now, bool targetDateGiven, IAssumptions assumptions)
+        public PersonReport(IPensionAgeCalc pensionAgeCalc, PersonStatus person, DateTime now, bool targetDateGiven, IAssumptions assumptions, DateTime? givenRetirementDate)
         {
+            _givenRetirementDate = givenRetirementDate;
             Status = person;
             StatePensionDate = pensionAgeCalc.StatePensionDate(person.Dob, person.Sex);
             PrivatePensionDate = pensionAgeCalc.PrivatePensionDate(StatePensionDate);
@@ -20,8 +22,8 @@ namespace TaxCalculator
             NationalInsuranceBill = Convert.ToInt32(taxResult.NationalInsurance);
             IncomeTaxBill = Convert.ToInt32(taxResult.IncomeTax);
 
-            CalcMinimumSteps = new StepsReport(person, StepType.CalcMinimum, now, assumptions); 
-            TargetSteps = new StepsReport(person, StepType.GivenDate, now, assumptions);
+            CalcMinimumSteps = new StepsReport(person, StepType.CalcMinimum, now, assumptions, PrivatePensionDate); 
+            TargetSteps = new StepsReport(person, StepType.GivenDate, now, assumptions, PrivatePensionDate);
             PrimarySteps = targetDateGiven ? TargetSteps : CalcMinimumSteps;
             StepDescriptions = new List<StepsReport> {CalcMinimumSteps, TargetSteps};
         }
@@ -42,11 +44,12 @@ namespace TaxCalculator
 
         public DateTime StatePensionDate { get; set; }
         public DateTime PrivatePensionDate { get; set; }
-        public int StateRetirementAge { get; set; }
-        public int PrivateRetirementAge { get; set; }
+        public DateTime PrivateRetirementDate  => _givenRetirementDate ?? PrivatePensionDate;
+        public int StatePensionAge { get; set; }
+        public int PrivatePensionAge { get; set; }
         public int AnnualStatePension { get; set; }
         public int QualifyingStatePensionYears { get; set; }
-        public int? PrivatePensionPot { get; set; }
+        public int PrivatePensionPotAtPrivatePensionAge { get; set; }
         public int PrivatePensionSafeWithdrawal { get; set; }
     }
 }

@@ -42,7 +42,7 @@ namespace TaxCalculator
         public IRetirementReport ReportFor(IEnumerable<PersonStatus> personStatuses, DateTime? givenRetirementDate = null)
         {
             var family = new FamilyStatus(personStatuses);
-            var result = new RetirementReport(_pensionAgeCalc, family, _now, givenRetirementDate.HasValue, _assumptions);
+            var result = new RetirementReport(_pensionAgeCalc, family, _now, givenRetirementDate, _assumptions);
 
             var emergencyFund = 0;
 
@@ -57,7 +57,7 @@ namespace TaxCalculator
                         stepDescription.UpdateSpending(person.Status.MonthlySpending);
                         stepDescription.UpdateGrowth();
                         stepDescription.UpdateStatePensionAmount(_statePensionAmountCalculator, person.StatePensionDate);
-                        stepDescription.UpdatePrivatePension(person.PrivatePensionDate);
+                        stepDescription.UpdatePrivatePension(givenRetirementDate);
                         stepDescription.UpdateSalary(person.MonthlyAfterTaxSalary);
                     }
 

@@ -6,7 +6,7 @@ namespace TaxCalculator
     {
         void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime statePensionDate);
         void UpdateGrowth();
-        void UpdatePrivatePension(DateTime privatePensionDate);
+        void UpdatePrivatePension(DateTime? givenRetirementDate);
         void UpdateSalary(decimal monthlyAfterTaxSalary);
         void UpdateSpending(decimal monthlySpending);
     }
