@@ -79,7 +79,6 @@ namespace TaxCalculator
             result.MinimumPossibleRetirementDate = result.MinimumPossibleRetirementDate;
             result.MinimumPossibleRetirementAge = AgeCalc.Age(family.PrimaryPerson.Dob, result.MinimumPossibleRetirementDate);
 
-
             return result;
         }
         
@@ -89,7 +88,6 @@ namespace TaxCalculator
             var monthsToDeath = MonthsToDeath(result.PrimaryPerson.Status.Dob, primaryStep.Date);
             var monthlySpending = result.Spending / _monthly;
 
-            //todo: try refactor this out
             var privatePensionAmounts = result.Persons.Select(p => new{p, p.CalcMinimumSteps.CurrentStep.PrivatePensionAmount})
                 .ToDictionary(arg => arg.p, arg=>arg.PrivatePensionAmount);
 
