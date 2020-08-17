@@ -283,7 +283,7 @@ namespace TaxCalculatorTests
             Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(1_805_256));
             Assert.That(report.SavingsAt100, Is.EqualTo(6_381_802));
             Assert.That(report.PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(446_625));
-            Assert.That(report.PrivatePensionPotAtStatePensionAge, Is.EqualTo(446_625));
+            Assert.That(report.PrivatePensionPotAtStatePensionAge, Is.EqualTo(585_592));
         }
         
         [Test]
