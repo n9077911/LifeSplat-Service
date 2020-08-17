@@ -22,5 +22,7 @@ namespace TaxCalculator
         int SavingsAtMinimumPossiblePensionAge { get; set; }
         int SavingsAt100 { get; set; }
         PersonReport PrimaryPerson { get; }
+        int PrivatePensionPotAtPrivatePensionAge { get; set; }
+        int PrivatePensionPotAtStatePensionAge { get; set; }
     }
 }

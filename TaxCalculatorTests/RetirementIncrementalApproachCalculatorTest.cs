@@ -258,7 +258,7 @@ namespace TaxCalculatorTests
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 06, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
             Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(363_441));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(46_063));
+            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(221_135));
             Assert.That(report.SavingsAt100, Is.EqualTo(46_063));
         }
 
@@ -278,7 +278,7 @@ namespace TaxCalculatorTests
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 06, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
             Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(1_138_298));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(5_044_845));
+            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(1_517_449));
             Assert.That(report.SavingsAt100, Is.EqualTo(5_044_845));
         }
         

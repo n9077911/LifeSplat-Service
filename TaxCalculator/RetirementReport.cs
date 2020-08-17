@@ -42,6 +42,10 @@ namespace TaxCalculator
         public int SavingsAtStatePensionAge { get; set; }
         public int SavingsAtMinimumPossiblePensionAge { get; set; }
         public int SavingsAt100 { get; set; }
+
+        public int PrivatePensionPotAtPrivatePensionAge { get; set; }
+        public int PrivatePensionPotAtStatePensionAge { get; set; }
+
         public PersonReport PrimaryPerson => PersonReports[_family.PrimaryPerson];
 
         public void CurrentSteps(FamilyStatus family, bool targetDateGiven)
@@ -81,6 +85,7 @@ namespace TaxCalculator
                 {
                     privatePensionSet = true;
                     SavingsAtPrivatePensionAge = Convert.ToInt32(SavingsForIthStep(i));
+                    PrivatePensionPotAtPrivatePensionAge = Convert.ToInt32(PrivatePensionPotForIthStep(i));
                 }
 
                 foreach (var person in _family.Persons)
@@ -89,9 +94,9 @@ namespace TaxCalculator
 
                 if (stepDate >= _family.PrimaryPerson.StatePensionDate && !statePensionSet)
                 {
-                    //TODO: FIX! in middle of another refactor but below should be statePensionSet!
-                    privatePensionSet = true;
+                    statePensionSet = true;
                     SavingsAtStatePensionAge = Convert.ToInt32(SavingsForIthStep(i));
+                    PrivatePensionPotAtStatePensionAge = Convert.ToInt32(PrivatePensionPotForIthStep(i));
                 }
             }
 
@@ -100,7 +105,12 @@ namespace TaxCalculator
 
         private decimal SavingsForIthStep(int i)
         {
-            return StepsDict.Values.Select(list => list[i].Savings).Sum();
+            return StepsDict.Values.Select(steps => steps[i].Savings).Sum();
+        }
+        
+        private decimal PrivatePensionPotForIthStep(int i)
+        {
+            return StepsDict.Values.Select(steps => steps[i].PrivatePensionAmount).Sum();
         }
     }
 

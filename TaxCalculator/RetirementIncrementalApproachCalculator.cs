@@ -50,7 +50,6 @@ namespace TaxCalculator
             var family = new FamilyStatus(personStatuses);
             var result = new RetirementReport(_pensionAgeCalc, family);
 
-
             var targetDateGiven = givenRetirementDate.HasValue;
 
             var emergencyFund = 0;
