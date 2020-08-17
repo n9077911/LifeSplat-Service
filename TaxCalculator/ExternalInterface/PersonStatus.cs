@@ -26,15 +26,23 @@ namespace TaxCalculator.ExternalInterface
         public decimal EmployeeContribution
         {
             get => _employeeContribution;
-            //todo: add validation, must be between 0 and 1
-            set => _employeeContribution = value;
+            set
+            {
+                if(value>1 || value < 0)
+                    throw new Exception($"Invalid employee contribution of {value} given. Must be between 0 & 1 (i.e. 0 and 100%)");
+                _employeeContribution = value;
+            }
         }
 
         public decimal EmployerContribution
         {
             get => _employerContribution;
-            //todo: add validation, must be between 0 and 1
-            set => _employerContribution = value;
+            set
+            {
+                if(value>1 || value < 0)
+                    throw new Exception($"Invalid employer contribution of {value} given. Must be between 0 & 1 (i.e. 0 and 100%)");
+                _employerContribution = value;
+            }
         }
     }
 }

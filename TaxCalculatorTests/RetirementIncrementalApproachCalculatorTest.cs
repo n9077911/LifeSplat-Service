@@ -285,14 +285,14 @@ namespace TaxCalculatorTests
         [Test]
         public void KnowsWhenTwoIdenticalPeopleCanRetire()
         {
-            //two identical people should be able to retire at the same time as an identical individualS
+            //two identical people should be able to retire at the same time as an identical individuals
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
 
             var person1 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
-                    EmployeeContribution = 5, EmployerContribution = 3};
+                    EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
             var person2 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
-                    EmployeeContribution = 5, EmployerContribution = 3};
+                    EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
 
             var couple = calc.ReportFor(new[] {person1, person2});
             var single = calc.ReportFor(new[] {person1});
