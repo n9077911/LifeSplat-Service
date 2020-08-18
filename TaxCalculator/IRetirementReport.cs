@@ -9,17 +9,20 @@ namespace TaxCalculator
         int MonthlySpending { get; }
         DateAmount TimeToRetirement { get; }
         DateTime BankruptDate { get; }
-        DateTime MinimumPossibleRetirementDate { get; }
-        int MinimumPossibleRetirementAge { get; }
+
         DateTime? TargetRetirementDate { get; }
         int? TargetRetirementAge { get; }
+        
+        DateTime MinimumPossibleRetirementDate { get; }
+        int MinimumPossibleRetirementAge { get; }
         int SavingsAtPrivatePensionAge { get; }
         int SavingsAtStatePensionAge { get; }
         int SavingsAtMinimumPossiblePensionAge { get; }
         int SavingsAt100 { get; }
-        PersonReport PrimaryPerson { get; }
         int PrivatePensionPotAtPrivatePensionAge { get; }
         int PrivatePensionPotAtStatePensionAge { get; }
+        
+        PersonReport PrimaryPerson { get; }
         List<PersonReport> Persons { get; }
     }
 }

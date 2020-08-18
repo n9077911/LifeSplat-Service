@@ -65,8 +65,11 @@ namespace TaxCalculator
                 
                 if (!calcdMinimum && IsThatEnoughTillDeath(emergencyFund, result))
                 {
-                    result.MinimumPossibleRetirementDate = result.PrimaryPerson.CalcMinimumSteps.CurrentStep.Date;
-                    result.SavingsAtMinimumPossiblePensionAge =  Convert.ToInt32(result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum());
+                    foreach (var resultPerson in result.Persons)
+                    {
+                        resultPerson.MinimumPossibleRetirementDate = result.PrimaryPerson.CalcMinimumSteps.CurrentStep.Date;
+                        resultPerson.SavingsAtMinimumPossiblePensionAge =  Convert.ToInt32(result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum());
+                    }
                     calcdMinimum = true;
                 }
             }
@@ -76,8 +79,6 @@ namespace TaxCalculator
             result.TimeToRetirement = new DateAmount(_now, result.MinimumPossibleRetirementDate);
             result.TargetRetirementDate = givenRetirementDate;
             result.TargetRetirementAge = result.TargetRetirementDate.HasValue ? AgeCalc.Age(family.PrimaryPerson.Dob, result.TargetRetirementDate.Value) : (int?) null;
-            result.MinimumPossibleRetirementDate = result.MinimumPossibleRetirementDate;
-            result.MinimumPossibleRetirementAge = AgeCalc.Age(family.PrimaryPerson.Dob, result.MinimumPossibleRetirementDate);
 
             return result;
         }

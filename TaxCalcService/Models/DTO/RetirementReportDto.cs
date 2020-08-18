@@ -6,33 +6,20 @@ namespace TaxCalcService.Models.DTO
 {
     public class RetirementReportDto
     {
-        public int MinimumPossibleRetirementAge { get; }
         public int? TargetRetirementAge { get; }
-        public DateTime MinimumPossibleRetirementDate{ get; }
         public DateTime? TargetRetirementDate{ get; }
-        public string TimeToRetirementDescription { get; }
         public int MonthlySpending { get; }
-        public int SavingsAtPrivatePensionAge { get; }
-        public int SavingsAtStatePensionAge { get; }
         public DateTime BankruptDate { get; }
+
         public List<string> StepsHeaders { get; }
-        public List<PersonReportDto> Person = new List<PersonReportDto>(); 
-        public int PrivatePensionPotAtStatePensionAge { get; }
-        public int PrivatePensionPotAtPrivatePensionAge { get; }
-        
+        public List<PersonReportDto> Person = new List<PersonReportDto>();
+
         public RetirementReportDto(IRetirementReport retirementReport)
         {
-            MinimumPossibleRetirementAge = retirementReport.MinimumPossibleRetirementAge;
-            MinimumPossibleRetirementDate = retirementReport.MinimumPossibleRetirementDate;
             TargetRetirementAge = retirementReport.TargetRetirementAge;
             TargetRetirementDate = retirementReport.TargetRetirementDate;
-            TimeToRetirementDescription = retirementReport.TimeToRetirement.ToString();
             MonthlySpending = retirementReport.MonthlySpending;
             
-            SavingsAtPrivatePensionAge = retirementReport.SavingsAtPrivatePensionAge;
-            SavingsAtStatePensionAge = retirementReport.SavingsAtStatePensionAge;
-            PrivatePensionPotAtPrivatePensionAge = retirementReport.PrivatePensionPotAtPrivatePensionAge;
-            PrivatePensionPotAtStatePensionAge = retirementReport.PrivatePensionPotAtStatePensionAge;
             BankruptDate = retirementReport.BankruptDate;
 
             foreach (var personReport in retirementReport.Persons)
@@ -55,6 +42,13 @@ namespace TaxCalcService.Models.DTO
                 
                 Person.Add(new PersonReportDto
                 {
+                    MinimumPossibleRetirementAge = personReport.MinimumPossibleRetirementAge,
+                    MinimumPossibleRetirementDate = personReport.MinimumPossibleRetirementDate,
+                    SavingsCombinedAtPrivatePensionAge = personReport.SavingsCombinedAtPrivatePensionAge,
+                    SavingsCombinedAtStatePensionAge = personReport.SavingsCombinedAtStatePensionAge,
+                    PrivatePensionPotCombinedAtPrivatePensionAge = personReport.PrivatePensionPotCombinedAtPrivatePensionAge,
+                    PrivatePensionPotCombinedAtStatePensionAge = personReport.PrivatePensionPotCombinedAtStatePensionAge,
+                    
                     StateRetirementAge = personReport.StatePensionAge,
                     PrivateRetirementAge = personReport.PrivatePensionAge,
                     StateRetirementDate = personReport.StatePensionDate,
@@ -64,7 +58,7 @@ namespace TaxCalcService.Models.DTO
                     AnnualStatePension = personReport.AnnualStatePension,
                     PrivatePensionPot = personReport.PrivatePensionPotAtPrivatePensionAge,
                     PrivatePensionSafeWithdrawal = personReport.PrivatePensionSafeWithdrawal,
-                    AfterTaxSalary = retirementReport.PrimaryPerson.AfterTaxSalary,
+                    AfterTaxSalary = personReport.AfterTaxSalary,
                     Steps = steps,
                 });
             }
@@ -79,6 +73,13 @@ namespace TaxCalcService.Models.DTO
 
     public class PersonReportDto
     {
+        public DateTime MinimumPossibleRetirementDate{ get; set; }
+        public int MinimumPossibleRetirementAge { get; set; }
+        public int SavingsCombinedAtPrivatePensionAge { get; set; }
+        public int SavingsCombinedAtStatePensionAge { get; set; }
+        public int PrivatePensionPotCombinedAtStatePensionAge { get; set; }
+        public int PrivatePensionPotCombinedAtPrivatePensionAge { get; set; }
+        
         public int StateRetirementAge { get; set; }
         public int PrivateRetirementAge { get; set;}
         public DateTime StateRetirementDate { get; set;}

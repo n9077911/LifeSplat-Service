@@ -49,7 +49,16 @@ namespace TaxCalculator
         public int PrivatePensionAge { get; set; }
         public int AnnualStatePension { get; set; }
         public int QualifyingStatePensionYears { get; set; }
-        public int PrivatePensionPotAtPrivatePensionAge { get; set; }
+        public int PrivatePensionPotCombinedAtPrivatePensionAge { get; set; }
+        public int PrivatePensionPotCombinedAtStatePensionAge { get; set; }
         public int PrivatePensionSafeWithdrawal { get; set; }
+        
+        public DateTime MinimumPossibleRetirementDate { get; set; }
+        public int MinimumPossibleRetirementAge => AgeCalc.Age(Status.Dob, MinimumPossibleRetirementDate);
+        public int SavingsAtMinimumPossiblePensionAge { get; set; }
+        public int SavingsCombinedAtPrivatePensionAge { get; set; }
+        public int SavingsCombinedAtStatePensionAge { get; set; }
+        public int SavingsAt100 { get; set; }
+        public int PrivatePensionPotAtPrivatePensionAge { get; set; }
     }
 }
