@@ -33,7 +33,7 @@ namespace TaxCalculator
             Date = now;
             Savings = existingSavings;
             PrivatePensionAmount = existingPrivatePension;
-            PrivatePensionGrowth = existingPensionGrowth; //todo: why is growth added here? this is for the initial step
+            PrivatePensionGrowth = existingPensionGrowth; //putting a growth figure for the initial might seem weird but on reflection it makes sense, helps the chart, and has no negative impact
         }
 
         public DateTime Date { get; private set; }

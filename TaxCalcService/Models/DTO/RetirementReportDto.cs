@@ -11,7 +11,7 @@ namespace TaxCalcService.Models.DTO
         public DateTime MinimumPossibleRetirementDate{ get; }
         public DateTime? TargetRetirementDate{ get; }
         public string TimeToRetirementDescription { get; }
-        public int Spending { get; }
+        public int MonthlySpending { get; }
         public int SavingsAtPrivatePensionAge { get; }
         public int SavingsAtStatePensionAge { get; }
         public DateTime BankruptDate { get; }
@@ -27,7 +27,7 @@ namespace TaxCalcService.Models.DTO
             TargetRetirementAge = retirementReport.TargetRetirementAge;
             TargetRetirementDate = retirementReport.TargetRetirementDate;
             TimeToRetirementDescription = retirementReport.TimeToRetirement.ToString();
-            Spending = retirementReport.Spending;
+            MonthlySpending = retirementReport.MonthlySpending;
             
             SavingsAtPrivatePensionAge = retirementReport.SavingsAtPrivatePensionAge;
             SavingsAtStatePensionAge = retirementReport.SavingsAtStatePensionAge;

@@ -6,6 +6,7 @@ namespace TaxCalculator
     public interface IRetirementReport
     {
         int Spending { get; }
+        int MonthlySpending { get; }
         DateAmount TimeToRetirement { get; }
         DateTime BankruptDate { get; }
         DateTime MinimumPossibleRetirementDate { get; }

@@ -39,6 +39,7 @@ namespace TaxCalculator
         
 
         public List<PersonReport> Persons { get; } = new List<PersonReport>();
+        public int MonthlySpending => Spending / 12;
 
         public void UpdatePersonResults()
         {
