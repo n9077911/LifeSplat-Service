@@ -37,6 +37,7 @@ namespace TaxCalcService.Models
                 ExistingPrivatePension = dto.Pension,
                 EmployerContribution = dto.EmployerContribution / 100m,
                 EmployeeContribution = dto.EmployeeContribution / 100m,
+                NiContributingYears = dto.NiContributingYears,
             };
             return personStatus;
         }

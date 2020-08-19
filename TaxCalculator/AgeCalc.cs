@@ -6,9 +6,18 @@ namespace TaxCalculator
     {
         public static int Age(DateTime dob, DateTime onDate)
         {
-            if(dob.Month < onDate.Month || (dob.Month == onDate.Month  && dob.Day <= onDate.Day))
-                return onDate.Year - dob.Year;
-            return onDate.Year - dob.Year - 1;
+            return dob.WholeYearsUntil(onDate);
+        }
+
+    }
+
+    public static class DateTimeExtensions
+    {
+        public static int WholeYearsUntil(this DateTime date, DateTime until)
+        {
+            if (date.Month < until.Month || (date.Month == until.Month && date.Day <= until.Day))
+                return until.Year - date.Year;
+            return until.Year - date.Year - 1;
         }
     }
 }

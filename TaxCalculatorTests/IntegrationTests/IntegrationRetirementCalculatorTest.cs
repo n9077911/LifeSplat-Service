@@ -15,7 +15,7 @@ namespace TaxCalculatorTests.IntegrationTests
         [Test]
         public void HighEarning_FortyYearOld_Woman()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, new PensionAgeCalc(), new StatePensionAmountCalculator());
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, new PensionAgeCalc(), new StatePensionAmountCalculator(_fixedDateProvider));
             var report = calc.ReportFor(new PersonStatus
                 {
                     Spending = 40_000,

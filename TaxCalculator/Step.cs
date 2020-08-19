@@ -47,7 +47,7 @@ namespace TaxCalculator
 
         public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate)
         {
-            var statePensionAmount = Retired() ? _previousStep.PredictedStatePensionAnnual : statePensionAmountCalculator.Calculate(_personStatus, Date);
+            var statePensionAmount = QuitWork() ? _previousStep.PredictedStatePensionAnnual : statePensionAmountCalculator.Calculate(_personStatus, Date);
 
             PredictedStatePensionAnnual = Convert.ToInt32(statePensionAmount);
 
@@ -58,12 +58,7 @@ namespace TaxCalculator
             }
         }
 
-        private bool Retired()
-        {
-            if(_givenRetirementDate.HasValue)
-                return Date > _givenRetirementDate;
-            return _calcdMinimum;
-        }
+        private bool QuitWork() => _givenRetirementDate.HasValue ? Date > _givenRetirementDate : _calcdMinimum;
 
         public void UpdateGrowth()
         {
@@ -76,18 +71,18 @@ namespace TaxCalculator
         {
             PrivatePensionGrowth = PrivatePensionAmount * _assumptions.MonthlyGrowthRate;
 
-            if (Date >= _privatePensionDate &&  (!givenRetirementDate.HasValue || Date >= givenRetirementDate.Value))
+            if (Date >= _privatePensionDate && QuitWork())
                 Savings += PrivatePensionGrowth;
             else
                 PrivatePensionAmount += PrivatePensionGrowth;
             
-            if (!Retired())
+            if (!QuitWork())
                 PrivatePensionAmount += (_personStatus.Salary / _monthly) * (_personStatus.EmployeeContribution + _personStatus.EmployerContribution);
         }
 
         public void UpdateSalary(decimal monthlyAfterTaxSalary)
         {
-            if (!Retired())
+            if (!QuitWork())
             {
                 Savings += monthlyAfterTaxSalary;
                 AfterTaxSalary = monthlyAfterTaxSalary;
