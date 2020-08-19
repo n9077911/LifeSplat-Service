@@ -50,6 +50,7 @@ namespace TaxCalculator
             {
                 personReport.PrivatePensionSafeWithdrawal = Convert.ToInt32(personReport.PrivatePensionPotAtPrivatePensionAge * _assumptions.AnnualGrowthRate); 
                 personReport.AnnualStatePension = Convert.ToInt32(personReport.PrimarySteps.Steps.Last().PredictedStatePensionAnnual);
+                personReport.NiContributingYears = personReport.PrimarySteps.Steps.Last().NiContributingYears;
                 personReport.StatePensionDate = personReport.StatePensionDate;
                 personReport.PrivatePensionDate = personReport.PrivatePensionDate;
             

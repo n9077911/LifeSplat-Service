@@ -56,6 +56,8 @@ namespace TaxCalcService.Models.DTO
                     NationalInsuranceBill = personReport.NationalInsuranceBill,
                     IncomeTaxBill = personReport.IncomeTaxBill,
                     AnnualStatePension = personReport.AnnualStatePension,
+                    CalculatedNiContributingYears = personReport.NiContributingYears,
+                    GivenNiContributingYears = personReport.Status.NiContributingYears,
                     PrivatePensionPot = personReport.PrivatePensionPotAtPrivatePensionAge,
                     PrivatePensionSafeWithdrawal = personReport.PrivatePensionSafeWithdrawal,
                     AfterTaxSalary = personReport.AfterTaxSalary,
@@ -91,5 +93,7 @@ namespace TaxCalcService.Models.DTO
         public int IncomeTaxBill { get; set;}
         public int AfterTaxSalary { get; set; }
         public List<List<object>> Steps { get; set; }
+        public int CalculatedNiContributingYears { get; set; }
+        public int? GivenNiContributingYears { get; set; }
     }
 }

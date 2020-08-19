@@ -5,7 +5,7 @@ namespace TaxCalculator
 {
     public interface IStatePensionAmountCalculator
     {
-        decimal Calculate(PersonStatus personStatus, DateTime futureDate);
+        (int, decimal) Calculate(PersonStatus personStatus, DateTime futureDate);
     }
 
     ///https://www.nidirect.gov.uk/articles/understanding-and-qualifying-new-state-pension
@@ -18,15 +18,16 @@ namespace TaxCalculator
             _now = dateProvider.Now();
         }
 
-        public decimal Calculate(PersonStatus personStatus, DateTime futureDate)
+        public (int, decimal) Calculate(PersonStatus personStatus, DateTime futureDate)
         {
             var contributingYears = personStatus.NiContributingYears.HasValue 
                 ? personStatus.NiContributingYears.Value + _now.WholeYearsUntil(futureDate) 
                 : AgeCalc.Age(personStatus.Dob, futureDate) - 21;
 
             var cappedContributingYears = Math.Min(contributingYears, 35);
-            
-            return cappedContributingYears < 10 ? 0 : decimal.Round((175.20m/35) * cappedContributingYears * 52, 2);
+
+            var amount = cappedContributingYears < 10 ? 0 : decimal.Round((175.20m/35) * cappedContributingYears * 52, 2);
+            return (contributingYears, amount);
         }
     }
 
@@ -39,9 +40,9 @@ namespace TaxCalculator
             _amount = amount;
         }
 
-        public decimal Calculate(PersonStatus personStatus, DateTime futureDate)
+        public (int, decimal) Calculate(PersonStatus personStatus, DateTime futureDate)
         {
-            return _amount;
+            return (35, _amount);
         }
     }
 }

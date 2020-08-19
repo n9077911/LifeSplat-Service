@@ -48,7 +48,7 @@ namespace TaxCalculator
         public int StatePensionAge { get; set; }
         public int PrivatePensionAge { get; set; }
         public int AnnualStatePension { get; set; }
-        public int QualifyingStatePensionYears { get; set; }
+        public int NiContributingYears { get; set; }
         public int PrivatePensionPotCombinedAtPrivatePensionAge { get; set; }
         public int PrivatePensionPotCombinedAtStatePensionAge { get; set; }
         public int PrivatePensionSafeWithdrawal { get; set; }

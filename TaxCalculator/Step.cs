@@ -39,6 +39,7 @@ namespace TaxCalculator
         public DateTime Date { get; private set; }
         public decimal StatePension { get; private set; }
         public decimal PredictedStatePensionAnnual { get; private set; }
+        public int NiContributingYears { get; private set; }
         public decimal Growth { get; private set; }
         public decimal AfterTaxSalary { get; private set; }
         public decimal Savings { get; private set; }
@@ -47,9 +48,17 @@ namespace TaxCalculator
 
         public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate)
         {
-            var statePensionAmount = QuitWork() ? _previousStep.PredictedStatePensionAnnual : statePensionAmountCalculator.Calculate(_personStatus, Date);
-
-            PredictedStatePensionAnnual = Convert.ToInt32(statePensionAmount);
+            if (QuitWork())
+            {
+                PredictedStatePensionAnnual = _previousStep.PredictedStatePensionAnnual;
+                NiContributingYears = _previousStep.NiContributingYears;
+            }
+            else
+            {
+                var predictedStatePensionAnnual = statePensionAmountCalculator.Calculate(_personStatus, Date);
+                NiContributingYears = predictedStatePensionAnnual.Item1;
+                PredictedStatePensionAnnual = predictedStatePensionAnnual.Item2;
+            }
 
             if (Date > personStatePensionDate)
             {
