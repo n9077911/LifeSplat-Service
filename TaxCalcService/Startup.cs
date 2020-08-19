@@ -34,6 +34,7 @@ namespace TaxCalcService
             });
             services.AddControllers().AddNewtonsoftJson();
             
+            services.AddSingleton<ITaxSystem, TwentyTwentyTaxSystem>();
             services.AddSingleton<IIncomeTaxCalculator, IncomeTaxCalculator>();
             services.AddSingleton<ITaxCalculatorDomainInterface, TaxCalculatorDomainInterface>();
             services.AddSingleton<IDateProvider, DateProvider>();
