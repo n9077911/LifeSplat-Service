@@ -57,7 +57,7 @@ namespace TaxCalculator
             {
                 var predictedStatePensionAnnual = statePensionAmountCalculator.Calculate(_personStatus, Date);
                 NiContributingYears = predictedStatePensionAnnual.Item1;
-                PredictedStatePensionAnnual = predictedStatePensionAnnual.Item2;
+                PredictedStatePensionAnnual = Convert.ToInt32(predictedStatePensionAnnual.Item2);
             }
 
             if (Date > personStatePensionDate)

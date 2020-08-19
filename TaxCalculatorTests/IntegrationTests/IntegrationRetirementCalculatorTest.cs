@@ -11,11 +11,12 @@ namespace TaxCalculatorTests.IntegrationTests
     {
         private readonly SafeWithdrawalNoInflationAssumptions _assumptions = new SafeWithdrawalNoInflationAssumptions();
         private readonly FixedDateProvider _fixedDateProvider = new FixedDateProvider(new DateTime(2020, 1, 1));
+        private readonly StatePensionAmountCalculator _statePensionCalculator = new StatePensionAmountCalculator(new FixedDateProvider(new DateTime(2020, 1, 1)), new TwentyTwentyTaxSystem());
 
         [Test]
         public void HighEarning_FortyYearOld_Woman()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, new PensionAgeCalc(), new StatePensionAmountCalculator(_fixedDateProvider));
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, new PensionAgeCalc(), _statePensionCalculator);
             var report = calc.ReportFor(new PersonStatus
                 {
                     Spending = 40_000,

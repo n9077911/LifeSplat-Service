@@ -16,8 +16,9 @@ namespace TaxCalculatorTests
         private readonly FixedDateProvider _fixedDateProvider = new FixedDateProvider(new DateTime(2020, 1, 1));
         private readonly SafeWithdrawalNoInflationAssumptions _assumptions = new SafeWithdrawalNoInflationAssumptions();
         private readonly StubPensionAgeCalc _pensionAgeCalc = new StubPensionAgeCalc(new DateTime(2049, 05, 30));
-
         private readonly FixedStatePensionAmountCalculator _fixedStatePensionAmountCalculator = new FixedStatePensionAmountCalculator(9110.4m);
+        private readonly StatePensionAmountCalculator _statePensionCalculator = new StatePensionAmountCalculator(new FixedDateProvider(new DateTime(2020, 1, 1)), new TwentyTwentyTaxSystem());
+
 
         [Test]
         public void KnowsWhenASalariedWorkerCanRetire_ThisYear()
@@ -122,8 +123,7 @@ namespace TaxCalculatorTests
         [Test]
         public void CalculatesReportBasedOnFixedRetirementDate()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
-                new StatePensionAmountCalculator(_fixedDateProvider));
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
             var status = new PersonStatus
             {
                 ExistingSavings = 50_000, Salary = 100_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30),
@@ -144,8 +144,7 @@ namespace TaxCalculatorTests
         [Test]
         public void ReconcileRetirementDateGivenMode_WithCalcMinimumMode()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
-                new StatePensionAmountCalculator(_fixedDateProvider));
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
             var status = new PersonStatus
             {
                 ExistingSavings = 50_000, Salary = 100_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30),
@@ -170,8 +169,7 @@ namespace TaxCalculatorTests
         [Test]
         public void Reconcile_RetirementAgeGivenMode_With_CalcMinimumMode_WhenMinimumComesBeforeTarget()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
-                new StatePensionAmountCalculator(_fixedDateProvider));
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
             var status = new PersonStatus
             {
                 ExistingSavings = 50_000, Salary = 100_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30),
@@ -194,8 +192,7 @@ namespace TaxCalculatorTests
         [Test]
         public void CalcsMinimumPossibleRetirementDate_WhenMinimumComesAfterTarget()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
-                new StatePensionAmountCalculator(_fixedDateProvider));
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
             var status = new PersonStatus
             {
                 ExistingSavings = 50_000, Salary = 100_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30),
@@ -244,8 +241,7 @@ namespace TaxCalculatorTests
         [Test]
         public void KnowsWhenTwoComplexWorkingPeopleCanRetire()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
-                new StatePensionAmountCalculator(_fixedDateProvider));
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
             var person1 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
@@ -265,8 +261,7 @@ namespace TaxCalculatorTests
         [Test]
         public void KnowsWhenTwoComplexWorkingPeopleCanRetire_WithDifferentBirthDates()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
-                new StatePensionAmountCalculator(_fixedDateProvider));
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
             var person1 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
@@ -297,8 +292,7 @@ namespace TaxCalculatorTests
         [Test]
         public void KnowsWhenTwoComplexWorkingPeopleCanRetire_WhoChooseToRetire_After_PrivatePensionAge()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
-                new StatePensionAmountCalculator(_fixedDateProvider));
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
             var person1 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
@@ -321,8 +315,7 @@ namespace TaxCalculatorTests
         [Test]
         public void KnowsWhenTwoComplexWorkingPeopleCanRetire_WhoChooseToRetire_Before_PrivatePensionAge()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
-                new StatePensionAmountCalculator(_fixedDateProvider));
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
             var person1 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
@@ -367,8 +360,7 @@ namespace TaxCalculatorTests
         [Test]
         public void KnowsWhenTwoIdenticalPeopleCanRetire_ConsideringGivenNiContributions()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
-                new StatePensionAmountCalculator(_fixedDateProvider));
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
             
             var person1 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), NiContributingYears = 0};
             var person2 = new PersonStatus {Salary = 50_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30), NiContributingYears = 5};
