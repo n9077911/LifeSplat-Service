@@ -88,7 +88,7 @@ namespace TaxCalculator
             if (stepDate >= person.StatePensionDate && !statePensionSet)
             {
                 statePensionSet = true;
-                person.SavingsCombinedAtStatePensionAge = Convert.ToInt32(SavingsForIthStep(stepIndex));
+                person.SavingsCombinedAtStatePensionAge = Convert.ToInt32(Math.Max(0, SavingsForIthStep(stepIndex)));
                 person.PrivatePensionPotCombinedAtStatePensionAge = Convert.ToInt32(PrivatePensionPotForIthStep(stepIndex));
             }
 
@@ -100,7 +100,7 @@ namespace TaxCalculator
             if (stepDate >= person.PrivatePensionDate && !privatePensionSet)
             {
                 privatePensionSet = true;
-                person.SavingsCombinedAtPrivatePensionAge = Convert.ToInt32(SavingsForIthStep(stepIndex));
+                person.SavingsCombinedAtPrivatePensionAge = Convert.ToInt32(Math.Max(0, SavingsForIthStep(stepIndex)));
                 person.PrivatePensionPotCombinedAtPrivatePensionAge = Convert.ToInt32(PrivatePensionPotForIthStep(stepIndex));
                 person.PrivatePensionPotAtPrivatePensionAge = Convert.ToInt32(person.PrimarySteps.Steps[stepIndex].PrivatePensionAmount);
             }

@@ -6,19 +6,16 @@ using TaxCalculatorTests.Stubs;
 
 namespace TaxCalculatorTests
 {
-    //TODO: TEST what happen if ran on 31st, 20th, or 29th of the month! does month logic fail?
-    //todo: support paying tax from pension income
-    //todo: support not earning enough for state pension contribution
+    //Todo: support paying tax from pension income
 
     [TestFixture]
     public class RetirementIncrementalApproachCalculatorTest
     {
         private readonly FixedDateProvider _fixedDateProvider = new FixedDateProvider(new DateTime(2020, 1, 1));
+        private readonly StatePensionAmountCalculator _statePensionCalculator = new StatePensionAmountCalculator(new FixedDateProvider(new DateTime(2020, 1, 1)), new TwentyTwentyTaxSystem());
         private readonly SafeWithdrawalNoInflationAssumptions _assumptions = new SafeWithdrawalNoInflationAssumptions();
         private readonly StubPensionAgeCalc _pensionAgeCalc = new StubPensionAgeCalc(new DateTime(2049, 05, 30));
         private readonly FixedStatePensionAmountCalculator _fixedStatePensionAmountCalculator = new FixedStatePensionAmountCalculator(9110.4m);
-        private readonly StatePensionAmountCalculator _statePensionCalculator = new StatePensionAmountCalculator(new FixedDateProvider(new DateTime(2020, 1, 1)), new TwentyTwentyTaxSystem());
-
 
         [Test]
         public void KnowsWhenASalariedWorkerCanRetire_ThisYear()
@@ -118,6 +115,28 @@ namespace TaxCalculatorTests
             Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(133_987));
             Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(5_359));
             Assert.That(report.SavingsAt100, Is.EqualTo(7_089));
+        }
+        
+        [Test]
+        public void HandlesEndOfMonthCalculations()
+        {
+            var eomDate = new FixedDateProvider(new DateTime(2020, 5, 31));
+            var calc = new RetirementIncrementalApproachCalculator(eomDate, _assumptions, _pensionAgeCalc,
+                new StatePensionAmountCalculator(eomDate, new TwentyTwentyTaxSystem()));
+            
+            var report = calc.ReportFor(new PersonStatus
+            {
+                ExistingSavings = 50_000, Salary = 30_000, Spending = 20_000, Dob = new DateTime(1981, 05, 30),
+                ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
+            });
+
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2039, 09, 28)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(58));
+            Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
+            Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
+            Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(131_454));
+            Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(5_258));
+            Assert.That(report.SavingsAt100, Is.EqualTo(9_259));
         }
 
         [Test]
