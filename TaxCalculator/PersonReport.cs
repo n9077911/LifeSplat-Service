@@ -49,6 +49,7 @@ namespace TaxCalculator
         public DateTime StatePensionDate { get; set; }
         public DateTime PrivatePensionDate { get; set; }
         public DateTime PrivateRetirementDate => _givenRetirementDate ?? PrivatePensionDate;
+        public int BankruptAge { get; set; }
         public int StatePensionAge { get; set; }
         public int PrivatePensionAge { get; set; }
         public int AnnualStatePension { get; set; }

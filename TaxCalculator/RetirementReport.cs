@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TaxCalculator.ExternalInterface;
@@ -54,6 +55,7 @@ namespace TaxCalculator
                 personReport.StatePensionDate = personReport.StatePensionDate;
                 personReport.PrivatePensionDate = personReport.PrivatePensionDate;
             
+                personReport.BankruptAge = AgeCalc.Age(personReport.Status.Dob, BankruptDate);
                 personReport.StatePensionAge = AgeCalc.Age(personReport.Status.Dob, personReport.StatePensionDate);
                 personReport.PrivatePensionAge = AgeCalc.Age(personReport.Status.Dob, personReport.PrivatePensionDate);
             }

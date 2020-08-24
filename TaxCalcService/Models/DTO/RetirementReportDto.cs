@@ -49,6 +49,7 @@ namespace TaxCalcService.Models.DTO
                     PrivatePensionPotCombinedAtPrivatePensionAge = personReport.PrivatePensionPotCombinedAtPrivatePensionAge,
                     PrivatePensionPotCombinedAtStatePensionAge = personReport.PrivatePensionPotCombinedAtStatePensionAge,
                     
+                    BankruptAge = personReport.BankruptAge,
                     StateRetirementAge = personReport.StatePensionAge,
                     PrivateRetirementAge = personReport.PrivatePensionAge,
                     StateRetirementDate = personReport.StatePensionDate,
@@ -82,6 +83,7 @@ namespace TaxCalcService.Models.DTO
         public int PrivatePensionPotCombinedAtStatePensionAge { get; set; }
         public int PrivatePensionPotCombinedAtPrivatePensionAge { get; set; }
         
+        public int BankruptAge { get; set; }
         public int StateRetirementAge { get; set; }
         public int PrivateRetirementAge { get; set;}
         public DateTime StateRetirementDate { get; set;}
