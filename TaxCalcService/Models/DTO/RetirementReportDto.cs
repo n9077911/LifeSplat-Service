@@ -31,10 +31,10 @@ namespace TaxCalcService.Models.DTO
                         {
                             step.Date.ToString("yyyy-MM-dd"),
                             Decimal.Round(step.Savings),
-                            Decimal.Round(step.StatePension),
+                            Decimal.Round(step.AfterTaxStatePension),
                             Decimal.Round(step.AfterTaxSalary),
                             Decimal.Round(step.Growth),
-                            Decimal.Round(step.PrivatePensionGrowth),
+                            Decimal.Round(step.AfterTaxPrivatePensionIncome),
                             Decimal.Round(step.PrivatePensionAmount),
                         }
                     );

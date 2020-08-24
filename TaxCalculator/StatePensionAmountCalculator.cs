@@ -1,5 +1,6 @@
 using System;
 using TaxCalculator.ExternalInterface;
+using TaxCalculator.TaxSystem;
 
 namespace TaxCalculator
 {

@@ -1,3 +1,5 @@
+using TaxCalculator.TaxSystem;
+
 namespace TaxCalculator.ExternalInterface
 {
     public interface ITaxResult
@@ -6,5 +8,7 @@ namespace TaxCalculator.ExternalInterface
         decimal NationalInsurance { get; }
         decimal Total { get; }
         decimal Remainder { get; }
+        decimal IncomeTaxFor(IncomeType type);
+        decimal RemainderFor(IncomeType type);
     }
 }

@@ -1,4 +1,4 @@
-namespace TaxCalculator
+namespace TaxCalculator.TaxSystem
 {
     public interface ITaxSystem
     {

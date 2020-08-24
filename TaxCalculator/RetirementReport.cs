@@ -9,12 +9,12 @@ namespace TaxCalculator
     {
         private readonly IAssumptions _assumptions;
 
-        public RetirementReport(IPensionAgeCalc pensionAgeCalc, FamilyStatus family, DateTime now, DateTime? givenRetirementDate, IAssumptions assumptions)
+        public RetirementReport(IPensionAgeCalc pensionAgeCalc, IIncomeTaxCalculator incomeTaxCalculator, FamilyStatus family, DateTime now, DateTime? givenRetirementDate, IAssumptions assumptions)
         {
             _assumptions = assumptions;
             TimeToRetirement = new DateAmount(DateTime.MinValue, DateTime.MinValue); //null object pattern
             foreach (var person in family.Persons)
-                Persons.Add(new PersonReport(pensionAgeCalc, person, now, givenRetirementDate.HasValue, _assumptions, givenRetirementDate));
+                Persons.Add(new PersonReport(pensionAgeCalc, incomeTaxCalculator, person, now, givenRetirementDate.HasValue, _assumptions, givenRetirementDate));
 
             Spending = family.Spending;
         }

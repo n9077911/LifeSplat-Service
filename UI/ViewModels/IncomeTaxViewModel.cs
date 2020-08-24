@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Caliburn.Micro;
 using TaxCalculator;
+using TaxCalculator.TaxSystem;
 using UI.Models;
 
 namespace UI.ViewModels

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TaxCalculator.ExternalInterface;
+using TaxCalculator.TaxSystem;
 
 namespace TaxCalculator
 {
@@ -12,6 +13,7 @@ namespace TaxCalculator
         private readonly IStatePensionAmountCalculator _statePensionAmountCalculator;
         private readonly decimal _monthly = 12;
         private readonly DateTime _now;
+        private IncomeTaxCalculator _incomeTaxCalculator;
 
         public RetirementIncrementalApproachCalculator(IDateProvider dateProvider,
             IAssumptions assumptions, IPensionAgeCalc pensionAgeCalc,
@@ -42,7 +44,8 @@ namespace TaxCalculator
         public IRetirementReport ReportFor(IEnumerable<PersonStatus> personStatuses, DateTime? givenRetirementDate = null)
         {
             var family = new FamilyStatus(personStatuses);
-            var result = new RetirementReport(_pensionAgeCalc, family, _now, givenRetirementDate, _assumptions);
+            _incomeTaxCalculator = new IncomeTaxCalculator();
+            var result = new RetirementReport(_pensionAgeCalc, _incomeTaxCalculator, family, _now, givenRetirementDate, _assumptions);
 
             var emergencyFund = 0;
 
@@ -58,7 +61,8 @@ namespace TaxCalculator
                         stepDescription.UpdateGrowth();
                         stepDescription.UpdateStatePensionAmount(_statePensionAmountCalculator, person.StatePensionDate);
                         stepDescription.UpdatePrivatePension(givenRetirementDate);
-                        stepDescription.UpdateSalary(person.MonthlyAfterTaxSalary);
+                        stepDescription.UpdateSalary(person.MonthlySalaryAfterDeductions);
+                        stepDescription.ProcessTaxableIncomeIntoSavings();
                     }
 
                 result.BalanceSavings();
@@ -94,6 +98,7 @@ namespace TaxCalculator
 
             var runningCash = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum();
             
+            
             for (var month = 1; month <= monthsToDeath; month++)
             {
                 runningCash -= monthlySpending;
@@ -101,14 +106,19 @@ namespace TaxCalculator
                 
                 foreach (var person in result.Persons)
                 {
-                    if (primaryStep.Date.AddMonths(month) > person.StatePensionDate)
-                        runningCash += person.CalcMinimumSteps.CurrentStep.PredictedStatePensionAnnual / _monthly;
+                    var annualisedPrivatePensionGrowth = privatePensionAmounts[person] * _assumptions.AnnualGrowthRate;
+                    var monthlyPrivatePensionGrowth = privatePensionAmounts[person] * _assumptions.MonthlyGrowthRate;
+                    var annualStatePension = person.CalcMinimumSteps.CurrentStep.PredictedStatePensionAnnual;
+                    
+                    var taxResult = _incomeTaxCalculator.TaxFor(0, annualisedPrivatePensionGrowth, annualStatePension);
 
-                    var pensionGrowth = privatePensionAmounts[person] * _assumptions.MonthlyGrowthRate;
+                    if (primaryStep.Date.AddMonths(month) > person.StatePensionDate)
+                        runningCash += taxResult.RemainderFor(IncomeType.StatePension) / _monthly;
+
                     if (primaryStep.Date.AddMonths(month) > person.PrivatePensionDate)
-                        runningCash += pensionGrowth;
+                        runningCash += monthlyPrivatePensionGrowth - (taxResult.IncomeTaxFor(IncomeType.PrivatePension) / _monthly);
                     else
-                        privatePensionAmounts[person] += pensionGrowth;
+                        privatePensionAmounts[person] += monthlyPrivatePensionGrowth;
                 }
 
                 if (runningCash < minimumCash)

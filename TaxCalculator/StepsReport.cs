@@ -18,7 +18,7 @@ namespace TaxCalculator
             _stepType = stepType;
             _assumptions = assumptions;
             _privatePensionDate = privatePensionDate;
-            Steps.Add(new Step(now, personStatus.ExistingSavings, personStatus.ExistingPrivatePension, personStatus.ExistingPrivatePension * assumptions.MonthlyGrowthRate));
+            Steps.Add(new Step(now, personStatus.ExistingSavings, personStatus.ExistingPrivatePension));
         }
 
         public List<Step> Steps { get; } = new List<Step>();
@@ -47,9 +47,9 @@ namespace TaxCalculator
             CurrentStep.UpdatePrivatePension(givenRetirementDate);
         }
 
-        public void UpdateSalary(decimal monthlyAfterTaxSalary)
+        public void UpdateSalary(decimal preTaxSalary)
         {
-            CurrentStep.UpdateSalary(monthlyAfterTaxSalary);
+            CurrentStep.UpdateSalary(preTaxSalary);
         }
 
         public void UpdateSpending(decimal monthlySpending)
@@ -60,6 +60,11 @@ namespace TaxCalculator
         public void SetSavings(decimal savings)
         {
             CurrentStep.SetSavings(savings);
+        }
+
+        public void ProcessTaxableIncomeIntoSavings()
+        {
+            CurrentStep.PayTaxAndBankTheRemainder();
         }
     }
 }
