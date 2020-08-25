@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -24,15 +25,13 @@ namespace TaxCalcService
 
         public void ConfigureServices(IServiceCollection services)
         {
+            var cultureInfo = new CultureInfo("en-GB");
+
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
+            
+            
             services.AddControllers(options => { options.InputFormatters.Insert(0, new TextPlainInputFormatter()); });
-            services.AddCors(options =>
-            {
-                options.AddPolicy(name: EnabledOrigins,
-                    builder =>
-                    {
-                        builder.WithOrigins("http://localhost:3000", "https://localhost:3000");
-                    });
-            });
             services.AddControllers().AddNewtonsoftJson();
             
             services.AddSingleton<ITaxSystem, TwentyTwentyTaxSystem>();
@@ -50,17 +49,28 @@ namespace TaxCalcService
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
+            // if (env.IsDevelopment())
+            // {
                 app.UseDeveloperExceptionPage();
-            }
+            // }
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
-            app.UseCors(EnabledOrigins);
-
+            
+            app.UseCors(builder =>
+            {
+                if(env.IsDevelopment())
+                    builder.WithOrigins("http://localhost:3000", "https://localhost:3000");
+                
+                if(env.IsProduction())
+                    builder.WithOrigins("http://localhost:3000", "https://localhost:3000", "https://lifesplat.com"); //temp while setting up lifesplat.com.. DELETE IF FOUND!
+                    // builder.WithOrigins("https://lifesplat.com");
+                
+                builder.AllowAnyMethod();
+                builder.AllowAnyHeader();
+            });
+            
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
