@@ -49,10 +49,10 @@ namespace TaxCalcService
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // if (env.IsDevelopment())
-            // {
+            if (env.IsDevelopment())
+            {
                 app.UseDeveloperExceptionPage();
-            // }
+            }
 
             app.UseHttpsRedirection();
 
@@ -64,8 +64,7 @@ namespace TaxCalcService
                     builder.WithOrigins("http://localhost:3000", "https://localhost:3000");
                 
                 if(env.IsProduction())
-                    builder.WithOrigins("http://localhost:3000", "https://localhost:3000", "https://lifesplat.com"); //temp while setting up lifesplat.com.. DELETE IF FOUND!
-                    // builder.WithOrigins("https://lifesplat.com");
+                    builder.WithOrigins("https://www.lifesplat.com", "https://lifesplat.com"); 
                 
                 builder.AllowAnyMethod();
                 builder.AllowAnyHeader();

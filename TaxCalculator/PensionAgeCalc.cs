@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -115,7 +116,7 @@ namespace TaxCalculator
             dateRange = dateRange ?? FindDateRange(dob, _jointLookupTable);
 
             if (dateRange == null) 
-                throw new Exception($"Unknown state retirement date for {dob:d}");
+                throw new Exception($"Unknown state retirement date for {dob:d} current culture {CultureInfo.CurrentCulture}");
             
             return dateRange.DateFor(dob);
         }
@@ -153,18 +154,25 @@ namespace TaxCalculator
 
         private static void PrepareLookupTable(List<(string, string)> jointTable, List<(DateTime, DateTime, IRelativeDateProvider)> lookUpTable)
         {
-            foreach (var tuple in jointTable)
+            try
             {
-                var dates = tuple.Item1.Split(new[] {" - "}, StringSplitOptions.None);
-                var start = DateTime.ParseExact(dates[0], "d MMMM yyyy", CultureInfo.CurrentCulture);
-                var end = DateTime.ParseExact(dates[1], "d MMMM yyyy", CultureInfo.CurrentCulture);
+                foreach (var tuple in jointTable)
+                {
+                    var dates = tuple.Item1.Split(new[] {" - "}, StringSplitOptions.None);
+                    var start = DateTime.ParseExact(dates[0], "d MMMM yyyy", CultureInfo.CurrentCulture);
+                    var end = DateTime.ParseExact(dates[1], "d MMMM yyyy", CultureInfo.CurrentCulture);
 
-                var dateProvider = new Regex(@"^\d\d").IsMatch(tuple.Item2)
-                    ? (IRelativeDateProvider) new BirthdayDateProvider(
-                        int.Parse(tuple.Item2.Split('-')[0]), int.Parse(tuple.Item2.Split('-')[1]))
-                    : new Date(DateTime.ParseExact(tuple.Item2, "d MMMM yyyy", CultureInfo.CurrentCulture));
+                    var dateProvider = new Regex(@"^\d\d").IsMatch(tuple.Item2)
+                        ? (IRelativeDateProvider) new BirthdayDateProvider(
+                            int.Parse(tuple.Item2.Split('-')[0]), int.Parse(tuple.Item2.Split('-')[1]))
+                        : new Date(DateTime.ParseExact(tuple.Item2, "d MMMM yyyy", CultureInfo.CurrentCulture));
 
-                lookUpTable.Add((start, end, dateProvider));
+                    lookUpTable.Add((start, end, dateProvider));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to configure pension date lookup table using culture {CultureInfo.CurrentCulture}" , ex);
             }
         }
 
