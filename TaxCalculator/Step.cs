@@ -126,7 +126,7 @@ namespace TaxCalculator
             var incomeTaxCalculator = new IncomeTaxCalculator();
             var afterTax = incomeTaxCalculator.TaxFor(_preTaxSalary*12, _annualPreTaxPrivatePensionIncome, _preTaxStatePensionIncome*12);
             AfterTaxSalary = afterTax.RemainderFor(IncomeType.Salary)/12;
-            AfterTaxPrivatePensionIncome = _monthlyPreTaxPrivatePensionIncome - (afterTax.IncomeTaxFor(IncomeType.PrivatePension)/12);
+            AfterTaxPrivatePensionIncome = _monthlyPreTaxPrivatePensionIncome - (afterTax.TotalTaxFor(IncomeType.PrivatePension)/12);
             AfterTaxStatePension = afterTax.RemainderFor(IncomeType.StatePension)/12;
             Savings += AfterTaxSalary + AfterTaxPrivatePensionIncome + AfterTaxStatePension;
         }

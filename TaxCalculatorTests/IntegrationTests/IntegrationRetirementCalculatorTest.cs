@@ -29,15 +29,15 @@ namespace TaxCalculatorTests.IntegrationTests
                     EmployeeContribution = 0.05m,
                 });
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2034, 01, 01)));
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2034, 05, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(52));
             Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
             Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
             Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
-            Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(397_123));
-            Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(15_885));
-            Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("14 Years and 0 Months"));
+            Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(400_384));
+            Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(16_015));
+            Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("14 Years and 4 Months"));
         }    
     }
 }

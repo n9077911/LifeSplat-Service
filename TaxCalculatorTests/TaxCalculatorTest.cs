@@ -33,9 +33,9 @@ namespace TaxCalculatorTests
         {
             var result = new IncomeTaxCalculator().TaxFor(60_000, 60_000, 60_000);
             
-            Assert.That(result.IncomeTaxFor(IncomeType.Salary), Is.EqualTo(16_500));
-            Assert.That(result.IncomeTaxFor(IncomeType.PrivatePension), Is.EqualTo(24_000));
-            Assert.That(result.IncomeTaxFor(IncomeType.StatePension), Is.EqualTo(25_500));
+            Assert.That(result.TotalTaxFor(IncomeType.Salary), Is.EqualTo(21_560));
+            Assert.That(result.TotalTaxFor(IncomeType.PrivatePension), Is.EqualTo(24_000));
+            Assert.That(result.TotalTaxFor(IncomeType.StatePension), Is.EqualTo(25_500));
         }
         
         [Test]

@@ -8,7 +8,7 @@ namespace TaxCalculator.ExternalInterface
         decimal NationalInsurance { get; }
         decimal Total { get; }
         decimal Remainder { get; }
-        decimal IncomeTaxFor(IncomeType type);
+        decimal TotalTaxFor(IncomeType type);
         decimal RemainderFor(IncomeType type);
     }
 }

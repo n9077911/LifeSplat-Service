@@ -14,8 +14,6 @@ namespace TaxCalcService
 {
     public class Startup
     {
-        private const string EnabledOrigins = "enabledOrigins";
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -61,9 +59,8 @@ namespace TaxCalcService
             app.UseCors(builder =>
             {
                 if (env.IsDevelopment())
-                    builder.WithOrigins("http://localhost:3000", "https://localhost:3000"//, 
-                        // "https://sctaxcalcservice.azurewebsites.net", "https://sctaxcalcservice.azurewebsites.net"
-                        );
+                    builder.WithOrigins("http://localhost:3000", "https://localhost:3000",
+                        "https://sctaxcalcservice.azurewebsites.net", "https://sctaxcalcservice.azurewebsites.net");
                 
                 if(env.IsProduction())
                     builder.WithOrigins("https://www.lifesplat.com", "https://lifesplat.com"); 

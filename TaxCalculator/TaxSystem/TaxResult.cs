@@ -20,7 +20,7 @@ namespace TaxCalculator.TaxSystem
         public decimal Total { get; private set; }
         public decimal Remainder { get; private set; }
 
-        public decimal IncomeTaxFor(IncomeType type)
+        public decimal TotalTaxFor(IncomeType type)
         {
             return _taxPerIncomeType.ContainsKey(type) ? _taxPerIncomeType[type] : 0;
         }

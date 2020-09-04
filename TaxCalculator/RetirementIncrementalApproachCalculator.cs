@@ -116,7 +116,7 @@ namespace TaxCalculator
                         runningCash += taxResult.RemainderFor(IncomeType.StatePension) / _monthly;
 
                     if (primaryStep.Date.AddMonths(month) > person.PrivatePensionDate)
-                        runningCash += monthlyPrivatePensionGrowth - (taxResult.IncomeTaxFor(IncomeType.PrivatePension) / _monthly);
+                        runningCash += monthlyPrivatePensionGrowth - (taxResult.TotalTaxFor(IncomeType.PrivatePension) / _monthly);
                     else
                         privatePensionAmounts[person] += monthlyPrivatePensionGrowth;
                 }
