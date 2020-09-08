@@ -7,8 +7,8 @@ namespace TaxCalcService.Models.DTO
         public int Salary { get; set; }
         public int Savings { get; set; }
         public int Pension { get; set; }
-        public int EmployerContribution { get; set; }
-        public int EmployeeContribution { get; set; }
+        public decimal EmployerContribution { get; set; }
+        public decimal EmployeeContribution { get; set; }
         public int? NiContributingYears { get; set; }
         public DateTime Dob { get; set; }
         public bool Female { get; set; }
