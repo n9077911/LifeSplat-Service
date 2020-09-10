@@ -5,8 +5,6 @@ namespace TaxCalculator
 {
     public interface IRetirementReport
     {
-        int Spending { get; }
-        int MonthlySpending { get; }
         DateAmount TimeToRetirement { get; }
         DateTime BankruptDate { get; }
 
@@ -24,5 +22,7 @@ namespace TaxCalculator
         
         PersonReport PrimaryPerson { get; }
         List<PersonReport> Persons { get; }
+        List<SpendingStep> SpendingSteps { get; }
+        decimal MonthlySpendingAt(DateTime date);
     }
 }

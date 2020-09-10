@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace TaxCalculator
 {
@@ -8,6 +9,6 @@ namespace TaxCalculator
         void UpdateGrowth();
         void UpdatePrivatePension(DateTime? givenRetirementDate);
         void UpdateSalary(decimal preTaxSalary);
-        void UpdateSpending(decimal monthlySpending);
+        void UpdateSpending();
     }
 }

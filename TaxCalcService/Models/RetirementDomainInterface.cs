@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using TaxCalcService.Models.DTO;
 using TaxCalculator;
@@ -16,10 +15,11 @@ namespace TaxCalcService.Models
             _retirementCalculator = retirementCalculator;
         }
 
-        public RetirementReportDto RetirementReportFor(int targetRetirementAge, IEnumerable<PersonDto> persons)
+        public RetirementReportDto RetirementReportFor(int targetRetirementAge, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
         {
             var personsStatuses = persons.Select(PersonStatus);
-            var retirementReport = _retirementCalculator.ReportForTargetAge(personsStatuses, targetRetirementAge);
+            var spendingStepInputs = spendingSteps.Select(dto => new SpendingStepInput(dto.Date, dto.Amount));
+            var retirementReport = _retirementCalculator.ReportForTargetAge(personsStatuses, spendingStepInputs, targetRetirementAge);
 
             var result = new RetirementReportDto(retirementReport);
             return result;
@@ -31,7 +31,6 @@ namespace TaxCalcService.Models
             {
                 Dob = dto.Dob,
                 Salary = dto.Salary,
-                Spending = dto.Spending,
                 Sex = dto.Female ? Sex.Female : Sex.Male,
                 ExistingSavings = dto.Savings,
                 ExistingPrivatePension = dto.Pension,

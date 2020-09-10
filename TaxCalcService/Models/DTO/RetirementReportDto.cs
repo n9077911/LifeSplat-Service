@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TaxCalculator;
 
 namespace TaxCalcService.Models.DTO
 {
+    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
     public class RetirementReportDto
     {
         public int? TargetRetirementAge { get; }
         public DateTime? TargetRetirementDate{ get; }
-        public int MonthlySpending { get; }
         public DateTime BankruptDate { get; }
 
         public List<string> StepsHeaders { get; }
-        public List<PersonReportDto> Person = new List<PersonReportDto>();
+        public List<PersonReportDto> Person { get; } = new List<PersonReportDto>();
+        public List<SpendingStepDto> SpendingSteps {get;}
 
         public RetirementReportDto(IRetirementReport retirementReport)
         {
             TargetRetirementAge = retirementReport.TargetRetirementAge;
             TargetRetirementDate = retirementReport.TargetRetirementDate;
-            MonthlySpending = retirementReport.MonthlySpending;
-            
             BankruptDate = retirementReport.BankruptDate;
-
+            SpendingSteps = retirementReport.SpendingSteps.Select(s => new SpendingStepDto{StartDate = s.StartDate, EndDate = s.EndDate, Spending = s.Spending}).ToList();
+            
             foreach (var personReport in retirementReport.Persons)
             {
                 var steps = new List<List<object>>();
@@ -36,6 +37,7 @@ namespace TaxCalcService.Models.DTO
                             Decimal.Round(step.Growth),
                             Decimal.Round(step.AfterTaxPrivatePensionIncome),
                             Decimal.Round(step.PrivatePensionAmount),
+                            Decimal.Round(step.Spending),
                         }
                     );
                 }
@@ -69,7 +71,7 @@ namespace TaxCalcService.Models.DTO
             StepsHeaders = new List<string>
             {
                 "Date", "Cash", "StatePension", "AfterTaxSalary", "Growth", "PrivatePensionGrowth",
-                "PrivatePensionAmount"
+                "PrivatePensionAmount", "Spending"
             };
         }
     }

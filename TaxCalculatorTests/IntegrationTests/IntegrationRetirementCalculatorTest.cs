@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using NUnit.Framework;
 using TaxCalculator;
 using TaxCalculator.ExternalInterface;
@@ -18,16 +17,15 @@ namespace TaxCalculatorTests.IntegrationTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, new PensionAgeCalc(), _statePensionCalculator);
             var report = calc.ReportFor(new PersonStatus
-                {
-                    Spending = 40_000,
-                    Salary = 100_000, 
-                    Dob = new DateTime(1981, 05, 30), 
-                    Sex = Sex.Female,
-                    ExistingSavings = 50_000,
-                    ExistingPrivatePension = 100_000,
-                    EmployerContribution = 0.03m,
-                    EmployeeContribution = 0.05m,
-                });
+            {
+                Salary = 100_000, 
+                Dob = new DateTime(1981, 05, 30), 
+                Sex = Sex.Female,
+                ExistingSavings = 50_000,
+                ExistingPrivatePension = 100_000,
+                EmployerContribution = 0.03m,
+                EmployeeContribution = 0.05m,
+            }, new []{new SpendingStepInput(_fixedDateProvider.Now(), 40_000)});
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2034, 05, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(52));

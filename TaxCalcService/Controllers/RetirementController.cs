@@ -24,7 +24,7 @@ namespace TaxCalcService.Controllers
             {
                 var options = new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
                 var request = JsonSerializer.Deserialize<RetirementReportRequestDto>(body, options);
-                return _retirement.RetirementReportFor(request.TargetRetirementAge, request.Persons);
+                return _retirement.RetirementReportFor(request.TargetRetirementAge, request.SpendingSteps, request.Persons);
             });
         }
     }

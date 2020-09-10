@@ -25,25 +25,25 @@ namespace TaxCalculator
             _now = dateProvider.Now();
         }
 
-
-        public IRetirementReport ReportForTargetAge(PersonStatus personStatus, int? retirementAge = null)
+        public IRetirementReport ReportForTargetAge(PersonStatus personStatus, IEnumerable<SpendingStepInput> spendingStepInputs, int? retirementAge = null)
         {
-            return ReportForTargetAge(new[] {personStatus}, retirementAge);
+            return ReportForTargetAge(new[] {personStatus}, spendingStepInputs, retirementAge);
         }
 
-        public IRetirementReport ReportForTargetAge(IEnumerable<PersonStatus> personStatus, int? retirementAge = null)
+        public IRetirementReport ReportForTargetAge(IEnumerable<PersonStatus> personStatus, IEnumerable<SpendingStepInput> spendingStepInputs, int? retirementAge = null)
         {
-            return ReportFor(personStatus, retirementAge.HasValue && retirementAge.Value != 0 ? personStatus.First().Dob.AddYears(retirementAge.Value) : (DateTime?) null);
+            var retirementDate = retirementAge.HasValue && retirementAge.Value != 0 ? personStatus.First().Dob.AddYears(retirementAge.Value) : (DateTime?) null;
+            return ReportFor(personStatus, spendingStepInputs, retirementDate);
         }
 
-        public IRetirementReport ReportFor(PersonStatus personStatus, DateTime? givenRetirementDate = null)
+        public IRetirementReport ReportFor(PersonStatus personStatus, IEnumerable<SpendingStepInput> spendingStepInputs, DateTime? givenRetirementDate = null)
         {
-            return ReportFor(new[] {personStatus}, givenRetirementDate);
+            return ReportFor(new[] {personStatus}, spendingStepInputs, givenRetirementDate);
         }
 
-        public IRetirementReport ReportFor(IEnumerable<PersonStatus> personStatuses, DateTime? givenRetirementDate = null)
+        public IRetirementReport ReportFor(IEnumerable<PersonStatus> personStatuses, IEnumerable<SpendingStepInput> spendingStepInputs, DateTime? givenRetirementDate = null)
         {
-            var family = new FamilyStatus(personStatuses);
+            var family = new FamilyStatus(personStatuses, spendingStepInputs);
             _incomeTaxCalculator = new IncomeTaxCalculator();
             var result = new RetirementReport(_pensionAgeCalc, _incomeTaxCalculator, family, _now, givenRetirementDate, _assumptions);
 
@@ -54,10 +54,10 @@ namespace TaxCalculator
             for (var month = 1; month <= MonthsToDeath(family.PrimaryPerson.Dob, _now); month++)
             {
                 foreach (var person in result.Persons)
-                    foreach (var stepDescription in person.StepDescriptions)
+                    foreach (var stepDescription in person.StepReports)
                     {
-                        stepDescription.NewStep(calcdMinimum, givenRetirementDate);
-                        stepDescription.UpdateSpending(person.Status.MonthlySpending);
+                        stepDescription.NewStep(calcdMinimum, result, result.Persons.Count(), givenRetirementDate);
+                        stepDescription.UpdateSpending();
                         stepDescription.UpdateGrowth();
                         stepDescription.UpdateStatePensionAmount(_statePensionAmountCalculator, person.StatePensionDate);
                         stepDescription.UpdatePrivatePension(givenRetirementDate);
@@ -91,7 +91,6 @@ namespace TaxCalculator
         {
             var primaryStep = result.PrimaryPerson.CalcMinimumSteps.CurrentStep;
             var monthsToDeath = MonthsToDeath(result.PrimaryPerson.Status.Dob, primaryStep.Date);
-            var monthlySpending = result.Spending / _monthly;
 
             var privatePensionAmounts = result.Persons.Select(p => new{p, p.CalcMinimumSteps.CurrentStep.PrivatePensionAmount})
                 .ToDictionary(arg => arg.p, arg=>arg.PrivatePensionAmount);
@@ -101,7 +100,8 @@ namespace TaxCalculator
             
             for (var month = 1; month <= monthsToDeath; month++)
             {
-                runningCash -= monthlySpending;
+                runningCash -= result.MonthlySpendingAt(primaryStep.Date.AddMonths(month));
+                
                 runningCash += runningCash * _assumptions.MonthlyGrowthRate;
                 
                 foreach (var person in result.Persons)

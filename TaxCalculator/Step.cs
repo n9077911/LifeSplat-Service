@@ -22,9 +22,9 @@ namespace TaxCalculator
         private decimal _monthlyPreTaxPrivatePensionIncome = 0;
         private decimal _preTaxStatePensionIncome = 0;
 
-        public Step(Step previousStep, PersonStatus personStatus, bool calcdMinimum, IAssumptions assumptions, DateTime privatePensionDate, DateTime? givenRetirementDate = null)
+        public Step(Step previousStep, DateTime stepDate, PersonStatus personStatus, bool calcdMinimum, IAssumptions assumptions, DateTime privatePensionDate, decimal spending, DateTime? givenRetirementDate = null)
         {
-            Date = previousStep.Date.AddMonths(1);
+            Date = stepDate;
             Savings = previousStep.Savings;
             PrivatePensionAmount = previousStep.PrivatePensionAmount;
             _previousStep = previousStep;
@@ -32,14 +32,16 @@ namespace TaxCalculator
             _calcdMinimum = calcdMinimum;
             _assumptions = assumptions;
             _privatePensionDate = privatePensionDate;
+            Spending = spending;
             _givenRetirementDate = givenRetirementDate;
         }
         
-        public Step(DateTime now, int existingSavings, int existingPrivatePension)
+        public Step(DateTime now, int existingSavings, int existingPrivatePension, decimal personStatusMonthlySpending)
         {
             Date = now;
             Savings = existingSavings;
             PrivatePensionAmount = existingPrivatePension;
+            Spending = personStatusMonthlySpending;
         }
 
         public DateTime Date { get; private set; }
@@ -50,6 +52,7 @@ namespace TaxCalculator
         public decimal AfterTaxStatePension { get; private set; }
         public decimal AfterTaxPrivatePensionIncome { get; private set; }
         
+        public decimal Spending { get; private set; }
         public decimal Savings { get; private set; }
         public decimal PrivatePensionAmount { get; private set; }
 
@@ -108,9 +111,9 @@ namespace TaxCalculator
             }
         }
 
-        public void UpdateSpending(decimal monthlySpending)
+        public void UpdateSpending()
         {
-            Savings -= monthlySpending;
+            Savings -= Spending;
         }
 
         public void SetSavings(decimal savings)

@@ -8,7 +8,6 @@ namespace TaxCalculator
         {
             return dob.WholeYearsUntil(onDate);
         }
-
     }
 
     public static class DateTimeExtensions

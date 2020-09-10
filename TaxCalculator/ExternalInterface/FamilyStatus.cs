@@ -5,13 +5,13 @@ namespace TaxCalculator.ExternalInterface
 {
     public class FamilyStatus
     {
-        public FamilyStatus(IEnumerable<PersonStatus> personStatuses)
+        public FamilyStatus(IEnumerable<PersonStatus> personStatuses, IEnumerable<SpendingStepInput> spendingStepInputs)
         {
+            SpendingStepInputs = spendingStepInputs;
             Persons.AddRange(personStatuses);
-            Spending = Persons.Select(p => p.Spending).Sum();
         }
 
-        public int Spending { get; }
+        public IEnumerable<SpendingStepInput> SpendingStepInputs { get; }
         public List<PersonStatus> Persons { get; } = new List<PersonStatus>();
         public PersonStatus PrimaryPerson => Persons.First();
     }

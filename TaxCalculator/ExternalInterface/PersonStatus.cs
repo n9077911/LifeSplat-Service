@@ -11,10 +11,8 @@ namespace TaxCalculator.ExternalInterface
         public int ExistingPrivatePension { get; set; }
         public int? NiContributingYears { get; set; }
         public int Salary { get; set; }
-        public int Spending { get; set; }
         public DateTime Dob { get; set; }
         public Sex Sex { get; set; }
-        public decimal MonthlySpending => Spending / 12m;
 
         public decimal EmployeeContribution
         {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TaxCalculator.ExternalInterface;
 
 namespace TaxCalculator
@@ -7,10 +8,10 @@ namespace TaxCalculator
     public class PersonReport
     {
         private readonly DateTime? _givenRetirementDate;
-        private const int Monthly = 12;
+        private const decimal Monthly = 12;
 
         public PersonReport(IPensionAgeCalc pensionAgeCalc, IIncomeTaxCalculator incomeTaxCalculator, PersonStatus person, DateTime now, bool targetDateGiven, IAssumptions assumptions,
-            DateTime? givenRetirementDate)
+            DateTime? givenRetirementDate, decimal monthlySpendingAt)
         {
             _givenRetirementDate = givenRetirementDate;
             Status = person;
@@ -25,18 +26,19 @@ namespace TaxCalculator
             NationalInsuranceBill = Convert.ToInt32(taxResult.NationalInsurance);
             IncomeTaxBill = Convert.ToInt32(taxResult.IncomeTax);
 
-            CalcMinimumSteps = new StepsReport(person, StepType.CalcMinimum, now, assumptions, PrivatePensionDate);
-            TargetSteps = new StepsReport(person, StepType.GivenDate, now, assumptions, PrivatePensionDate);
+            CalcMinimumSteps = new StepsReport(person, StepType.CalcMinimum, now, assumptions, monthlySpendingAt, PrivatePensionDate);
+            TargetSteps = new StepsReport(person, StepType.GivenDate, now, assumptions, monthlySpendingAt, PrivatePensionDate);
             PrimarySteps = targetDateGiven ? TargetSteps : CalcMinimumSteps;
-            StepDescriptions = new List<StepsReport> {CalcMinimumSteps, TargetSteps};
+            StepReports = new List<StepsReport> {CalcMinimumSteps, TargetSteps};
         }
 
         public PersonStatus Status { get; }
 
-        public List<StepsReport> StepDescriptions { get; }
+        public List<StepsReport> StepReports { get; }
 
         public StepsReport CalcMinimumSteps { get; }
         public StepsReport TargetSteps { get; }
+        //Between calc minimum and target retirement date steps... which are considered primary? i.e. which does the user want to see.
         public StepsReport PrimarySteps { get; }
 
 
