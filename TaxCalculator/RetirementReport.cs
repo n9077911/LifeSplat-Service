@@ -38,7 +38,7 @@ namespace TaxCalculator
         public int MinimumPossibleRetirementAge => PrimaryPerson.MinimumPossibleRetirementAge;
         public int SavingsAtPrivatePensionAge => PrimaryPerson.SavingsCombinedAtPrivatePensionAge;
         public int SavingsAtStatePensionAge => PrimaryPerson.SavingsCombinedAtStatePensionAge;
-        public int SavingsAtMinimumPossiblePensionAge => PrimaryPerson.SavingsAtMinimumPossiblePensionAge;P
+        public int SavingsAtMinimumPossiblePensionAge => PrimaryPerson.SavingsAtMinimumPossiblePensionAge;
         public int PrivatePensionPotAtPrivatePensionAge => PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge;
         public int PrivatePensionPotAtStatePensionAge => PrimaryPerson.PrivatePensionPotCombinedAtStatePensionAge;
         public int SavingsAt100 { get; set; }
