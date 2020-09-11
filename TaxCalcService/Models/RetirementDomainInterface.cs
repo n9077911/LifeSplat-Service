@@ -18,7 +18,11 @@ namespace TaxCalcService.Models
         public RetirementReportDto RetirementReportFor(int targetRetirementAge, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
         {
             var personsStatuses = persons.Select(PersonStatus);
-            var spendingStepInputs = spendingSteps.Select(dto => new SpendingStepInput(dto.Date, dto.Amount));
+            var spendingStepInputs = spendingSteps.Select(dto =>
+            {
+                var date = dto.Date ?? personsStatuses.First().Dob.AddYears(dto.Age.Value);
+                return new SpendingStepInput(date, dto.Amount);
+            });
             var retirementReport = _retirementCalculator.ReportForTargetAge(personsStatuses, spendingStepInputs, targetRetirementAge);
 
             var result = new RetirementReportDto(retirementReport);
