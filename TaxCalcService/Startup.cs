@@ -59,12 +59,15 @@ namespace TaxCalcService
             app.UseCors(builder =>
             {
                 if (env.IsDevelopment())
-                    builder.WithOrigins("http://localhost:3000", "https://localhost:3000",
+                    builder.WithOrigins("http://localhost:3000", "https://localhost:3000", 
+                        "http://localhost:5000", "https://localhost:5000",
+                        "http://localhost:8080", "https://localhost:8080",
                         "https://sctaxcalcservice.azurewebsites.net", "https://sctaxcalcservice.azurewebsites.net");
                 
                 if(env.IsProduction())
-                    builder.WithOrigins("https://www.lifesplat.com", "https://lifesplat.com"); 
-                
+                    builder.WithOrigins("https://www.lifesplat.com", "https://lifesplat.com", 
+                        "https://www.staging.lifesplat.com", "https://staging.lifesplat.com"); 
+                    
                 builder.AllowAnyMethod();
                 builder.AllowAnyHeader();
             });

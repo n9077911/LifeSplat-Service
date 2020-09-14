@@ -49,7 +49,8 @@ namespace TaxCalculator
 
         public decimal MonthlySpendingAt(DateTime date)
         {
-            return SpendingSteps.First(step => date.Date >= step.StartDate.Date && date.Date <= step.EndDate.Date).Spending / 12m;
+            var spendingStep = SpendingSteps.FirstOrDefault(step => date.Date >= step.StartDate.Date && date.Date <= step.EndDate.Date) ?? SpendingSteps.Last();
+            return spendingStep.Spending / 12m;
         }
 
         public void UpdatePersonResults()
