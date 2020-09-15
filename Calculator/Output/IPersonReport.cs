@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using TaxCalculator.Input;
+using Calculator.Input;
 
-namespace TaxCalculator.Output
+namespace Calculator.Output
 {
     public interface IPersonReport
     {

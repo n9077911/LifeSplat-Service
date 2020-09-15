@@ -1,4 +1,4 @@
-namespace TaxCalculator.StatePensionCalculator
+namespace Calculator.StatePensionCalculator
 {
     public readonly struct StatePensionResult
     {

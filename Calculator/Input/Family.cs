@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TaxCalculator.Input
+namespace Calculator.Input
 {
     public class Family
     {

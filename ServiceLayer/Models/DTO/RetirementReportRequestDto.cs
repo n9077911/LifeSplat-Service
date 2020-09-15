@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TaxCalcService.Models.DTO
+namespace ServiceLayer.Models.DTO
 {
     public class RetirementReportRequestDto
     {

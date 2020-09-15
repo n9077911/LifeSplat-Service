@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
-using TaxCalculator;
-using TaxCalculator.TaxSystem;
+using Calculator;
+using Calculator.TaxSystem;
 
 namespace CalculatorTests
 {

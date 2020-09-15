@@ -1,6 +1,6 @@
 using System;
 
-namespace TaxCalculator.Output
+namespace Calculator.Output
 {
     public class SpendingStepReport
     {

@@ -4,7 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Formatters;
 
-namespace TaxCalcService.Misc
+namespace ServiceLayer.Misc
 {
     //Needed to avoid a localhost problem whereby cors prevents the sending of application/json content-type. 
     //This feels like a hack. According to the internet its widely used.

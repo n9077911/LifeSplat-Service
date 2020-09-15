@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TaxCalculator.ExternalInterface;
-using TaxCalculator.Input;
-using TaxCalculator.StatePensionCalculator;
+using Calculator.ExternalInterface;
+using Calculator.Input;
+using Calculator.StatePensionCalculator;
 
-namespace TaxCalculator.Output
+namespace Calculator.Output
 {
     internal class RetirementReport : IRetirementReport, ISpendingForDate
     {

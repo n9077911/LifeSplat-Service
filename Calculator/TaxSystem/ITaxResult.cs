@@ -1,4 +1,4 @@
-namespace TaxCalculator.TaxSystem
+namespace Calculator.TaxSystem
 {
     /// <summary>
     /// The output from an income tax calculation

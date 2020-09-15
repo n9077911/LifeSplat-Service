@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TaxCalculator.ExternalInterface;
-using TaxCalculator.Input;
-using TaxCalculator.Output;
-using TaxCalculator.StatePensionCalculator;
-using TaxCalculator.TaxSystem;
+using Calculator.ExternalInterface;
+using Calculator.Input;
+using Calculator.Output;
+using Calculator.StatePensionCalculator;
+using Calculator.TaxSystem;
 
-namespace TaxCalculator
+namespace Calculator
 {
     /// <summary>
     /// Generates a retirement report detailing when a user can retire by iterating through a users future life

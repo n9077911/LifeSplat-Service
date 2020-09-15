@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using TaxCalcService.Models;
-using TaxCalcService.Models.DTO;
+using ServiceLayer.Models;
+using ServiceLayer.Models.DTO;
 
-namespace TaxCalcService.Controllers
+namespace ServiceLayer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

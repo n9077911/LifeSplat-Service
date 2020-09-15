@@ -1,10 +1,10 @@
 using System;
-using TaxCalculator.ExternalInterface;
-using TaxCalculator.Input;
-using TaxCalculator.StatePensionCalculator;
-using TaxCalculator.TaxSystem;
+using Calculator.Input;
+using Calculator.StatePensionCalculator;
+using Calculator.TaxSystem;
+using Calculator.ExternalInterface;
 
-namespace TaxCalculator
+namespace Calculator
 {
     
     public interface IStatePensionAmountCalculator

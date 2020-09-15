@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
-using TaxCalcService.Models.DTO;
-using TaxCalculator.ExternalInterface;
+using Calculator.ExternalInterface;
+using ServiceLayer.Models.DTO;
 
-namespace TaxCalcService.Models
+namespace ServiceLayer.Models
 {
     public class TaxCalculatorDomainInterface : ITaxCalculatorDomainInterface
     {

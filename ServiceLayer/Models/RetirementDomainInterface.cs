@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using TaxCalcService.Models.DTO;
-using TaxCalculator;
-using TaxCalculator.ExternalInterface;
-using TaxCalculator.Input;
+using Calculator;
+using Calculator.ExternalInterface;
+using Calculator.Input;
+using ServiceLayer.Models.DTO;
 
-namespace TaxCalcService.Models
+namespace ServiceLayer.Models
 {
     public class RetirementDomainInterface : IRetirementDomainInterface
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace TaxCalculator.StatePensionCalculator
+namespace Calculator.StatePensionCalculator
 {
     /// <summary>
     /// Calculates your state pension and private pension age

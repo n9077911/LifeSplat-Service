@@ -4,15 +4,15 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TaxCalcService.Misc;
-using TaxCalcService.Models;
-using TaxCalculator;
-using TaxCalculator.ExternalInterface;
-using TaxCalculator.Input;
-using TaxCalculator.StatePensionCalculator;
-using TaxCalculator.TaxSystem;
+using Calculator;
+using Calculator.ExternalInterface;
+using Calculator.Input;
+using Calculator.StatePensionCalculator;
+using Calculator.TaxSystem;
+using ServiceLayer.Misc;
+using ServiceLayer.Models;
 
-namespace TaxCalcService
+namespace ServiceLayer
 {
     public class Startup
     {

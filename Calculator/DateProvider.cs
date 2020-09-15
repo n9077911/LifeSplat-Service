@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TaxCalculator
+namespace Calculator
 {
     public interface IDateProvider
     {

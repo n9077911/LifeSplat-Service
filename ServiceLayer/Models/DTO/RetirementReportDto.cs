@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using TaxCalculator;
-using TaxCalculator.Output;
+using Calculator;
+using Calculator.Output;
 
-namespace TaxCalcService.Models.DTO
+namespace ServiceLayer.Models.DTO
 {
     [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
     public class RetirementReportDto

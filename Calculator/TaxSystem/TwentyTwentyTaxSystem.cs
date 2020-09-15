@@ -1,4 +1,4 @@
-namespace TaxCalculator.TaxSystem
+namespace Calculator.TaxSystem
 {
     public class TwentyTwentyTaxSystem : ITaxSystem
     {

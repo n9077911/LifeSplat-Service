@@ -1,6 +1,6 @@
 using System;
 
-namespace TaxCalculator
+namespace Calculator
 {
     /// <summary>
     /// An amount of time specified in years and months

@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using CalculatorTests.Stubs;
 using NUnit.Framework;
-using TaxCalculator;
-using TaxCalculator.ExternalInterface;
-using TaxCalculator.Input;
-using TaxCalculator.StatePensionCalculator;
-using TaxCalculator.TaxSystem;
+using Calculator;
+using Calculator.ExternalInterface;
+using Calculator.Input;
+using Calculator.StatePensionCalculator;
+using Calculator.TaxSystem;
 
 namespace CalculatorTests
 {

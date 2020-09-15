@@ -1,4 +1,4 @@
-namespace TaxCalculator
+namespace Calculator
 {
     public enum Sex
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace TaxCalculator.Output
+namespace Calculator.Output
 {
     public interface IRetirementReport
     {

@@ -1,7 +1,7 @@
 using System;
-using TaxCalculator.Input;
+using Calculator.Input;
 
-namespace TaxCalculator
+namespace Calculator
 {
     public class SafeWithdrawalNoInflationAssumptions : IAssumptions
     {

@@ -1,6 +1,6 @@
-﻿using TaxCalculator.TaxSystem;
+﻿using Calculator.TaxSystem;
 
-namespace TaxCalculator.ExternalInterface
+namespace Calculator.ExternalInterface
 {
     public interface IIncomeTaxCalculator
     {

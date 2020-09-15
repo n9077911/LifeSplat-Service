@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using TaxCalcService.Models.DTO;
-using TaxCalculator.ExternalInterface;
+using Calculator.ExternalInterface;
+using ServiceLayer.Models.DTO;
 
-namespace TaxCalcService.Models
+namespace ServiceLayer.Models
 {
     public interface IRetirementDomainInterface
     {

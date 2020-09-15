@@ -1,6 +1,6 @@
-﻿using TaxCalcService.Models.DTO;
+﻿using ServiceLayer.Models.DTO;
 
-namespace TaxCalcService.Models
+namespace ServiceLayer.Models
 {
     public interface ITaxCalculatorDomainInterface
     {

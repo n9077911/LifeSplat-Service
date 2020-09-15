@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using TaxCalculator.Input;
-using TaxCalculator.Output;
+using Calculator.Input;
+using Calculator.Output;
 
-namespace TaxCalculator.ExternalInterface
+namespace Calculator.ExternalInterface
 {
     /// <summary>
     /// Generates a retirement report detailing when a user can retire

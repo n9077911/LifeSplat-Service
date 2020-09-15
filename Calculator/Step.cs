@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using TaxCalculator.ExternalInterface;
-using TaxCalculator.Input;
-using TaxCalculator.TaxSystem;
+using Calculator.Input;
+using Calculator.TaxSystem;
+using Calculator.ExternalInterface;
 
-namespace TaxCalculator
+namespace Calculator
 {
     /// <summary>
     /// Represents 1 month of a persons future life.

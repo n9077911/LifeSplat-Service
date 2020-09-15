@@ -1,4 +1,4 @@
-namespace TaxCalculator.Input
+namespace Calculator.Input
 {
     public interface IAssumptions
     {

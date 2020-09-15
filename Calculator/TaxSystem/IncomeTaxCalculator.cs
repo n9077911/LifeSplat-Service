@@ -1,7 +1,7 @@
 ﻿using System;
-using TaxCalculator.ExternalInterface;
+using Calculator.ExternalInterface;
 
-namespace TaxCalculator.TaxSystem
+namespace Calculator.TaxSystem
 {
     /// <summary>
     /// Calculates income tax and NI based a persons salary

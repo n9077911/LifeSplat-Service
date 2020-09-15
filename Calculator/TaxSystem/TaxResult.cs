@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using TaxCalculator.ExternalInterface;
+using Calculator.ExternalInterface;
 
-namespace TaxCalculator.TaxSystem
+namespace Calculator.TaxSystem
 {
     ///The output of an income tax calculation
     public class TaxResult : ITaxResult

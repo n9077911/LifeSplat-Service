@@ -1,9 +1,9 @@
 using System;
 using NUnit.Framework;
-using TaxCalculator;
-using TaxCalculator.ExternalInterface;
-using TaxCalculator.Input;
-using TaxCalculator.TaxSystem;
+using Calculator;
+using Calculator.ExternalInterface;
+using Calculator.Input;
+using Calculator.TaxSystem;
 
 namespace CalculatorTests
 {

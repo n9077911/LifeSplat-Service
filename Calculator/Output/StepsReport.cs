@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TaxCalculator.Input;
+using Calculator.Input;
 
-namespace TaxCalculator.Output
+namespace Calculator.Output
 {
     /// <summary>
     /// A report detailing the full list of Steps produced by the retirement calculator algorithm.

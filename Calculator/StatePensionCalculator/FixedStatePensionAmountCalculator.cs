@@ -1,7 +1,7 @@
 using System;
-using TaxCalculator.Input;
+using Calculator.Input;
 
-namespace TaxCalculator.StatePensionCalculator
+namespace Calculator.StatePensionCalculator
 {
     public class FixedStatePensionAmountCalculator : IStatePensionAmountCalculator
     {

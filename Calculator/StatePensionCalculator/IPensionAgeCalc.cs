@@ -1,6 +1,6 @@
 using System;
 
-namespace TaxCalculator.StatePensionCalculator
+namespace Calculator.StatePensionCalculator
 {
     public interface IPensionAgeCalc
     {

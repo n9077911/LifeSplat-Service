@@ -1,6 +1,6 @@
 using System;
 
-namespace TaxCalculator.Input
+namespace Calculator.Input
 {
     public class SpendingStep
     {

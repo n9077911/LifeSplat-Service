@@ -1,4 +1,4 @@
-﻿namespace TaxCalcService.Models.DTO
+﻿namespace ServiceLayer.Models.DTO
 {
     public class TaxResultItemDto
     {
