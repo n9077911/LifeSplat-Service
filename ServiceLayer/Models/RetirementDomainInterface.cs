@@ -7,6 +7,9 @@ using ServiceLayer.Models.DTO;
 
 namespace ServiceLayer.Models
 {
+    /// <summary>
+    /// RetirementCalculator gateway. Knows how to translate given DTOs from the client into a format required by RetirementCalculator.
+    /// </summary>
     public class RetirementDomainInterface : IRetirementDomainInterface
     {
         private readonly IRetirementCalculator _retirementCalculator;
