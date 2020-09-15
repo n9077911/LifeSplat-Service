@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using TaxCalculator;
+using TaxCalculator.Output;
 
 namespace TaxCalcService.Models.DTO
 {
@@ -61,7 +62,7 @@ namespace TaxCalcService.Models.DTO
                     IncomeTaxBill = personReport.IncomeTaxBill,
                     AnnualStatePension = personReport.AnnualStatePension,
                     CalculatedNiContributingYears = personReport.NiContributingYears,
-                    GivenNiContributingYears = personReport.Status.NiContributingYears,
+                    GivenNiContributingYears = personReport.Person.NiContributingYears,
                     PrivatePensionPot = personReport.PrivatePensionPotAtPrivatePensionAge,
                     PrivatePensionSafeWithdrawal = personReport.PrivatePensionSafeWithdrawal,
                     AfterTaxSalary = personReport.AfterTaxSalary,

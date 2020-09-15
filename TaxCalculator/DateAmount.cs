@@ -2,7 +2,9 @@ using System;
 
 namespace TaxCalculator
 {
-    ///An amount of time specified in years and month
+    /// <summary>
+    /// An amount of time specified in years and months
+    /// </summary>
     public class DateAmount
     {
         public DateAmount(DateTime dateStart, DateTime dateEnd)

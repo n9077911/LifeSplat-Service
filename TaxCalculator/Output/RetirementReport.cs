@@ -1,16 +1,17 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using TaxCalculator.ExternalInterface;
+using TaxCalculator.Input;
+using TaxCalculator.StatePensionCalculator;
 
-namespace TaxCalculator
+namespace TaxCalculator.Output
 {
-    public class RetirementReport : IRetirementReport, ISpendingForDate
+    internal class RetirementReport : IRetirementReport, ISpendingForDate
     {
         private readonly IAssumptions _assumptions;
 
-        public RetirementReport(IPensionAgeCalc pensionAgeCalc, IIncomeTaxCalculator incomeTaxCalculator, FamilyStatus family, DateTime now, DateTime? givenRetirementDate, IAssumptions assumptions)
+        public RetirementReport(IPensionAgeCalc pensionAgeCalc, IIncomeTaxCalculator incomeTaxCalculator, Family family, DateTime now, DateTime? givenRetirementDate, IAssumptions assumptions)
         {
             _assumptions = assumptions;
             TimeToRetirement = new DateAmount(DateTime.MinValue, DateTime.MinValue); 
@@ -19,15 +20,15 @@ namespace TaxCalculator
             for (int i = 0; i < spendingStepInputs.Count; i++)
             {
                 var endDate = i < spendingStepInputs.Count - 1 ? spendingStepInputs[i + 1].Date : family.PrimaryPerson.Dob.AddYears(100);
-                SpendingSteps.Add(new SpendingStep(spendingStepInputs[i].Date, endDate.AddDays(-1), spendingStepInputs[i].NewAmount));
+                SpendingSteps.Add(new SpendingStepReport(spendingStepInputs[i].Date, endDate.AddDays(-1), spendingStepInputs[i].NewAmount));
             }
             
             var monthlySpendingAt = MonthlySpendingAt(now)/family.Persons.Count;
             foreach (var person in family.Persons)
-                Persons.Add(new PersonReport(pensionAgeCalc, incomeTaxCalculator, person, now, givenRetirementDate.HasValue, _assumptions, givenRetirementDate, monthlySpendingAt));
+                Persons.Add(new PersonReport(pensionAgeCalc, incomeTaxCalculator, person, now, givenRetirementDate.HasValue, _assumptions, monthlySpendingAt));
         }
 
-        public List<SpendingStep> SpendingSteps { get; } = new List<SpendingStep>();
+        public List<SpendingStepReport> SpendingSteps { get; } = new List<SpendingStepReport>();
         public DateAmount TimeToRetirement { get; set; }
         public DateTime BankruptDate { get; private set; } = DateTime.MaxValue;
         
@@ -41,11 +42,11 @@ namespace TaxCalculator
         public int SavingsAtMinimumPossiblePensionAge => PrimaryPerson.SavingsAtMinimumPossiblePensionAge;
         public int PrivatePensionPotAtPrivatePensionAge => PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge;
         public int PrivatePensionPotAtStatePensionAge => PrimaryPerson.PrivatePensionPotCombinedAtStatePensionAge;
-        public int SavingsAt100 { get; set; }
+        public int SavingsAt100 { get; private set; }
 
-        public PersonReport PrimaryPerson => Persons.First();
+        public IPersonReport PrimaryPerson => Persons.First();
 
-        public List<PersonReport> Persons { get; } = new List<PersonReport>();
+        public List<IPersonReport> Persons { get; } = new List<IPersonReport>();
 
         public decimal MonthlySpendingAt(DateTime date)
         {
@@ -63,16 +64,16 @@ namespace TaxCalculator
                 personReport.StatePensionDate = personReport.StatePensionDate;
                 personReport.PrivatePensionDate = personReport.PrivatePensionDate;
             
-                personReport.BankruptAge = AgeCalc.Age(personReport.Status.Dob, BankruptDate);
-                personReport.StatePensionAge = AgeCalc.Age(personReport.Status.Dob, personReport.StatePensionDate);
-                personReport.PrivatePensionAge = AgeCalc.Age(personReport.Status.Dob, personReport.PrivatePensionDate);
+                personReport.BankruptAge = AgeCalc.Age(personReport.Person.Dob, BankruptDate);
+                personReport.StatePensionAge = AgeCalc.Age(personReport.Person.Dob, personReport.StatePensionDate);
+                personReport.PrivatePensionAge = AgeCalc.Age(personReport.Person.Dob, personReport.PrivatePensionDate);
             }
         }
         
         public void UpdateResultsBasedOnSetDates()
         {
             var bankrupt = false;
-            var detailsSet = Persons.Select(p => new Details{Person = p, PrivatePensionSet = false, StatePensionSet=false}).ToList();
+            var detailsSet = Persons.Select(p => new DetailsSet{Person = p, PrivatePensionSet = false, StatePensionSet=false}).ToList();
             
             for (int stepIndex = 0; stepIndex < PrimaryPerson.CalcMinimumSteps.Steps.Count; stepIndex++)
             {
@@ -93,7 +94,7 @@ namespace TaxCalculator
             SavingsAt100 = Convert.ToInt32(SavingsForIthStep(PrimaryPerson.CalcMinimumSteps.Steps.Count-1));
         }
 
-        private bool UpdateStatePensionDetails(PersonReport person, DateTime stepDate, bool statePensionSet, int stepIndex)
+        private bool UpdateStatePensionDetails(IPersonReport person, DateTime stepDate, bool statePensionSet, int stepIndex)
         {
             if (stepDate >= person.StatePensionDate && !statePensionSet)
             {
@@ -105,7 +106,7 @@ namespace TaxCalculator
             return statePensionSet;
         }
 
-        private bool UpdatePrivatePensionDetails(PersonReport person, DateTime stepDate, bool privatePensionSet, int stepIndex)
+        private bool UpdatePrivatePensionDetails(IPersonReport person, DateTime stepDate, bool privatePensionSet, int stepIndex)
         {
             if (stepDate >= person.PrivatePensionDate && !privatePensionSet)
             {
@@ -135,30 +136,21 @@ namespace TaxCalculator
             
             foreach (var person in Persons)
             {
-                person.CalcMinimumSteps.SetSavings(calcMinSavings / Persons.Count());
-                person.TargetSteps.SetSavings(targetSavings / Persons.Count());
+                person.CalcMinimumSteps.SetSavings(calcMinSavings / Persons.Count);
+                person.TargetSteps.SetSavings(targetSavings / Persons.Count);
             }
         }
     }
 
-    public class SpendingStep
+    public class DetailsSet
     {
-        public DateTime StartDate { get; }
-        public DateTime EndDate { get; }
-        public int Spending { get; }
-
-        public SpendingStep(DateTime startDate, DateTime endDate, int spending)
-        {
-            StartDate = startDate;
-            EndDate = endDate;
-            Spending = spending;
-        }
-    }
-
-    public class Details
-    {
-        public PersonReport Person { get; set; }
+        public IPersonReport Person { get; set; }
         public bool PrivatePensionSet { get; set; }
         public bool StatePensionSet { get; set; }
+    }
+    
+    public interface ISpendingForDate
+    {
+        decimal MonthlySpendingAt(DateTime date);
     }
 }

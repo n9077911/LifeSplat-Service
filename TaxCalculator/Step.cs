@@ -2,15 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using TaxCalculator.ExternalInterface;
+using TaxCalculator.Input;
 using TaxCalculator.TaxSystem;
 
 namespace TaxCalculator
 {
+    /// <summary>
+    /// Represents 1 month of a persons future life.
+    /// Used by RetirementIncrementalApproachCalculator to keep track of a persons finances as the calculator iterates through the persons future. 
+    /// </summary>
     [DebuggerDisplay("{Date} : {Savings}")]
-    public class Step : IStepUpdater
+    public class Step
     {
         private readonly Step _previousStep;
-        private readonly PersonStatus _personStatus;
+        private readonly Person _person;
         private readonly bool _calcdMinimum;
         private readonly IAssumptions _assumptions;
         private readonly DateTime _privatePensionDate;
@@ -22,26 +27,31 @@ namespace TaxCalculator
         private decimal _monthlyPreTaxPrivatePensionIncome = 0;
         private decimal _preTaxStatePensionIncome = 0;
 
-        public Step(Step previousStep, DateTime stepDate, PersonStatus personStatus, bool calcdMinimum, IAssumptions assumptions, DateTime privatePensionDate, decimal spending, DateTime? givenRetirementDate = null)
+        public Step(Step previousStep, DateTime stepDate, Person person, bool calcdMinimum, IAssumptions assumptions, DateTime privatePensionDate, decimal spending, DateTime? givenRetirementDate = null)
         {
             Date = stepDate;
             Savings = previousStep.Savings;
             PrivatePensionAmount = previousStep.PrivatePensionAmount;
             _previousStep = previousStep;
-            _personStatus = personStatus;
+            _person = person;
             _calcdMinimum = calcdMinimum;
             _assumptions = assumptions;
             _privatePensionDate = privatePensionDate;
             Spending = spending;
             _givenRetirementDate = givenRetirementDate;
         }
-        
-        public Step(DateTime now, int existingSavings, int existingPrivatePension, decimal personStatusMonthlySpending)
+
+        private Step(DateTime now, int existingSavings, int existingPrivatePension, decimal personStatusMonthlySpending)
         {
             Date = now;
             Savings = existingSavings;
             PrivatePensionAmount = existingPrivatePension;
             Spending = personStatusMonthlySpending;
+        }
+
+        public static Step CreateInitialStep(DateTime now, int existingSavings, int existingPrivatePension, decimal personStatusMonthlySpending)
+        {
+            return new Step(now, existingSavings, existingPrivatePension, personStatusMonthlySpending);
         }
 
         public DateTime Date { get; private set; }
@@ -52,23 +62,22 @@ namespace TaxCalculator
         public decimal AfterTaxStatePension { get; private set; }
         public decimal AfterTaxPrivatePensionIncome { get; private set; }
         
-        public decimal Spending { get; private set; }
+        public decimal Spending { get; }
         public decimal Savings { get; private set; }
         public decimal PrivatePensionAmount { get; private set; }
 
         public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate)
         {
-            if (QuitWork())
+            if (PersonHasQuitWork())
             {
                 PredictedStatePensionAnnual = _previousStep.PredictedStatePensionAnnual;
                 NiContributingYears = _previousStep.NiContributingYears;
             }
             else
             {
-                var predictedStatePensionAnnual = statePensionAmountCalculator.Calculate(_personStatus, Date);
-                NiContributingYears = predictedStatePensionAnnual.Item1;
-                PredictedStatePensionAnnual = Convert.ToInt32(predictedStatePensionAnnual.Item2);
-                // PredictedStatePensionAnnual = predictedStatePensionAnnual.Item2;
+                var predictedStatePensionAnnual = statePensionAmountCalculator.Calculate(_person, Date);
+                NiContributingYears = predictedStatePensionAnnual.ContributingYears;
+                PredictedStatePensionAnnual = Convert.ToInt32(predictedStatePensionAnnual.Amount);
             }
 
             if (Date > personStatePensionDate)
@@ -77,7 +86,7 @@ namespace TaxCalculator
             }
         }
 
-        private bool QuitWork() => _givenRetirementDate.HasValue ? Date > _givenRetirementDate : _calcdMinimum;
+        private bool PersonHasQuitWork() => _givenRetirementDate.HasValue ? Date > _givenRetirementDate : _calcdMinimum;
 
         public void UpdateGrowth()
         {
@@ -86,11 +95,11 @@ namespace TaxCalculator
             Savings += growth;
         }
 
-        public void UpdatePrivatePension(DateTime? givenRetirementDate)
+        public void UpdatePrivatePension()
         {
             var privatePensionGrowth = PrivatePensionAmount * _assumptions.MonthlyGrowthRate;
 
-            if (Date >= _privatePensionDate && QuitWork())
+            if (Date >= _privatePensionDate && PersonHasQuitWork())
             {
                 //must be annualised (using the monthly figure and multiplying by 12 won't work as 12*monthlyRate != annualRate - because the monthly rate assumes compounding!
                 _annualPreTaxPrivatePensionIncome = PrivatePensionAmount * _assumptions.AnnualGrowthRate;
@@ -99,13 +108,13 @@ namespace TaxCalculator
             else
                 PrivatePensionAmount += privatePensionGrowth;
             
-            if (!QuitWork())
-                PrivatePensionAmount += (_personStatus.Salary / _monthly) * (_personStatus.EmployeeContribution + _personStatus.EmployerContribution);
+            if (!PersonHasQuitWork())
+                PrivatePensionAmount += (_person.Salary / _monthly) * (_person.EmployeeContribution + _person.EmployerContribution);
         }
 
         public void UpdateSalary(decimal preTaxSalary)
         {
-            if (!QuitWork())
+            if (!PersonHasQuitWork())
             {
                 _preTaxSalary = preTaxSalary;
             }
@@ -128,9 +137,9 @@ namespace TaxCalculator
             //In that case the fact they work\receive pension for a partial year would mean their real tax bill is less that calculated here
             var incomeTaxCalculator = new IncomeTaxCalculator();
             var afterTax = incomeTaxCalculator.TaxFor(_preTaxSalary*12, _annualPreTaxPrivatePensionIncome, _preTaxStatePensionIncome*12);
-            AfterTaxSalary = afterTax.RemainderFor(IncomeType.Salary)/12;
+            AfterTaxSalary = afterTax.AfterTaxIncomeFor(IncomeType.Salary)/12;
             AfterTaxPrivatePensionIncome = _monthlyPreTaxPrivatePensionIncome - (afterTax.TotalTaxFor(IncomeType.PrivatePension)/12);
-            AfterTaxStatePension = afterTax.RemainderFor(IncomeType.StatePension)/12;
+            AfterTaxStatePension = afterTax.AfterTaxIncomeFor(IncomeType.StatePension)/12;
             Savings += AfterTaxSalary + AfterTaxPrivatePensionIncome + AfterTaxStatePension;
         }
     }

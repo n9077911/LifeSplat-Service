@@ -1,5 +1,6 @@
 using System;
 using TaxCalculator;
+using TaxCalculator.StatePensionCalculator;
 
 namespace TaxCalculatorTests.Stubs
 {

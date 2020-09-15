@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace TaxCalculator.ExternalInterface
+namespace TaxCalculator.Input
 {
-    public class PersonStatus
+    public class Person
     {
         private decimal _employeeContribution;
         private decimal _employerContribution;
@@ -35,6 +35,5 @@ namespace TaxCalculator.ExternalInterface
                 _employerContribution = value;
             }
         }
-
     }
 }

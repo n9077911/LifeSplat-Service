@@ -3,6 +3,7 @@ using TaxCalculator.ExternalInterface;
 
 namespace TaxCalculator.TaxSystem
 {
+    ///The output of an income tax calculation
     public class TaxResult : ITaxResult
     {
         private readonly decimal _totalIncome;
@@ -12,20 +13,20 @@ namespace TaxCalculator.TaxSystem
         public TaxResult(decimal totalIncome)
         {
             _totalIncome = totalIncome;
-            Remainder = _totalIncome;
+            AfterTaxIncome = _totalIncome;
         }
 
         public decimal IncomeTax { get; private set; }
         public decimal NationalInsurance { get; private set; }
-        public decimal Total { get; private set; }
-        public decimal Remainder { get; private set; }
+        public decimal TotalTax { get; private set; }
+        public decimal AfterTaxIncome { get; private set; }
 
         public decimal TotalTaxFor(IncomeType type)
         {
             return _taxPerIncomeType.ContainsKey(type) ? _taxPerIncomeType[type] : 0;
         }
 
-        public decimal RemainderFor(IncomeType type)
+        public decimal AfterTaxIncomeFor(IncomeType type)
         {
             if(_incomePerIncomeType.ContainsKey(type) && _taxPerIncomeType.ContainsKey(type))
                 return _incomePerIncomeType[type] - _taxPerIncomeType[type];
@@ -37,16 +38,16 @@ namespace TaxCalculator.TaxSystem
             _taxPerIncomeType[incomeType] = _taxPerIncomeType[incomeType] + incomeTax;
             
             IncomeTax += incomeTax;
-            Total += incomeTax;
-            Remainder = _totalIncome - Total;
+            TotalTax += incomeTax;
+            AfterTaxIncome = _totalIncome - TotalTax;
         }
 
         public void AddNationalInsurance(decimal nationalInsurance, IncomeType incomeType)
         {
             _taxPerIncomeType[incomeType] = _taxPerIncomeType[incomeType] + nationalInsurance;
             NationalInsurance += nationalInsurance;
-            Total += nationalInsurance;
-            Remainder = _totalIncome - Total;
+            TotalTax += nationalInsurance;
+            AfterTaxIncome = _totalIncome - TotalTax;
         }
 
         public void AddIncomeFor(decimal income, IncomeType incomeType)

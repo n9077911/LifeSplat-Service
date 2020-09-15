@@ -3,6 +3,7 @@ using System.Linq;
 using TaxCalcService.Models.DTO;
 using TaxCalculator;
 using TaxCalculator.ExternalInterface;
+using TaxCalculator.Input;
 
 namespace TaxCalcService.Models
 {
@@ -21,7 +22,7 @@ namespace TaxCalcService.Models
             var spendingStepInputs = spendingSteps.Select(dto =>
             {
                 var date = dto.Date ?? personsStatuses.First().Dob.AddYears(dto.Age.Value);
-                return new SpendingStepInput(date, dto.Amount);
+                return new SpendingStep(date, dto.Amount);
             });
             var retirementReport = _retirementCalculator.ReportForTargetAge(personsStatuses, spendingStepInputs, targetRetirementAge);
 
@@ -29,9 +30,9 @@ namespace TaxCalcService.Models
             return result;
         }
 
-        private static PersonStatus PersonStatus(PersonDto dto)
+        private static Person PersonStatus(PersonDto dto)
         {
-            var personStatus = new PersonStatus
+            var personStatus = new Person
             {
                 Dob = dto.Dob,
                 Salary = dto.Salary,

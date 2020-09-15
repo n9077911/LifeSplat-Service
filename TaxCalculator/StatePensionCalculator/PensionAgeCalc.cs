@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace TaxCalculator
+namespace TaxCalculator.StatePensionCalculator
 {
-    //info taken from https://www.gov.uk/government/publications/state-pension-age-timetable/state-pension-age-timetable
+    /// <summary>
+    /// Calculates your state pension and private pension age
+    /// Info taken from https://www.gov.uk/government/publications/state-pension-age-timetable/state-pension-age-timetable
+    /// </summary>
     public class PensionAgeCalc : IPensionAgeCalc
     {
         private static readonly List<(string, string)> MensPensionAgeTable = new List<(string, string)>
@@ -113,7 +115,7 @@ namespace TaxCalculator
 
             var dateRange = FindDateRange(dob, sex == Sex.Male ? _mensLookupTable : _womensLookupTable);
 
-            dateRange = dateRange ?? FindDateRange(dob, _jointLookupTable);
+            dateRange ??= FindDateRange(dob, _jointLookupTable);
 
             if (dateRange == null) 
                 throw new Exception($"Unknown state retirement date for {dob:d} current culture {CultureInfo.CurrentCulture}");
