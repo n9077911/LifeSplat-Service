@@ -1,6 +1,7 @@
 # LifeSplat-Service
 
-A web service that estimates a british persons earliest feasible retirement date based on some key financial details and assumptions.
+A web service that projects a British persons financial future including projecting their savings and earliest feasible retirement date. 
+Projections are based on the users key financial details and assumptions.
 
 The service contains an algorithm that starts at today's date and iterates through the users future life month by month until the user hits 100 years old.
 At each monthly increment basic financial information is applied to the users current financial status
