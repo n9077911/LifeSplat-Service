@@ -35,8 +35,7 @@ The potential future features are extensive, above is just an example
 
 ## Contributing
 
-Create a branch from master and raise a pull request. Pre discuss planned changes to avoid disappointment.
-At time of writing there are no contributions other than the primary author. Expect these contribution guidelines to change if their is demand.
+Currently LifeSplat-Service does not accept contributions. If there is demand this can change.
 
 ## License
 
