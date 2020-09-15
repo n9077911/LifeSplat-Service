@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace TaxCalculator
+namespace TaxCalculator.Output
 {
     public interface IRetirementReport
     {
@@ -20,9 +20,9 @@ namespace TaxCalculator
         int PrivatePensionPotAtPrivatePensionAge { get; }
         int PrivatePensionPotAtStatePensionAge { get; }
         
-        PersonReport PrimaryPerson { get; }
-        List<PersonReport> Persons { get; }
-        List<SpendingStep> SpendingSteps { get; }
+        IPersonReport PrimaryPerson { get; }
+        List<IPersonReport> Persons { get; }
+        List<SpendingStepReport> SpendingSteps { get; }
         decimal MonthlySpendingAt(DateTime date);
     }
 }

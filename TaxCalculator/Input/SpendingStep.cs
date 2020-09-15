@@ -1,13 +1,13 @@
 using System;
 
-namespace TaxCalculator.ExternalInterface
+namespace TaxCalculator.Input
 {
-    public class SpendingStepInput
+    public class SpendingStep
     {
         public DateTime Date { get; }
         public int NewAmount { get; }
 
-        public SpendingStepInput(DateTime date, int newAmount)
+        public SpendingStep(DateTime date, int newAmount)
         {
             Date = date;
             NewAmount = newAmount;

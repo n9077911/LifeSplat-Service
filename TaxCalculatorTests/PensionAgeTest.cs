@@ -1,6 +1,7 @@
 using System;
 using NUnit.Framework;
 using TaxCalculator;
+using TaxCalculator.StatePensionCalculator;
 
 namespace TaxCalculatorTests
 {

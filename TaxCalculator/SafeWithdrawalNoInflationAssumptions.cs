@@ -1,4 +1,5 @@
 using System;
+using TaxCalculator.Input;
 
 namespace TaxCalculator
 {

@@ -25,7 +25,7 @@ namespace TaxCalculatorTests
             var tax160000 = new IncomeTaxCalculator().TaxFor(160_000);
             Assert.That(tax160000.IncomeTax, Is.EqualTo(57_000));
             Assert.That(tax160000.NationalInsurance, Is.EqualTo(7_060));
-            Assert.That(tax160000.Total, Is.EqualTo(64_060));
+            Assert.That(tax160000.TotalTax, Is.EqualTo(64_060));
         }
 
         [Test]

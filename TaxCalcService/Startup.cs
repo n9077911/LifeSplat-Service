@@ -8,6 +8,8 @@ using TaxCalcService.Misc;
 using TaxCalcService.Models;
 using TaxCalculator;
 using TaxCalculator.ExternalInterface;
+using TaxCalculator.Input;
+using TaxCalculator.StatePensionCalculator;
 using TaxCalculator.TaxSystem;
 
 namespace TaxCalcService

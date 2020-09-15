@@ -1,7 +1,11 @@
 using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using TaxCalculator;
 using TaxCalculator.ExternalInterface;
+using TaxCalculator.Input;
+using TaxCalculator.StatePensionCalculator;
+using TaxCalculator.TaxSystem;
 using TaxCalculatorTests.Stubs;
 
 namespace TaxCalculatorTests
@@ -21,8 +25,8 @@ namespace TaxCalculatorTests
         public void KnowsWhenASalariedWorkerCanRetire_ThisYear()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _fixedStatePensionAmountCalculator);
-            var report = calc.ReportFor(new PersonStatus {Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
-                new []{new SpendingStepInput(_fixedDateProvider.Now(), 100)});
+            var report = calc.ReportFor(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
+                new []{new SpendingStep(_fixedDateProvider.Now(), 100)});
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2020, 02, 1)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(38));
@@ -38,7 +42,7 @@ namespace TaxCalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var report = calc.ReportFor(new PersonStatus {Salary = 30_000, Dob = new DateTime(1981, 05, 30)}, new[]{new SpendingStepInput(_fixedDateProvider.Now(), 2_500)});
+            var report = calc.ReportFor(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)}, new[]{new SpendingStep(_fixedDateProvider.Now(), 2_500)});
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2021, 12, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(40));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("1 Year and 11 Months"));
@@ -46,15 +50,17 @@ namespace TaxCalculatorTests
         }
 
         [Test]
-        public void KnowsWhenTwoSimpleWorkingPeopleCanRetire()
+        public void KnowsWhenTwoSimplePeopleCanRetire()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
 
-            var person1 = new PersonStatus {Salary = 15_000, Dob = new DateTime(1981, 05, 30)};
-            var person2 = new PersonStatus {Salary = 15_000, Dob = new DateTime(1981, 05, 30)};
+            var person1 = new Person {Salary = 15_000, Dob = new DateTime(1981, 05, 30)};
+            var person2 = new Person {Salary = 15_000, Dob = new DateTime(1981, 05, 30)};
 
-            var report = calc.ReportFor(new[] {person1, person2}, new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)});
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)};
+            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
         
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2038, 04, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(56));
@@ -66,8 +72,8 @@ namespace TaxCalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var report = calc.ReportFor(new PersonStatus {Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
-                new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)});
+            var report = calc.ReportFor(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
+                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2048, 08, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(67));
@@ -78,13 +84,13 @@ namespace TaxCalculatorTests
         }
 
         [Test]
-        public void ConsidersExistingSavings()
+        public void KnowsWhenAWorkerCanRetire_ConsideringExistingSavings()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var report = calc.ReportFor(new PersonStatus
+            var report = calc.ReportFor(new Person
                 {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
-                new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)});
+                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2042, 12, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(61));
@@ -95,16 +101,16 @@ namespace TaxCalculatorTests
         }
 
         [Test]
-        public void ConsidersPrivatePensionSavings_CalcMinimum()
+        public void KnowsWhenAWorkerCanRetire_ConsideringPrivatePension_CalcMinimumMode()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var report = calc.ReportFor(new PersonStatus
+            var report = calc.ReportFor(new Person
             {
                 ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30),
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             },
-                new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)});
+                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2039, 08, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(58));
@@ -116,38 +122,64 @@ namespace TaxCalculatorTests
         }
         
         [Test]
-        public void HandlesEndOfMonthCalculations()
+        public void KnowsWhenAHighEarningWomanCanRetire()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, new PensionAgeCalc(), _statePensionCalculator);
+            var report = calc.ReportFor(new Person
+            {
+                Salary = 100_000, 
+                Dob = new DateTime(1981, 05, 30), 
+                Sex = Sex.Female,
+                ExistingSavings = 50_000,
+                ExistingPrivatePension = 100_000,
+                EmployerContribution = 0.03m,
+                EmployeeContribution = 0.05m,
+            }, new []{new SpendingStep(_fixedDateProvider.Now(), 40_000), new SpendingStep(_fixedDateProvider.Now().AddYears(10), 30_000)});
+
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 12, 01)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
+            Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
+            Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
+            Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
+            Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
+            Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(364_855));
+            Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(14_594));
+            Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("10 Years and 11 Months"));
+        }
+        
+        [Test]
+        public void KnowsWhenAComplexPersonCanRetire_CalculatingAtEndOfTheMonth()
         {
             var eomDate = new FixedDateProvider(new DateTime(2020, 5, 31));
             var calc = new RetirementIncrementalApproachCalculator(eomDate, _assumptions, _pensionAgeCalc,
                 new StatePensionAmountCalculator(eomDate, new TwentyTwentyTaxSystem()));
             
-            var report = calc.ReportFor(new PersonStatus
+            var report = calc.ReportFor(new Person
             {
                 ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30),
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             },
-            new []{new SpendingStepInput(eomDate.Now(), 20_000)});
+            new []{new SpendingStep(eomDate.Now(), 20_000), new SpendingStep(eomDate.Now(), 18_000)});
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2039, 11, 28)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(58));
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2036, 04, 28)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(54));
             Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
             Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
-            Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(131_454));
-            Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(5_258));
-            Assert.That(report.SavingsAt100, Is.EqualTo(4_235));
+            Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(122_972));
+            Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(4_919));
+            Assert.That(report.SavingsAt100, Is.EqualTo(5_794));
         }
 
         [Test]
-        public void CalculatesReportBasedOnFixedRetirementDate()
+        public void KnowsWhenAWorkerCanRetire_WithTargetRetirementDateGiven()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
-            var status = new PersonStatus
+            var status = new Person
             {
                 ExistingSavings = 50_000, Salary = 100_000, Dob = new DateTime(1981, 05, 30),
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             };
-            var report = calc.ReportFor(status, new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)}, new DateTime(2026, 05, 30));
+            var report = calc.ReportFor(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, new DateTime(2026, 05, 30));
 
             Assert.That(report.TargetRetirementDate, Is.EqualTo(new DateTime(2026, 05, 30)));
             Assert.That(report.TargetRetirementAge, Is.EqualTo(45));
@@ -160,16 +192,16 @@ namespace TaxCalculatorTests
         }
 
         [Test]
-        public void ReconcileRetirementDateGivenMode_WithCalcMinimumMode()
+        public void Reconciles_RetirementDateGivenMode_WithCalcMinimumMode()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
-            var status = new PersonStatus
+            var status = new Person
             {
                 ExistingSavings = 50_000, Salary = 100_000, Dob = new DateTime(1981, 05, 30),
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             };
 
-            var report = calc.ReportFor(status, new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)});
+            var report = calc.ReportFor(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
             Assert.That(report.SavingsAt100, Is.EqualTo(1_612));
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(150_664));
@@ -177,7 +209,7 @@ namespace TaxCalculatorTests
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
 
             //validate earliest possible retirement date
-            var report2 = calc.ReportFor(status, new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)}, report.MinimumPossibleRetirementDate);
+            var report2 = calc.ReportFor(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, report.MinimumPossibleRetirementDate);
             Assert.That(report2.SavingsAt100, Is.EqualTo(report.SavingsAt100));
             Assert.That(report2.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge));
             Assert.That(report2.PrimaryPerson.AnnualStatePension, Is.EqualTo(report.PrimaryPerson.AnnualStatePension));
@@ -188,19 +220,19 @@ namespace TaxCalculatorTests
         public void Reconcile_RetirementAgeGivenMode_With_CalcMinimumMode_WhenMinimumComesBeforeTarget()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
-            var status = new PersonStatus
+            var status = new Person
             {
                 ExistingSavings = 50_000, Salary = 100_000, Dob = new DateTime(1981, 05, 30),
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             };
 
-            var report = calc.ReportForTargetAge(status, new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)}, 50);
+            var report = calc.ReportForTargetAge(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 50);
             Assert.That(report.SavingsAt100, Is.EqualTo(3_199_745));
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
 
-            var report2 = calc.ReportFor(status, new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)});
+            var report2 = calc.ReportFor(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
             Assert.That(report2.SavingsAt100, Is.EqualTo(1_612));
             Assert.That(report2.MinimumPossibleRetirementDate, Is.EqualTo(report.MinimumPossibleRetirementDate));
             Assert.That(report2.MinimumPossibleRetirementAge, Is.EqualTo(report.MinimumPossibleRetirementAge));
@@ -208,16 +240,16 @@ namespace TaxCalculatorTests
         }
 
         [Test]
-        public void CalcsMinimumPossibleRetirementDate_WhenMinimumComesAfterTarget()
+        public void KnowsWhenAWorkerCanRetire_WhenMinimumComesAfterTarget()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
-            var status = new PersonStatus
+            var status = new Person
             {
                 ExistingSavings = 50_000, Salary = 100_000, Dob = new DateTime(1981, 05, 30),
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             };
 
-            var report = calc.ReportForTargetAge(status, new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)}, 42);
+            var report = calc.ReportForTargetAge(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 42);
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
@@ -229,9 +261,9 @@ namespace TaxCalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var status = new PersonStatus {Salary = 20_000, Dob = new DateTime(1981, 05, 30)};
+            var status = new Person {Salary = 20_000, Dob = new DateTime(1981, 05, 30)};
 
-            var report = calc.ReportForTargetAge(status, new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)});
+            var report = calc.ReportForTargetAge(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2076, 06, 01)));
             Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2020, 02, 01)));
@@ -242,9 +274,9 @@ namespace TaxCalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var status = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30)};
+            var status = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30)};
 
-            var report = calc.ReportForTargetAge(status, new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)}, 42);
+            var report = calc.ReportForTargetAge(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 42);
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2034, 06, 01)));
             Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2026, 09, 01)));
@@ -255,12 +287,14 @@ namespace TaxCalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
-            var person1 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
-            var person2 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
 
-            var report = calc.ReportFor(new[] {person1, person2}, new []{new SpendingStepInput(_fixedDateProvider.Now(), 40_000)});
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
+            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
         
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 07, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
@@ -275,12 +309,14 @@ namespace TaxCalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
-            var person1 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
-            var person2 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1971, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person2 = new Person {Salary = 50_000, Dob = new DateTime(1971, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
 
-            var report = calc.ReportFor(new[] {person1, person2}, new []{new SpendingStepInput(_fixedDateProvider.Now(), 40_000)});
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
+            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
         
             Assert.That(report.Persons[0].MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 05, 01)));
             Assert.That(report.Persons[0].MinimumPossibleRetirementAge, Is.EqualTo(48));
@@ -307,30 +343,32 @@ namespace TaxCalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
-            var person1 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1971, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1971, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
-            var person2 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
-            
-            var report = calc.ReportFor(new[] {person1, person2}, new []{new SpendingStepInput(_fixedDateProvider.Now(), 40_000)});
-        
-            Assert.That(report.Persons[0].MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 05, 01)));
-            Assert.That(report.Persons[0].MinimumPossibleRetirementAge, Is.EqualTo(48));
-            Assert.That(report.Persons[0].SavingsCombinedAtPrivatePensionAge, Is.EqualTo(354_912));
-            Assert.That(report.Persons[0].SavingsCombinedAtStatePensionAge, Is.EqualTo(208_095));
-            Assert.That(report.Persons[0].PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(179_150));
-            Assert.That(report.Persons[0].PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(358_299));
-            Assert.That(report.Persons[0].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(358_299));
 
-            Assert.That(report.Persons[1].MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 05, 01)));
-            Assert.That(report.Persons[1].MinimumPossibleRetirementAge, Is.EqualTo(58));
-            Assert.That(report.Persons[1].SavingsCombinedAtPrivatePensionAge, Is.EqualTo(354_912));
-            Assert.That(report.Persons[1].SavingsCombinedAtStatePensionAge, Is.EqualTo(208_095));
-            Assert.That(report.Persons[1].PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(179_150));
-            Assert.That(report.Persons[1].PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(358_299));
-            Assert.That(report.Persons[1].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(358_299));
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
+            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+        
+            Assert.That(report.Persons[0].MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 02, 01)));
+            Assert.That(report.Persons[0].MinimumPossibleRetirementAge, Is.EqualTo(58));
+            Assert.That(report.Persons[0].SavingsCombinedAtPrivatePensionAge, Is.EqualTo(329_157));
+            Assert.That(report.Persons[0].SavingsCombinedAtStatePensionAge, Is.EqualTo(168_601));
+            Assert.That(report.Persons[0].PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(177_722));
+            Assert.That(report.Persons[0].PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(355_443));
+            Assert.That(report.Persons[0].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(355_443));
+
+            Assert.That(report.Persons[1].MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 02, 01)));
+            Assert.That(report.Persons[1].MinimumPossibleRetirementAge, Is.EqualTo(48));
+            Assert.That(report.Persons[1].SavingsCombinedAtPrivatePensionAge, Is.EqualTo(329_157));
+            Assert.That(report.Persons[1].SavingsCombinedAtStatePensionAge, Is.EqualTo(168_601));
+            Assert.That(report.Persons[1].PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(177_722));
+            Assert.That(report.Persons[1].PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(355_443));
+            Assert.That(report.Persons[1].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(355_443));
             
-            Assert.That(report.SavingsAt100, Is.EqualTo(28_077));
+            Assert.That(report.SavingsAt100, Is.EqualTo(13_485));
         }
 
         [Test]
@@ -338,12 +376,14 @@ namespace TaxCalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
-            var person1 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
-            var person2 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
 
-            var report = calc.ReportFor(new[] {person1, person2}, new []{new SpendingStepInput(_fixedDateProvider.Now(), 40_000)}, new DateTime(2044, 06, 01));
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
+            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs), new DateTime(2044, 06, 01));
         
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 07, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
@@ -361,12 +401,14 @@ namespace TaxCalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
-            var person1 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
-            var person2 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
 
-            var report = calc.ReportFor(new[] {person1, person2}, new []{new SpendingStepInput(_fixedDateProvider.Now(), 40_000)}, new DateTime(2034, 06, 01));
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
+            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs), new DateTime(2034, 06, 01));
         
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 07, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
@@ -386,13 +428,17 @@ namespace TaxCalculatorTests
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
 
-            var person1 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                     EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
-            var person2 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                     EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
 
-            var couple = calc.ReportFor(new[] {person1, person2}, new []{new SpendingStepInput(_fixedDateProvider.Now(), 40_000)});
-            var single = calc.ReportFor(new[] {person1}, new []{new SpendingStepInput(_fixedDateProvider.Now(), 20_000)});
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
+            var couple = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            IEnumerable<Person> personStatuses1 = new[] {person1};
+            IEnumerable<SpendingStep> spendingStepInputs1 = new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)};
+            var single = calc.ReportFor(new Family(personStatuses1, spendingStepInputs1));
 
             Assert.That(couple.MinimumPossibleRetirementDate, Is.EqualTo(single.MinimumPossibleRetirementDate));
             Assert.That(couple.MinimumPossibleRetirementAge, Is.EqualTo(single.MinimumPossibleRetirementAge));
@@ -401,14 +447,16 @@ namespace TaxCalculatorTests
         }
 
         [Test]
-        public void KnowsWhenTwoIdenticalPeopleCanRetire_ConsideringGivenNiContributions()
+        public void KnowsWhenTwoPeopleCanRetire_ConsideringGivenNiContributions()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
             
-            var person1 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), NiContributingYears = 0};
-            var person2 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30), NiContributingYears = 5};
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), NiContributingYears = 0};
+            var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), NiContributingYears = 5};
 
-            var couple = calc.ReportFor(new[] {person1, person2}, new []{new SpendingStepInput(_fixedDateProvider.Now(), 40_000)});
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
+            var couple = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
             Assert.That(couple.Persons[0].AnnualStatePension, Is.EqualTo(3_904));
             Assert.That(couple.Persons[1].AnnualStatePension, Is.EqualTo(5_206));
             Assert.That(couple.Persons[0].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(0));
@@ -423,15 +471,16 @@ namespace TaxCalculatorTests
 
             var now = _fixedDateProvider.Now();
 
-            var spendingSteps = new []{new SpendingStepInput(now, 40_000),
-                new SpendingStepInput(now.AddYears(5), 50_000),
-                new SpendingStepInput(now.AddYears(10), 30_000),
-                new SpendingStepInput(now.AddYears(20), 20_000)};
+            var spendingSteps = new []{new SpendingStep(now, 40_000),
+                new SpendingStep(now.AddYears(5), 50_000),
+                new SpendingStep(now.AddYears(10), 30_000),
+                new SpendingStep(now.AddYears(20), 20_000)};
 
-            var person1 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30)};
-            var person2 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1981, 05, 30)};
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30)};
+            var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30)};
 
-            var report = calc.ReportFor(new[] {person1, person2}, spendingSteps);
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            var report = calc.ReportFor(new Family(personStatuses, spendingSteps));
             
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 06, 01)));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(400_203));
@@ -446,14 +495,16 @@ namespace TaxCalculatorTests
             var birthDay = 10;
             var todayDay = 15;
 
-            var person1 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1993, 05, birthDay)};
-            var person2 = new PersonStatus {Salary = 50_000, Dob = new DateTime(1993, 02, 10)};
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1993, 05, birthDay)};
+            var person2 = new Person {Salary = 50_000, Dob = new DateTime(1993, 02, 10)};
 
-            var report = calc.ReportFor(new[] {person1, person2}, new[]{new SpendingStepInput(new DateTime(2020, 1, todayDay), 20000)});
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            IEnumerable<SpendingStep> spendingStepInputs = new[]{new SpendingStep(new DateTime(2020, 1, todayDay), 20000)};
+            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
             
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 06, 01)));
-            Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(400_203));
-            Assert.That(report.SavingsAt100, Is.EqualTo(41_611));
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2026, 09, 01)));
+            Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(420_051));
+            Assert.That(report.SavingsAt100, Is.EqualTo(5_494));
         }
     }
 }

@@ -1,28 +1,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TaxCalculator.ExternalInterface;
+using TaxCalculator.Input;
 
-namespace TaxCalculator
+namespace TaxCalculator.Output
 {
     /// <summary>
-    /// Builds up a report detailing the full list of Steps produced by the retirement calculator algorithm.
+    /// A report detailing the full list of Steps produced by the retirement calculator algorithm.
     /// Part of the output of the algorithm.
     /// </summary>
-    public class StepsReport : IStepUpdater
+    public class StepsReport
     {
-        private readonly PersonStatus _personStatus;
+        private readonly Person _person;
         private readonly StepType _stepType;
         private readonly IAssumptions _assumptions;
         private readonly DateTime _privatePensionDate;
 
-        public StepsReport(PersonStatus personStatus, StepType stepType, DateTime now, IAssumptions assumptions, decimal monthlySpendingNow, DateTime privatePensionDate)
+        public StepsReport(Person person, StepType stepType, DateTime now, IAssumptions assumptions, decimal monthlySpendingNow, DateTime privatePensionDate)
         {
-            _personStatus = personStatus;
+            _person = person;
             _stepType = stepType;
             _assumptions = assumptions;
             _privatePensionDate = privatePensionDate;
-            Steps.Add(new Step(now, personStatus.ExistingSavings, personStatus.ExistingPrivatePension, monthlySpendingNow));
+            Steps.Add(Step.CreateInitialStep(now, person.ExistingSavings, person.ExistingPrivatePension, monthlySpendingNow));
         }
 
         public List<Step> Steps { get; } = new List<Step>();
@@ -36,8 +36,8 @@ namespace TaxCalculator
             var spending = spendingForDate.MonthlySpendingAt(newStepDate)/numberOfPersons;
                 
             Steps.Add(_stepType == StepType.CalcMinimum 
-            ? new Step(CurrentStep, newStepDate, _personStatus, calcdMinimum, _assumptions, _privatePensionDate, spending) 
-            : new Step(CurrentStep, newStepDate, _personStatus, false, _assumptions, _privatePensionDate, spending, givenRetirementDate)); 
+            ? new Step(CurrentStep, newStepDate, _person, calcdMinimum, _assumptions, _privatePensionDate, spending) 
+            : new Step(CurrentStep, newStepDate, _person, false, _assumptions, _privatePensionDate, spending, givenRetirementDate)); 
         }
 
         public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate)
@@ -50,9 +50,9 @@ namespace TaxCalculator
             CurrentStep.UpdateGrowth();
         }
 
-        public void UpdatePrivatePension(DateTime? givenRetirementDate)
+        public void UpdatePrivatePension()
         {
-            CurrentStep.UpdatePrivatePension(givenRetirementDate);
+            CurrentStep.UpdatePrivatePension();
         }
 
         public void UpdateSalary(decimal preTaxSalary)
@@ -74,10 +74,5 @@ namespace TaxCalculator
         {
             CurrentStep.PayTaxAndBankTheRemainder();
         }
-    }
-
-    public interface ISpendingForDate
-    {
-        decimal MonthlySpendingAt(DateTime date);
     }
 }

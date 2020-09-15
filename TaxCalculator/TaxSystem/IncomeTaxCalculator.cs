@@ -3,6 +3,9 @@ using TaxCalculator.ExternalInterface;
 
 namespace TaxCalculator.TaxSystem
 {
+    /// <summary>
+    /// Calculates income tax and NI based a persons salary
+    /// </summary>
     public class IncomeTaxCalculator : IIncomeTaxCalculator
     {
         public ITaxResult TaxFor(decimal payeSalary, decimal privatePension = 0, decimal statePension = 0)
@@ -37,14 +40,14 @@ namespace TaxCalculator.TaxSystem
         private static void AddIncomeTax(decimal payeSalary, decimal privatePension, decimal statePension, TaxResult result)
         {
             var taxBands = TaxBands.InitialEngland2020();
-            taxBands.UpdatePersonalAllowance(payeSalary, privatePension, statePension);
 
-            taxBands = ApplyIncomeTaxIncome(payeSalary, result, taxBands, IncomeType.Salary);
-            taxBands = ApplyIncomeTaxIncome(privatePension, result, taxBands, IncomeType.PrivatePension);
-            taxBands = ApplyIncomeTaxIncome(statePension, result, taxBands, IncomeType.StatePension);
+            taxBands.UpdatePersonalAllowance(payeSalary, privatePension, statePension);
+            taxBands = UpdateTaxResultWithIncome(result, payeSalary, IncomeType.Salary, taxBands);
+            taxBands = UpdateTaxResultWithIncome(result, privatePension, IncomeType.PrivatePension, taxBands);
+            UpdateTaxResultWithIncome(result, statePension, IncomeType.StatePension, taxBands);
         }
 
-        private static TaxBands ApplyIncomeTaxIncome(decimal income, TaxResult result, TaxBands taxBands, IncomeType incomeType)
+        private static TaxBands UpdateTaxResultWithIncome(TaxResult result, decimal income, IncomeType incomeType, TaxBands taxBands)
         {
             decimal incomeCopy = income;
             result.AddIncomeFor(income, incomeType);

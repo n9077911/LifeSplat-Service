@@ -2,6 +2,9 @@ using System;
 
 namespace TaxCalculator.TaxSystem
 {
+    /// <summary>
+    /// Tracks how much of the given tax bands have been used up e.g. if someone earns 5k they have used 5k of the 12_500 tax free allowance
+    /// </summary>
     internal class TaxBands
     {
         private readonly decimal _lowerBandLimit;
