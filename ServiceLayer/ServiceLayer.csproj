@@ -5,7 +5,7 @@
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
     <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
     <AspNetCoreModuleName>AspNetCoreModule</AspNetCoreModuleName>
-    <RootNamespace>TaxCalcService</RootNamespace>
+    <RootNamespace>ServiceLayer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

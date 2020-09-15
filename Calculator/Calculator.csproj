@@ -5,7 +5,7 @@
     <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
     <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
     <AspNetCoreModuleName>AspNetCoreModule</AspNetCoreModuleName>
-    <RootNamespace>TaxCalculator</RootNamespace>
+    <RootNamespace>Calculator</RootNamespace>
   </PropertyGroup>
 
 </Project>
