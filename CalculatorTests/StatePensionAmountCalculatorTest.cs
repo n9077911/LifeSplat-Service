@@ -5,7 +5,7 @@ using TaxCalculator.ExternalInterface;
 using TaxCalculator.Input;
 using TaxCalculator.TaxSystem;
 
-namespace TaxCalculatorTests
+namespace CalculatorTests
 {
     [TestFixture]
     public class StatePensionAmountCalculatorTest

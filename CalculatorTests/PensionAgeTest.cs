@@ -3,7 +3,7 @@ using NUnit.Framework;
 using TaxCalculator;
 using TaxCalculator.StatePensionCalculator;
 
-namespace TaxCalculatorTests
+namespace CalculatorTests
 {
     public class PensionAgeTest
     {

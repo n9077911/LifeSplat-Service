@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using TaxCalculator;
 
-namespace TaxCalculatorTests
+namespace CalculatorTests
 {
     public class AgeCalcTest
     {

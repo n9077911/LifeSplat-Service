@@ -2,7 +2,7 @@
 using TaxCalculator;
 using TaxCalculator.TaxSystem;
 
-namespace TaxCalculatorTests
+namespace CalculatorTests
 {
     public class TaxCalculatorTests
     {
