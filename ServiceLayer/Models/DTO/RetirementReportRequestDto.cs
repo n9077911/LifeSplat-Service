@@ -5,7 +5,7 @@ namespace ServiceLayer.Models.DTO
     public class RetirementReportRequestDto
     {
         public int TargetRetirementAge { get; set; }
-        public string TargetCashSavings { get; set; }
+        public string EmergencyFund { get; set; }
         public IEnumerable<PersonDto> Persons { get; set; }
         public IEnumerable<SpendingStepInputDto> SpendingSteps { get; set; }
     }

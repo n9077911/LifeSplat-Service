@@ -1,12 +1,12 @@
 namespace Calculator.Input
 {
-    public class CashSavingsSpec
+    public class EmergencyFundSpec
     {
         private readonly decimal _amount;
         private readonly decimal _months;
         private readonly bool _isMonths;
 
-        public CashSavingsSpec(string amount)
+        public EmergencyFundSpec(string amount)
         {
             if (amount.EndsWith('m') || amount.EndsWith('M'))
             {
@@ -26,9 +26,9 @@ namespace Calculator.Input
             return _amount;
         }
 
-        public CashSavingsSpec SplitInTwo()
+        public EmergencyFundSpec SplitInTwo()
         {
-            return new CashSavingsSpec(_isMonths?(_months/2)+"m" :(_amount/2).ToString());
+            return new EmergencyFundSpec(_isMonths?(_months/2)+"m" :(_amount/2).ToString());
         }
     }
 }

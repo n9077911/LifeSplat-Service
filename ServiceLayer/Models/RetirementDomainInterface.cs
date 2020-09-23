@@ -19,13 +19,13 @@ namespace ServiceLayer.Models
             _retirementCalculator = retirementCalculator;
         }
 
-        public RetirementReportDto RetirementReportFor(int targetRetirementAge, string targetCashSavings, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
+        public RetirementReportDto RetirementReportFor(int targetRetirementAge, string emergencyFund, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
         {
-            var cashSavingsSpec = new CashSavingsSpec(targetCashSavings);
+            var emergencyFundSpec = new EmergencyFundSpec(emergencyFund);
             if (persons.Count() == 2)
-                cashSavingsSpec = cashSavingsSpec.SplitInTwo();
+                emergencyFundSpec = emergencyFundSpec.SplitInTwo();
             
-            var personsStatuses = persons.Select(p => PersonStatus(p, cashSavingsSpec));
+            var personsStatuses = persons.Select(p => PersonStatus(p, emergencyFundSpec));
             var spendingStepInputs = spendingSteps.Select(dto =>
             {
                 var date = dto.Date ?? personsStatuses.First().Dob.AddYears(dto.Age.Value);
@@ -37,14 +37,14 @@ namespace ServiceLayer.Models
             return result;
         }
 
-        private static Person PersonStatus(PersonDto dto, CashSavingsSpec cashSavingsSpec)
+        private static Person PersonStatus(PersonDto dto, EmergencyFundSpec emergencyFundSpec)
         {
             var personStatus = new Person
             {
                 Dob = dto.Dob,
                 Salary = dto.Salary,
                 Sex = dto.Female ? Sex.Female : Sex.Male,
-                CashSavingsSpec = cashSavingsSpec,
+                EmergencyFundSpec = emergencyFundSpec,
                 ExistingSavings = dto.Savings,
                 ExistingPrivatePension = dto.Pension,
                 EmployerContribution = dto.EmployerContribution / 100m,

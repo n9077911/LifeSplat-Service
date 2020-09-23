@@ -32,7 +32,7 @@ namespace Calculator
         {
             Date = stepDate;
             Savings = previousStep.Savings;
-            CashSavings = previousStep.CashSavings;
+            EmergencyFund = previousStep.EmergencyFund;
             PrivatePensionAmount = previousStep.PrivatePensionAmount;
             _previousStep = previousStep;
             _person = person;
@@ -43,28 +43,28 @@ namespace Calculator
             _givenRetirementDate = givenRetirementDate;
         }
 
-        private Step(DateTime now, int existingSavings, int existingPrivatePension, CashSavingsSpec cashSavingsSpec, decimal personMonthlySpending)
+        private Step(DateTime now, int existingSavings, int existingPrivatePension, EmergencyFundSpec emergencyFundSpec, decimal personMonthlySpending)
         {
             Date = now;
 
-            var requiredCashSavings = cashSavingsSpec.RequiredSavings(personMonthlySpending);
+            var requiredCashSavings = emergencyFundSpec.RequiredSavings(personMonthlySpending);
             if (requiredCashSavings > existingSavings)
             {
-                CashSavings = existingSavings;
+                EmergencyFund = existingSavings;
             }
             else
             {
                 Savings = existingSavings - requiredCashSavings;
-                CashSavings = requiredCashSavings;
+                EmergencyFund = requiredCashSavings;
             }
             
             PrivatePensionAmount = existingPrivatePension;
             Spending = personMonthlySpending;
         }
 
-        public static Step CreateInitialStep(DateTime now, int existingSavings, int existingPrivatePension, CashSavingsSpec cashSavingsSpec, decimal personMonthlySpending)
+        public static Step CreateInitialStep(DateTime now, int existingSavings, int existingPrivatePension, EmergencyFundSpec emergencyFundSpec, decimal personMonthlySpending)
         {
-            return new Step(now, existingSavings, existingPrivatePension, cashSavingsSpec, personMonthlySpending);
+            return new Step(now, existingSavings, existingPrivatePension, emergencyFundSpec, personMonthlySpending);
         }
 
         public DateTime Date { get; private set; }
@@ -77,7 +77,7 @@ namespace Calculator
         
         public decimal Spending { get; }
         public decimal Savings { get; private set; }
-        public decimal CashSavings { get; private set; }
+        public decimal EmergencyFund { get; private set; }
         public decimal PrivatePensionAmount { get; private set; }
 
         public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate)
@@ -140,7 +140,7 @@ namespace Calculator
                 Savings -= Spending;
             else
             {
-                CashSavings -= Spending - Savings;
+                EmergencyFund -= Spending - Savings;
                 Savings = 0;
             }
         }
@@ -150,9 +150,9 @@ namespace Calculator
             Savings = savings;
         }
         
-        public void SetCashSavings(decimal savings)
+        public void SetEmergencyFund(decimal savings)
         {
-            CashSavings = savings;
+            EmergencyFund = savings;
         }
 
         public void PayTaxAndBankTheRemainder()
@@ -168,18 +168,18 @@ namespace Calculator
 
             var newIncome = AfterTaxSalary + AfterTaxPrivatePensionIncome + AfterTaxStatePension;
 
-            var requiredCash = _person.CashSavingsSpec.RequiredSavings(Spending);
-                var newlyRequiredCash = requiredCash - CashSavings;
+            var requiredCash = _person.EmergencyFundSpec.RequiredSavings(Spending);
+                var newlyRequiredCash = requiredCash - EmergencyFund;
                 if (newlyRequiredCash <= 0) //we have more cash than needed so move it to investments
                     Savings += newlyRequiredCash * -1; 
                 else if(newlyRequiredCash > 0 && newIncome >= newlyRequiredCash)//income more than fills the cash requirement then assign the relevant amount to cash and remainder to investments
                 {
-                    CashSavings = requiredCash;
+                    EmergencyFund = requiredCash;
                     newIncome -= newlyRequiredCash;
                 }
                 else if(newlyRequiredCash > 0 && newIncome < newlyRequiredCash) //income fails to fill the cash requirement then assign all income to cash.
                 {
-                    CashSavings += newIncome;
+                    EmergencyFund += newIncome;
                     newIncome = 0;
                 }
 
@@ -189,18 +189,18 @@ namespace Calculator
 
         private void RebalanceInvestmentsAndCashSavings()
         {
-            var requiredCash = _person.CashSavingsSpec.RequiredSavings(Spending);
-            if (CashSavings < requiredCash)
+            var requiredCash = _person.EmergencyFundSpec.RequiredSavings(Spending);
+            if (EmergencyFund < requiredCash)
             {
-                var newlyRequiredAmount = requiredCash - CashSavings;
+                var newlyRequiredAmount = requiredCash - EmergencyFund;
                 if (Savings > newlyRequiredAmount)
                 {
-                    CashSavings = requiredCash;
+                    EmergencyFund = requiredCash;
                     Savings -= newlyRequiredAmount;
                 }
                 else
                 {
-                    CashSavings += Savings;
+                    EmergencyFund += Savings;
                     Savings = 0;
                 }
             }
