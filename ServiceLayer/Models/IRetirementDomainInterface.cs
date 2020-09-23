@@ -7,6 +7,6 @@ namespace ServiceLayer.Models
 {
     public interface IRetirementDomainInterface
     {
-        RetirementReportDto RetirementReportFor(int targetRetirementAge, string targetCashSavings, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons);
+        RetirementReportDto RetirementReportFor(int targetRetirementAge, string emergencyFund, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons);
     }
 }

@@ -78,7 +78,7 @@ namespace Calculator.Output
             for (int stepIndex = 0; stepIndex < PrimaryPerson.CalcMinimumSteps.Steps.Count; stepIndex++)
             {
                 var stepDate = PrimaryPerson.CalcMinimumSteps.Steps[stepIndex].Date;
-                if (Persons.Select(p => p.PrimarySteps.Steps[stepIndex].Savings).Sum() + Persons.Select(p => p.PrimarySteps.Steps[stepIndex].CashSavings).Sum() < 0 && !bankrupt)
+                if (Persons.Select(p => p.PrimarySteps.Steps[stepIndex].Savings).Sum() + Persons.Select(p => p.PrimarySteps.Steps[stepIndex].EmergencyFund).Sum() < 0 && !bankrupt)
                 {
                     bankrupt = true;
                     BankruptDate = stepDate;
@@ -121,7 +121,7 @@ namespace Calculator.Output
 
         private decimal TotalSavingsForIthStep(int i)
         {
-            return Persons.Select(p => p.PrimarySteps.Steps[i].Savings + p.PrimarySteps.Steps[i].CashSavings).Sum();
+            return Persons.Select(p => p.PrimarySteps.Steps[i].Savings + p.PrimarySteps.Steps[i].EmergencyFund).Sum();
         }
         
         private decimal PrivatePensionPotForIthStep(int i)
@@ -134,15 +134,15 @@ namespace Calculator.Output
             var calcMinSavings = Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum();
             var targetSavings = Persons.Select(p => p.TargetSteps.CurrentStep.Savings).Sum();
             
-            var calcMinCashSavings = Persons.Select(p => p.CalcMinimumSteps.CurrentStep.CashSavings).Sum();
-            var targetMinCashSavings = Persons.Select(p => p.TargetSteps.CurrentStep.CashSavings).Sum();
+            var calcMinEmergencyFund = Persons.Select(p => p.CalcMinimumSteps.CurrentStep.EmergencyFund).Sum();
+            var targetMinEmergencyFund = Persons.Select(p => p.TargetSteps.CurrentStep.EmergencyFund).Sum();
             
             foreach (var person in Persons)
             {
                 person.CalcMinimumSteps.SetSavings(calcMinSavings / Persons.Count);
                 person.TargetSteps.SetSavings(targetSavings / Persons.Count);
-                person.CalcMinimumSteps.SetCashSavings(calcMinCashSavings / Persons.Count);
-                person.TargetSteps.SetCashSavings(targetMinCashSavings / Persons.Count);
+                person.CalcMinimumSteps.SetEmergencyFund(calcMinEmergencyFund / Persons.Count);
+                person.TargetSteps.SetEmergencyFund(targetMinEmergencyFund / Persons.Count);
             }
         }
     }

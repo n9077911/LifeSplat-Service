@@ -102,7 +102,8 @@ namespace Calculator
                 .ToDictionary(arg => arg.p, arg=>arg.PrivatePensionAmount);
 
             var runningInvestments = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum();
-            var cashSavings = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.CashSavings).Sum();
+            var cashSavings = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.EmergencyFund).Sum();
+            var emergencyFundMet = false;
             
             for (var month = 1; month <= monthsToDeath; month++)
             {
@@ -136,12 +137,15 @@ namespace Calculator
                         privatePensionAmounts[person] += monthlyPrivatePensionGrowth;
                 }
                 
-                var requiredCash = result.Persons.Select(p => p.Person.CashSavingsSpec.RequiredSavings(monthlySpending / result.Persons.Count())).Sum();
+                var requiredCash = result.Persons.Select(p => p.Person.EmergencyFundSpec.RequiredSavings(monthlySpending / result.Persons.Count())).Sum();
                 
                 (cashSavings, runningInvestments) = AssignIncomeToRelevantPot(requiredCash, newIncome, cashSavings, runningInvestments);
                 (cashSavings, runningInvestments) = RebalanceInvestmentsAndCashSavings(requiredCash, cashSavings, runningInvestments);
 
-                if (runningInvestments + cashSavings <= minimumCash)
+                if (cashSavings >= requiredCash)
+                    emergencyFundMet = true;
+                    
+                if (emergencyFundMet && runningInvestments < minimumCash)
                     return false;
             }
 

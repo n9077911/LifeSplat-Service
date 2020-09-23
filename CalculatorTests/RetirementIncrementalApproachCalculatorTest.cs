@@ -106,7 +106,7 @@ namespace CalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), CashSavingsSpec = new CashSavingsSpec("10000")};
+            var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), EmergencyFundSpec = new EmergencyFundSpec("10000")};
             var report = calc.ReportFor(person,
                 new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
 
@@ -124,7 +124,7 @@ namespace CalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), CashSavingsSpec = new CashSavingsSpec("1000000")};
+            var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), EmergencyFundSpec = new EmergencyFundSpec("1000000")};
             var report = calc.ReportFor(person,
                 new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
 
@@ -545,18 +545,18 @@ namespace CalculatorTests
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
             var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
-                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("10000")};
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, EmergencyFundSpec = new EmergencyFundSpec("10000")};
             var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
-                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("10000")};
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, EmergencyFundSpec = new EmergencyFundSpec("10000")};
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000), new SpendingStep(_fixedDateProvider.Now(), 50_000)};
             var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
         
-            Assert.That(report.Persons.First().PrimarySteps.Steps.First().CashSavings, Is.EqualTo(10_000));
-            Assert.That(report.Persons.First().PrimarySteps.Steps.Last().CashSavings, Is.EqualTo(9_774).Within(1));
-            Assert.That(report.Persons.Last().PrimarySteps.Steps.First().CashSavings, Is.EqualTo(10_000));
-            Assert.That(report.Persons.Last().PrimarySteps.Steps.Last().CashSavings, Is.EqualTo(9_774).Within(1));
+            Assert.That(report.Persons.First().PrimarySteps.Steps.First().EmergencyFund, Is.EqualTo(10_000));
+            Assert.That(report.Persons.First().PrimarySteps.Steps.Last().EmergencyFund, Is.EqualTo(9_774).Within(1));
+            Assert.That(report.Persons.Last().PrimarySteps.Steps.First().EmergencyFund, Is.EqualTo(10_000));
+            Assert.That(report.Persons.Last().PrimarySteps.Steps.Last().EmergencyFund, Is.EqualTo(9_774).Within(1));
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2035, 08, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(54));
             Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(526_963));
@@ -570,16 +570,16 @@ namespace CalculatorTests
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
             var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
-                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("50000")};
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
             var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
-                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("50000")};
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 50_000)};
             var reportExpressedAsANumber = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
             
-            person1.CashSavingsSpec =  new CashSavingsSpec("24m"); //each person spends 25k, so 24m*25k == 50k
-            person2.CashSavingsSpec = new CashSavingsSpec("24m");
+            person1.EmergencyFundSpec =  new EmergencyFundSpec("24m"); //each person spends 25k, so 24m*25k == 50k
+            person2.EmergencyFundSpec = new EmergencyFundSpec("24m");
                 
             personStatuses = new[] {person1, person2};
             spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 50_000)};

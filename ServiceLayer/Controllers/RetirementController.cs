@@ -24,7 +24,7 @@ namespace ServiceLayer.Controllers
             {
                 var options = new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
                 var request = JsonSerializer.Deserialize<RetirementReportRequestDto>(body, options);
-                return _retirement.RetirementReportFor(request.TargetRetirementAge, request.TargetCashSavings, request.SpendingSteps, request.Persons);
+                return _retirement.RetirementReportFor(request.TargetRetirementAge, request.EmergencyFund, request.SpendingSteps, request.Persons);
             });
         }
     }
