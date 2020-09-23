@@ -6,6 +6,7 @@ namespace ServiceLayer.Models.DTO
     {
         public int Salary { get; set; }
         public int Savings { get; set; }
+        public string CashSavingsSpec { get; set; }
         public int Pension { get; set; }
         public decimal EmployerContribution { get; set; }
         public decimal EmployeeContribution { get; set; }

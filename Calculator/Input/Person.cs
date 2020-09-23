@@ -13,6 +13,7 @@ namespace Calculator.Input
         public int Salary { get; set; }
         public DateTime Dob { get; set; }
         public Sex Sex { get; set; }
+        public CashSavingsSpec CashSavingsSpec { get; set; } = new CashSavingsSpec("0"); //Cash needed for spending and emergency fund.
 
         public decimal EmployeeContribution
         {

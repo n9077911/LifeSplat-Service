@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using CalculatorTests.Stubs;
 using NUnit.Framework;
 using Calculator;
@@ -98,6 +99,37 @@ namespace CalculatorTests
             Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("22 Years and 11 Months"));
             Assert.That(report.SavingsAt100, Is.EqualTo(7_282));
+        }
+        
+        [Test]
+        public void KnowsWhenAWorkerCanRetire_ConsideringCashSavingsRequirement()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
+                _fixedStatePensionAmountCalculator);
+            var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), CashSavingsSpec = new CashSavingsSpec("10000")};
+            var report = calc.ReportFor(person,
+                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2043, 11, 01)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(62));
+            Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
+            Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
+            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(211_209));
+            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(207_387));
+            Assert.That(report.SavingsAt100, Is.EqualTo(4_041));
+        }
+        
+        [Test]
+        public void KnowsWhenAWorkerCanRetire_ConsideringVeryLargeCashSavingsRequirement()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
+                _fixedStatePensionAmountCalculator);
+            var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), CashSavingsSpec = new CashSavingsSpec("1000000")};
+            var report = calc.ReportFor(person,
+                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2057, 08, 01)));
+            Assert.That(report.SavingsAt100, Is.EqualTo(736));
         }
 
         [Test]
@@ -301,7 +333,7 @@ namespace CalculatorTests
             Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(371_943));
             Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(234_105));
             Assert.That(report.SavingsAt100, Is.EqualTo(43_368));
-        }
+        } 
         
         //currently one of 2 tests that that inspects the separate person reports.
         [Test]
@@ -506,5 +538,57 @@ namespace CalculatorTests
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(420_051));
             Assert.That(report.SavingsAt100, Is.EqualTo(5_494));
         }
+        
+        [Test]
+        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_ConsideringCashSavingsRequirement()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
+
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("10000")};
+            var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("10000")};
+
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000), new SpendingStep(_fixedDateProvider.Now(), 50_000)};
+            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+        
+            Assert.That(report.Persons.First().PrimarySteps.Steps.First().CashSavings, Is.EqualTo(10_000));
+            Assert.That(report.Persons.First().PrimarySteps.Steps.Last().CashSavings, Is.EqualTo(9_774).Within(1));
+            Assert.That(report.Persons.Last().PrimarySteps.Steps.First().CashSavings, Is.EqualTo(10_000));
+            Assert.That(report.Persons.Last().PrimarySteps.Steps.Last().CashSavings, Is.EqualTo(9_774).Within(1));
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2035, 08, 01)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(54));
+            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(526_963));
+            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(356_458));
+            Assert.That(report.SavingsAt100, Is.EqualTo(19_548));
+        } 
+
+        [Test]
+        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_ConsideringCashSavingsRequirement_ExpressedAsANumberOfMonths()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
+
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("100000")};
+            var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("100000")};
+
+            IEnumerable<Person> personStatuses = new[] {person1, person2};
+            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000), new SpendingStep(_fixedDateProvider.Now(), 50_000)};
+            var reportExpressedAsANumber = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            
+            person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("24m")};
+            person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("24m")};
+
+            personStatuses = new[] {person1, person2};
+            spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000), new SpendingStep(_fixedDateProvider.Now(), 50_000)};
+
+            var reportExpressedAsMonths = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+        
+            Assert.That(reportExpressedAsANumber.SavingsAt100, Is.EqualTo(reportExpressedAsMonths.SavingsAt100));
+        } 
     }
 }

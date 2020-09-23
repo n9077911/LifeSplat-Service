@@ -101,14 +101,23 @@ namespace Calculator
             var privatePensionAmounts = result.Persons.Select(p => new{p, p.CalcMinimumSteps.CurrentStep.PrivatePensionAmount})
                 .ToDictionary(arg => arg.p, arg=>arg.PrivatePensionAmount);
 
-            var runningCash = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum();
-            
+            var runningInvestments = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum();
+            var cashSavings = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.CashSavings).Sum();
             
             for (var month = 1; month <= monthsToDeath; month++)
             {
-                runningCash -= result.MonthlySpendingAt(primaryStep.Date.AddMonths(month));
-                
-                runningCash += runningCash * _assumptions.MonthlyGrowthRate;
+                var newIncome = 0m;
+                var monthlySpending = result.MonthlySpendingAt(primaryStep.Date.AddMonths(month));
+
+                if (runningInvestments > monthlySpending)
+                    runningInvestments -= monthlySpending;
+                else //if (runningInvestments > 0)
+                {
+                    cashSavings -= (monthlySpending - runningInvestments);
+                    runningInvestments = 0;
+                }
+                        
+                newIncome += runningInvestments * _assumptions.MonthlyGrowthRate;
                 
                 foreach (var person in result.Persons)
                 {
@@ -119,19 +128,69 @@ namespace Calculator
                     var taxResult = _incomeTaxCalculator.TaxFor(0, annualisedPrivatePensionGrowth, annualStatePension);
 
                     if (primaryStep.Date.AddMonths(month) > person.StatePensionDate)
-                        runningCash += taxResult.AfterTaxIncomeFor(IncomeType.StatePension) / _monthly;
+                        newIncome += taxResult.AfterTaxIncomeFor(IncomeType.StatePension) / _monthly;
 
                     if (primaryStep.Date.AddMonths(month) > person.PrivatePensionDate)
-                        runningCash += monthlyPrivatePensionGrowth - (taxResult.TotalTaxFor(IncomeType.PrivatePension) / _monthly);
+                        newIncome += monthlyPrivatePensionGrowth - (taxResult.TotalTaxFor(IncomeType.PrivatePension) / _monthly);
                     else
                         privatePensionAmounts[person] += monthlyPrivatePensionGrowth;
                 }
+                
+                var requiredCash = result.Persons.Select(p => p.Person.CashSavingsSpec.RequiredSavings(monthlySpending / result.Persons.Count())).Sum();
+                
+                (cashSavings, runningInvestments) = AssignIncomeToRelevantPot(requiredCash, newIncome, cashSavings, runningInvestments);
+                (cashSavings, runningInvestments) = RebalanceInvestmentsAndCashSavings(requiredCash, cashSavings, runningInvestments);
 
-                if (runningCash < minimumCash)
+                if (runningInvestments + cashSavings <= minimumCash)
                     return false;
             }
 
             return true;
+        }
+        
+        private (decimal, decimal) RebalanceInvestmentsAndCashSavings(decimal requiredCash, decimal cashSavings, decimal investments)
+        {
+            if (cashSavings < requiredCash)
+            {
+                var newlyRequiredAmount = requiredCash - cashSavings;
+                if (investments > newlyRequiredAmount)
+                {
+                    cashSavings = requiredCash;
+                    investments -= newlyRequiredAmount;
+                }
+                else
+                {
+                    cashSavings += investments;
+                    investments = 0;
+                }
+            }
+
+            return (cashSavings, investments);
+        }
+
+        private static (decimal, decimal) AssignIncomeToRelevantPot(decimal requiredCash, decimal newIncome, decimal cashSavings, decimal runningInvestments)
+        {
+
+            var newlyRequiredCash = requiredCash - cashSavings;
+            if (newlyRequiredCash <= 0) //we have more cash than needed so move it to investments
+            {
+                runningInvestments += newlyRequiredCash * -1;
+                runningInvestments += newIncome;
+            }
+            else if (newlyRequiredCash > 0 && newIncome >= newlyRequiredCash) //income more than fills the cash requirement then assign the relevant amount to cash and remainder to investments
+            {
+                cashSavings = requiredCash;
+                runningInvestments = newIncome - newlyRequiredCash;
+            }
+            else if (newlyRequiredCash > 0 && newIncome < newlyRequiredCash) //income fails to fill the cash requirement then assign all income to cash.
+            {
+                cashSavings += newIncome;
+                newlyRequiredCash = requiredCash - cashSavings;
+                cashSavings += newlyRequiredCash;
+                runningInvestments -= newlyRequiredCash;
+            }
+
+            return (cashSavings, runningInvestments);
         }
 
         private int MonthsToDeath(DateTime dob, DateTime now)

@@ -27,10 +27,12 @@ namespace Calculator
         private decimal _monthlyPreTaxPrivatePensionIncome = 0;
         private decimal _preTaxStatePensionIncome = 0;
 
-        public Step(Step previousStep, DateTime stepDate, Person person, bool calcdMinimum, IAssumptions assumptions, DateTime privatePensionDate, decimal spending, DateTime? givenRetirementDate = null)
+        public Step(Step previousStep, DateTime stepDate, Person person, bool calcdMinimum, IAssumptions assumptions, 
+            DateTime privatePensionDate, decimal spending, DateTime? givenRetirementDate = null)
         {
             Date = stepDate;
             Savings = previousStep.Savings;
+            CashSavings = previousStep.CashSavings;
             PrivatePensionAmount = previousStep.PrivatePensionAmount;
             _previousStep = previousStep;
             _person = person;
@@ -41,17 +43,28 @@ namespace Calculator
             _givenRetirementDate = givenRetirementDate;
         }
 
-        private Step(DateTime now, int existingSavings, int existingPrivatePension, decimal personStatusMonthlySpending)
+        private Step(DateTime now, int existingSavings, int existingPrivatePension, CashSavingsSpec cashSavingsSpec, decimal personMonthlySpending)
         {
             Date = now;
-            Savings = existingSavings;
+
+            var requiredCashSavings = cashSavingsSpec.RequiredSavings(personMonthlySpending);
+            if (requiredCashSavings > existingSavings)
+            {
+                CashSavings = existingSavings;
+            }
+            else
+            {
+                Savings = existingSavings - requiredCashSavings;
+                CashSavings = requiredCashSavings;
+            }
+            
             PrivatePensionAmount = existingPrivatePension;
-            Spending = personStatusMonthlySpending;
+            Spending = personMonthlySpending;
         }
 
-        public static Step CreateInitialStep(DateTime now, int existingSavings, int existingPrivatePension, decimal personStatusMonthlySpending)
+        public static Step CreateInitialStep(DateTime now, int existingSavings, int existingPrivatePension, CashSavingsSpec cashSavingsSpec, decimal personMonthlySpending)
         {
-            return new Step(now, existingSavings, existingPrivatePension, personStatusMonthlySpending);
+            return new Step(now, existingSavings, existingPrivatePension, cashSavingsSpec, personMonthlySpending);
         }
 
         public DateTime Date { get; private set; }
@@ -64,6 +77,7 @@ namespace Calculator
         
         public decimal Spending { get; }
         public decimal Savings { get; private set; }
+        public decimal CashSavings { get; private set; }
         public decimal PrivatePensionAmount { get; private set; }
 
         public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate)
@@ -122,12 +136,23 @@ namespace Calculator
 
         public void UpdateSpending()
         {
-            Savings -= Spending;
+            if (Savings > Spending)
+                Savings -= Spending;
+            else
+            {
+                CashSavings -= Spending - Savings;
+                Savings = 0;
+            }
         }
 
         public void SetSavings(decimal savings)
         {
             Savings = savings;
+        }
+        
+        public void SetCashSavings(decimal savings)
+        {
+            CashSavings = savings;
         }
 
         public void PayTaxAndBankTheRemainder()
@@ -140,7 +165,45 @@ namespace Calculator
             AfterTaxSalary = afterTax.AfterTaxIncomeFor(IncomeType.Salary)/12;
             AfterTaxPrivatePensionIncome = _monthlyPreTaxPrivatePensionIncome - (afterTax.TotalTaxFor(IncomeType.PrivatePension)/12);
             AfterTaxStatePension = afterTax.AfterTaxIncomeFor(IncomeType.StatePension)/12;
-            Savings += AfterTaxSalary + AfterTaxPrivatePensionIncome + AfterTaxStatePension;
+
+            var newIncome = AfterTaxSalary + AfterTaxPrivatePensionIncome + AfterTaxStatePension;
+
+            var requiredCash = _person.CashSavingsSpec.RequiredSavings(Spending);
+                var newlyRequiredCash = requiredCash - CashSavings;
+                if (newlyRequiredCash <= 0) //we have more cash than needed so move it to investments
+                    Savings += newlyRequiredCash * -1; 
+                else if(newlyRequiredCash > 0 && newIncome >= newlyRequiredCash)//income more than fills the cash requirement then assign the relevant amount to cash and remainder to investments
+                {
+                    CashSavings = requiredCash;
+                    newIncome -= newlyRequiredCash;
+                }
+                else if(newlyRequiredCash > 0 && newIncome < newlyRequiredCash) //income fails to fill the cash requirement then assign all income to cash.
+                {
+                    CashSavings += newIncome;
+                    newIncome = 0;
+                }
+
+            Savings += newIncome;
+            RebalanceInvestmentsAndCashSavings();
+        }
+
+        private void RebalanceInvestmentsAndCashSavings()
+        {
+            var requiredCash = _person.CashSavingsSpec.RequiredSavings(Spending);
+            if (CashSavings < requiredCash)
+            {
+                var newlyRequiredAmount = requiredCash - CashSavings;
+                if (Savings > newlyRequiredAmount)
+                {
+                    CashSavings = requiredCash;
+                    Savings -= newlyRequiredAmount;
+                }
+                else
+                {
+                    CashSavings += Savings;
+                    Savings = 0;
+                }
+            }
         }
     }
 }

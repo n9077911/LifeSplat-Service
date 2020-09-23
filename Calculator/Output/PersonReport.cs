@@ -26,7 +26,9 @@ namespace Calculator.Output
             CalcMinimumSteps = new StepsReport(person, StepType.CalcMinimum, now, assumptions, monthlySpendingAt, PrivatePensionDate);
             TargetSteps = new StepsReport(person, StepType.GivenDate, now, assumptions, monthlySpendingAt, PrivatePensionDate);
             PrimarySteps = targetDateGiven ? TargetSteps : CalcMinimumSteps;
-            StepReports = new List<StepsReport> {CalcMinimumSteps, TargetSteps};
+            StepReports = new List<StepsReport> {CalcMinimumSteps};
+            if(targetDateGiven)
+                StepReports.Add(TargetSteps);
         }
 
         public Person Person { get; }
