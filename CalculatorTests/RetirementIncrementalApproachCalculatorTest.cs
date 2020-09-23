@@ -570,21 +570,19 @@ namespace CalculatorTests
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
             var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
-                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("100000")};
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("50000")};
             var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
-                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("100000")};
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("50000")};
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
-            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000), new SpendingStep(_fixedDateProvider.Now(), 50_000)};
+            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 50_000)};
             var reportExpressedAsANumber = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
             
-            person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
-                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("24m")};
-            person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
-                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, CashSavingsSpec = new CashSavingsSpec("24m")};
-
+            person1.CashSavingsSpec =  new CashSavingsSpec("24m"); //each person spends 25k, so 24m*25k == 50k
+            person2.CashSavingsSpec = new CashSavingsSpec("24m");
+                
             personStatuses = new[] {person1, person2};
-            spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000), new SpendingStep(_fixedDateProvider.Now(), 50_000)};
+            spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 50_000)};
 
             var reportExpressedAsMonths = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
         
