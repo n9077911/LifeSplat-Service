@@ -78,7 +78,7 @@ namespace Calculator.Output
             for (int stepIndex = 0; stepIndex < PrimaryPerson.CalcMinimumSteps.Steps.Count; stepIndex++)
             {
                 var stepDate = PrimaryPerson.CalcMinimumSteps.Steps[stepIndex].Date;
-                if (Persons.Select(p => p.PrimarySteps.Steps[stepIndex].Savings).Sum() < 0 && !bankrupt)
+                if (Persons.Select(p => p.PrimarySteps.Steps[stepIndex].Savings).Sum() + Persons.Select(p => p.PrimarySteps.Steps[stepIndex].CashSavings).Sum() < 0 && !bankrupt)
                 {
                     bankrupt = true;
                     BankruptDate = stepDate;
@@ -91,7 +91,7 @@ namespace Calculator.Output
                 }
             }
 
-            SavingsAt100 = Convert.ToInt32(SavingsForIthStep(PrimaryPerson.CalcMinimumSteps.Steps.Count-1));
+            SavingsAt100 = Convert.ToInt32(TotalSavingsForIthStep(PrimaryPerson.CalcMinimumSteps.Steps.Count-1));
         }
 
         private bool UpdateStatePensionDetails(IPersonReport person, DateTime stepDate, bool statePensionSet, int stepIndex)
@@ -99,7 +99,7 @@ namespace Calculator.Output
             if (stepDate >= person.StatePensionDate && !statePensionSet)
             {
                 statePensionSet = true;
-                person.SavingsCombinedAtStatePensionAge = Convert.ToInt32(Math.Max(0, SavingsForIthStep(stepIndex)));
+                person.SavingsCombinedAtStatePensionAge = Convert.ToInt32(Math.Max(0, TotalSavingsForIthStep(stepIndex)));
                 person.PrivatePensionPotCombinedAtStatePensionAge = Convert.ToInt32(PrivatePensionPotForIthStep(stepIndex));
             }
 
@@ -111,7 +111,7 @@ namespace Calculator.Output
             if (stepDate >= person.PrivatePensionDate && !privatePensionSet)
             {
                 privatePensionSet = true;
-                person.SavingsCombinedAtPrivatePensionAge = Convert.ToInt32(Math.Max(0, SavingsForIthStep(stepIndex)));
+                person.SavingsCombinedAtPrivatePensionAge = Convert.ToInt32(Math.Max(0, TotalSavingsForIthStep(stepIndex)));
                 person.PrivatePensionPotCombinedAtPrivatePensionAge = Convert.ToInt32(PrivatePensionPotForIthStep(stepIndex));
                 person.PrivatePensionPotAtPrivatePensionAge = Convert.ToInt32(person.PrimarySteps.Steps[stepIndex].PrivatePensionAmount);
             }
@@ -119,9 +119,9 @@ namespace Calculator.Output
             return privatePensionSet;
         }
 
-        private decimal SavingsForIthStep(int i)
+        private decimal TotalSavingsForIthStep(int i)
         {
-            return Persons.Select(p => p.PrimarySteps.Steps[i].Savings).Sum();
+            return Persons.Select(p => p.PrimarySteps.Steps[i].Savings + p.PrimarySteps.Steps[i].CashSavings).Sum();
         }
         
         private decimal PrivatePensionPotForIthStep(int i)
@@ -134,10 +134,15 @@ namespace Calculator.Output
             var calcMinSavings = Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum();
             var targetSavings = Persons.Select(p => p.TargetSteps.CurrentStep.Savings).Sum();
             
+            var calcMinCashSavings = Persons.Select(p => p.CalcMinimumSteps.CurrentStep.CashSavings).Sum();
+            var targetMinCashSavings = Persons.Select(p => p.TargetSteps.CurrentStep.CashSavings).Sum();
+            
             foreach (var person in Persons)
             {
                 person.CalcMinimumSteps.SetSavings(calcMinSavings / Persons.Count);
                 person.TargetSteps.SetSavings(targetSavings / Persons.Count);
+                person.CalcMinimumSteps.SetCashSavings(calcMinCashSavings / Persons.Count);
+                person.TargetSteps.SetCashSavings(targetMinCashSavings / Persons.Count);
             }
         }
     }

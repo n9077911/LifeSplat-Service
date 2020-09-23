@@ -34,6 +34,7 @@ namespace ServiceLayer.Models.DTO
                         {
                             step.Date.ToString("yyyy-MM-dd"),
                             Decimal.Round(step.Savings),
+                            Decimal.Round(step.CashSavings),
                             Decimal.Round(step.AfterTaxStatePension),
                             Decimal.Round(step.AfterTaxSalary),
                             Decimal.Round(step.Growth),
@@ -72,7 +73,7 @@ namespace ServiceLayer.Models.DTO
 
             StepsHeaders = new List<string>
             {
-                "Date", "Cash", "StatePension", "AfterTaxSalary", "Growth", "PrivatePensionGrowth",
+                "Date", "Cash", "CashSavings", "StatePension", "AfterTaxSalary", "Growth", "PrivatePensionGrowth",
                 "PrivatePensionAmount", "Spending"
             };
         }

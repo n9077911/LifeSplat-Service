@@ -19,9 +19,13 @@ namespace ServiceLayer.Models
             _retirementCalculator = retirementCalculator;
         }
 
-        public RetirementReportDto RetirementReportFor(int targetRetirementAge, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
+        public RetirementReportDto RetirementReportFor(int targetRetirementAge, string targetCashSavings, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
         {
-            var personsStatuses = persons.Select(PersonStatus);
+            var cashSavingsSpec = new CashSavingsSpec(targetCashSavings);
+            if (persons.Count() == 2)
+                cashSavingsSpec = cashSavingsSpec.SplitInTwo();
+            
+            var personsStatuses = persons.Select(p => PersonStatus(p, cashSavingsSpec));
             var spendingStepInputs = spendingSteps.Select(dto =>
             {
                 var date = dto.Date ?? personsStatuses.First().Dob.AddYears(dto.Age.Value);
@@ -33,13 +37,14 @@ namespace ServiceLayer.Models
             return result;
         }
 
-        private static Person PersonStatus(PersonDto dto)
+        private static Person PersonStatus(PersonDto dto, CashSavingsSpec cashSavingsSpec)
         {
             var personStatus = new Person
             {
                 Dob = dto.Dob,
                 Salary = dto.Salary,
                 Sex = dto.Female ? Sex.Female : Sex.Male,
+                CashSavingsSpec = cashSavingsSpec,
                 ExistingSavings = dto.Savings,
                 ExistingPrivatePension = dto.Pension,
                 EmployerContribution = dto.EmployerContribution / 100m,

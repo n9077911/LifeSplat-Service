@@ -22,7 +22,7 @@ namespace Calculator.Output
             _stepType = stepType;
             _assumptions = assumptions;
             _privatePensionDate = privatePensionDate;
-            Steps.Add(Step.CreateInitialStep(now, person.ExistingSavings, person.ExistingPrivatePension, monthlySpendingNow));
+            Steps.Add(Step.CreateInitialStep(now, person.ExistingSavings, person.ExistingPrivatePension, person.CashSavingsSpec, monthlySpendingNow));
         }
 
         public List<Step> Steps { get; } = new List<Step>();
@@ -68,6 +68,11 @@ namespace Calculator.Output
         public void SetSavings(decimal savings)
         {
             CurrentStep.SetSavings(savings);
+        }
+        
+        public void SetCashSavings(decimal savings)
+        {
+            CurrentStep.SetCashSavings(savings);
         }
 
         public void ProcessTaxableIncomeIntoSavings()
