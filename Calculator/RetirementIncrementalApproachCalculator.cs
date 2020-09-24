@@ -102,7 +102,7 @@ namespace Calculator
                 .ToDictionary(arg => arg.p, arg=>arg.PrivatePensionAmount);
 
             var runningInvestments = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum();
-            var cashSavings = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.EmergencyFund).Sum();
+            var emergencyFund = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.EmergencyFund).Sum();
             var emergencyFundMet = false;
             
             for (var month = 1; month <= monthsToDeath; month++)
@@ -110,13 +110,7 @@ namespace Calculator
                 var newIncome = 0m;
                 var monthlySpending = result.MonthlySpendingAt(primaryStep.Date.AddMonths(month));
 
-                if (runningInvestments > monthlySpending)
-                    runningInvestments -= monthlySpending;
-                else //if (runningInvestments > 0)
-                {
-                    cashSavings -= (monthlySpending - runningInvestments);
-                    runningInvestments = 0;
-                }
+                (emergencyFund, runningInvestments) = ApplySpending(monthlySpending, emergencyFund, runningInvestments);
                         
                 newIncome += runningInvestments * _assumptions.MonthlyGrowthRate;
                 
@@ -139,62 +133,87 @@ namespace Calculator
                 
                 var requiredCash = result.Persons.Select(p => p.Person.EmergencyFundSpec.RequiredSavings(monthlySpending / result.Persons.Count())).Sum();
                 
-                (cashSavings, runningInvestments) = AssignIncomeToRelevantPot(requiredCash, newIncome, cashSavings, runningInvestments);
-                (cashSavings, runningInvestments) = RebalanceInvestmentsAndCashSavings(requiredCash, cashSavings, runningInvestments);
+                (emergencyFund, runningInvestments) = AssignIncomeToRelevantPot(requiredCash, newIncome, emergencyFund, runningInvestments);
+                (emergencyFund, runningInvestments) = RebalanceInvestmentsAndCashSavings(requiredCash, emergencyFund, runningInvestments);
 
-                if (cashSavings >= requiredCash)
+                if (emergencyFund >= requiredCash)
                     emergencyFundMet = true;
                     
-                if (emergencyFundMet && runningInvestments < minimumCash)
+                if (emergencyFundMet && runningInvestments <= minimumCash)
                     return false;
             }
 
-            return true;
+            return emergencyFundMet;
         }
-        
-        private (decimal, decimal) RebalanceInvestmentsAndCashSavings(decimal requiredCash, decimal cashSavings, decimal investments)
+
+        private static (decimal, decimal) ApplySpending(decimal monthlySpending, decimal emergencyFund, decimal investments)
         {
-            if (cashSavings < requiredCash)
+            if (investments > monthlySpending)
+                investments -= monthlySpending;
+            else
             {
-                var newlyRequiredAmount = requiredCash - cashSavings;
+                var diff = monthlySpending - investments;
+                investments = 0;
+                if (emergencyFund > diff)
+                {
+                    emergencyFund -= diff;
+                }
+                else
+                {
+                    var newDiff = emergencyFund - diff;
+                    emergencyFund = 0;
+                    investments -= newDiff;
+                }
+            }
+
+            return (emergencyFund, investments);
+        }
+
+        private (decimal, decimal) RebalanceInvestmentsAndCashSavings(decimal requiredCash, decimal emergencyFund, decimal investments)
+        {
+            var newlyRequiredAmount = requiredCash - emergencyFund;
+            if (emergencyFund < requiredCash)
+            {
                 if (investments > newlyRequiredAmount)
                 {
-                    cashSavings = requiredCash;
+                    emergencyFund = requiredCash;
                     investments -= newlyRequiredAmount;
                 }
                 else
                 {
-                    cashSavings += investments;
+                    emergencyFund += investments;
                     investments = 0;
                 }
             }
+            else
+            {
+                investments += emergencyFund - requiredCash;
+                emergencyFund = requiredCash;
+            }
 
-            return (cashSavings, investments);
+            return (emergencyFund, investments);
         }
 
-        private static (decimal, decimal) AssignIncomeToRelevantPot(decimal requiredCash, decimal newIncome, decimal cashSavings, decimal runningInvestments)
+        private static (decimal, decimal) AssignIncomeToRelevantPot(decimal requiredCash, decimal newIncome, decimal emergencyFund, decimal investments)
         {
 
-            var newlyRequiredCash = requiredCash - cashSavings;
-            if (newlyRequiredCash <= 0) //we have more cash than needed so move it to investments
+            var newlyRequiredCash = requiredCash - emergencyFund;
+
+            if (newlyRequiredCash > 0 && newIncome >= newlyRequiredCash) //income more than fills the cash requirement then assign the relevant amount to cash and remainder to investments
             {
-                runningInvestments += newlyRequiredCash * -1;
-                runningInvestments += newIncome;
-            }
-            else if (newlyRequiredCash > 0 && newIncome >= newlyRequiredCash) //income more than fills the cash requirement then assign the relevant amount to cash and remainder to investments
-            {
-                cashSavings = requiredCash;
-                runningInvestments = newIncome - newlyRequiredCash;
+                emergencyFund = requiredCash;
+                investments += newIncome - newlyRequiredCash;
             }
             else if (newlyRequiredCash > 0 && newIncome < newlyRequiredCash) //income fails to fill the cash requirement then assign all income to cash.
             {
-                cashSavings += newIncome;
-                newlyRequiredCash = requiredCash - cashSavings;
-                cashSavings += newlyRequiredCash;
-                runningInvestments -= newlyRequiredCash;
+                emergencyFund += newIncome;
+            }
+            else
+            {
+                investments += newIncome;
             }
 
-            return (cashSavings, runningInvestments);
+            return (emergencyFund, investments);
         }
 
         private int MonthsToDeath(DateTime dob, DateTime now)

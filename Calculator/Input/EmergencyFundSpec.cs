@@ -8,7 +8,11 @@ namespace Calculator.Input
 
         public EmergencyFundSpec(string amount)
         {
-            if (amount.EndsWith('m') || amount.EndsWith('M'))
+            if (amount == null)
+            {
+                _amount = 0;
+            }
+            else if (amount.EndsWith('m') || amount.EndsWith('M'))
             {
                 _months = decimal.Parse(amount.Substring(0, amount.Length - 1));
                 _isMonths = true;

@@ -140,9 +140,20 @@ namespace Calculator
                 Savings -= Spending;
             else
             {
-                EmergencyFund -= Spending - Savings;
+                var diff = Spending - Savings;
                 Savings = 0;
+                if (EmergencyFund > diff)
+                {
+                    EmergencyFund -= diff;
+                }
+                else
+                {
+                    var newDiff = EmergencyFund - diff;
+                    EmergencyFund = 0;
+                    Savings -= newDiff;
+                }
             }
+
         }
 
         public void SetSavings(decimal savings)
@@ -169,21 +180,23 @@ namespace Calculator
             var newIncome = AfterTaxSalary + AfterTaxPrivatePensionIncome + AfterTaxStatePension;
 
             var requiredCash = _person.EmergencyFundSpec.RequiredSavings(Spending);
-                var newlyRequiredCash = requiredCash - EmergencyFund;
-                if (newlyRequiredCash <= 0) //we have more cash than needed so move it to investments
-                    Savings += newlyRequiredCash * -1; 
-                else if(newlyRequiredCash > 0 && newIncome >= newlyRequiredCash)//income more than fills the cash requirement then assign the relevant amount to cash and remainder to investments
-                {
-                    EmergencyFund = requiredCash;
-                    newIncome -= newlyRequiredCash;
-                }
-                else if(newlyRequiredCash > 0 && newIncome < newlyRequiredCash) //income fails to fill the cash requirement then assign all income to cash.
-                {
-                    EmergencyFund += newIncome;
-                    newIncome = 0;
-                }
 
-            Savings += newIncome;
+            var newlyRequiredCash = requiredCash - EmergencyFund;
+
+            if(newlyRequiredCash > 0 && newIncome >= newlyRequiredCash)//income more than fills the cash requirement then assign the relevant amount to cash and remainder to investments
+            {
+                EmergencyFund = requiredCash;
+                Savings += newIncome - newlyRequiredCash;
+            }
+            else if(newlyRequiredCash > 0 && newIncome < newlyRequiredCash) //income fails to fill the cash requirement then assign all income to cash.
+            {
+                EmergencyFund += newIncome;
+            }
+            else
+            {
+                Savings += newIncome;
+            }
+            
             RebalanceInvestmentsAndCashSavings();
         }
 
@@ -203,6 +216,11 @@ namespace Calculator
                     EmergencyFund += Savings;
                     Savings = 0;
                 }
+            }
+            else
+            {
+                Savings += EmergencyFund - requiredCash;
+                EmergencyFund = requiredCash;
             }
         }
     }
