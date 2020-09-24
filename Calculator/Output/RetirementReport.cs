@@ -78,7 +78,7 @@ namespace Calculator.Output
             for (int stepIndex = 0; stepIndex < PrimaryPerson.CalcMinimumSteps.Steps.Count; stepIndex++)
             {
                 var stepDate = PrimaryPerson.CalcMinimumSteps.Steps[stepIndex].Date;
-                if (Persons.Select(p => p.PrimarySteps.Steps[stepIndex].Savings).Sum() + Persons.Select(p => p.PrimarySteps.Steps[stepIndex].EmergencyFund).Sum() < 0 && !bankrupt)
+                if (Persons.Select(p => p.PrimarySteps.Steps[stepIndex].Investments).Sum() + Persons.Select(p => p.PrimarySteps.Steps[stepIndex].EmergencyFund).Sum() < 0 && !bankrupt)
                 {
                     bankrupt = true;
                     BankruptDate = stepDate;
@@ -121,7 +121,7 @@ namespace Calculator.Output
 
         private decimal TotalSavingsForIthStep(int i)
         {
-            return Persons.Select(p => p.PrimarySteps.Steps[i].Savings + p.PrimarySteps.Steps[i].EmergencyFund).Sum();
+            return Persons.Select(p => p.PrimarySteps.Steps[i].Investments + p.PrimarySteps.Steps[i].EmergencyFund).Sum();
         }
         
         private decimal PrivatePensionPotForIthStep(int i)
@@ -131,8 +131,8 @@ namespace Calculator.Output
         
         public void BalanceSavings()
         {
-            var calcMinSavings = Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum();
-            var targetSavings = Persons.Select(p => p.TargetSteps.CurrentStep.Savings).Sum();
+            var calcMinSavings = Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Investments).Sum();
+            var targetSavings = Persons.Select(p => p.TargetSteps.CurrentStep.Investments).Sum();
             
             var calcMinEmergencyFund = Persons.Select(p => p.CalcMinimumSteps.CurrentStep.EmergencyFund).Sum();
             var targetMinEmergencyFund = Persons.Select(p => p.TargetSteps.CurrentStep.EmergencyFund).Sum();

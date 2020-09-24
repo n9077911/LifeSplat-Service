@@ -4,15 +4,12 @@ using System.Linq;
 using CalculatorTests.Stubs;
 using NUnit.Framework;
 using Calculator;
-using Calculator.ExternalInterface;
 using Calculator.Input;
 using Calculator.StatePensionCalculator;
 using Calculator.TaxSystem;
 
 namespace CalculatorTests
 {
-    //Todo: support paying tax from pension income
-
     [TestFixture]
     public class RetirementIncrementalApproachCalculatorTest
     {
@@ -587,7 +584,7 @@ namespace CalculatorTests
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
-            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
+            var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000,
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
             var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
