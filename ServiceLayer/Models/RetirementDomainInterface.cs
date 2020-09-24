@@ -19,7 +19,7 @@ namespace ServiceLayer.Models
             _retirementCalculator = retirementCalculator;
         }
 
-        public RetirementReportDto RetirementReportFor(int targetRetirementAge, string emergencyFund, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
+        public RetirementReportDto RetirementReportFor(int? targetRetirementAge, string emergencyFund, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
         {
             var emergencyFundSpec = new EmergencyFundSpec(emergencyFund);
             if (persons.Count() == 2)

@@ -102,7 +102,7 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenAWorkerCanRetire_ConsideringCashSavingsRequirement()
+        public void KnowsWhenAWorkerCanRetire_ConsideringEmergencyFundRequirement()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
@@ -120,7 +120,25 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenAWorkerCanRetire_ConsideringVeryLargeCashSavingsRequirement()
+        public void KnowsWhenAWorkerCanRetire_ConsideringEmergencyFundRequirement_And_DownwardSpendingStep()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
+                _fixedStatePensionAmountCalculator);
+            var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), EmergencyFundSpec = new EmergencyFundSpec("10000")};
+            var report = calc.ReportFor(person,
+                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000), new SpendingStep(_fixedDateProvider.Now().AddYears(10), 15_000)});
+
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2043, 11, 01)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(62));
+            Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
+            Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
+            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(211_209));
+            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(207_387));
+            Assert.That(report.SavingsAt100, Is.EqualTo(4_041));
+        }
+        
+        [Test]
+        public void KnowsWhenAWorkerCanRetire_ConsideringVeryLargeEmergencyFundRequirement()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
@@ -540,7 +558,7 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_ConsideringCashSavingsRequirement()
+        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_ConsideringEmergencyFundRequirement()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
@@ -565,7 +583,7 @@ namespace CalculatorTests
         } 
 
         [Test]
-        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_ConsideringCashSavingsRequirement_ExpressedAsANumberOfMonths()
+        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_ConsideringEmergencyFundRequirement_ExpressedAsANumberOfMonths()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
