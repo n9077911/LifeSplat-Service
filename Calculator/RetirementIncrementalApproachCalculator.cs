@@ -152,17 +152,17 @@ namespace Calculator
                 investments -= monthlySpending;
             else
             {
-                var diff = monthlySpending - investments;
+                var spendingToAssign = monthlySpending - investments;
                 investments = 0;
-                if (emergencyFund > diff)
+                if (emergencyFund > spendingToAssign)
                 {
-                    emergencyFund -= diff;
+                    emergencyFund -= spendingToAssign;
                 }
                 else
                 {
-                    var newDiff = emergencyFund - diff;
+                    spendingToAssign = spendingToAssign - emergencyFund;
                     emergencyFund = 0;
-                    investments -= newDiff;
+                    investments -= spendingToAssign;
                 }
             }
 
