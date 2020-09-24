@@ -148,7 +148,7 @@ namespace Calculator
                 }
                 else
                 {
-                    var newDiff = EmergencyFund - diff;
+                    var newDiff = diff - EmergencyFund;
                     EmergencyFund = 0;
                     Savings -= newDiff;
                 }

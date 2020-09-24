@@ -110,13 +110,13 @@ namespace CalculatorTests
             var report = calc.ReportFor(person,
                 new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2043, 11, 01)));
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2043, 12, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(62));
             Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
             Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(211_209));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(207_387));
-            Assert.That(report.SavingsAt100, Is.EqualTo(4_041));
+            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(209_872));
+            Assert.That(report.SavingsAt100, Is.EqualTo(12_640));
         }
         
         [Test]
@@ -128,13 +128,13 @@ namespace CalculatorTests
             var report = calc.ReportFor(person,
                 new []{new SpendingStep(_fixedDateProvider.Now(), 20_000), new SpendingStep(_fixedDateProvider.Now().AddYears(10), 15_000)});
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2043, 11, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(62));
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2037, 01, 01)));
+            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(55));
             Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
             Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
-            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(211_209));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(207_387));
-            Assert.That(report.SavingsAt100, Is.EqualTo(4_041));
+            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(208_018));
+            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(119_903));
+            Assert.That(report.SavingsAt100, Is.EqualTo(16_850));
         }
         
         [Test]
@@ -146,8 +146,8 @@ namespace CalculatorTests
             var report = calc.ReportFor(person,
                 new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2057, 08, 01)));
-            Assert.That(report.SavingsAt100, Is.EqualTo(736));
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(0001, 01, 01)));
+            Assert.That(report.SavingsAt100, Is.EqualTo(520_809));
         }
 
         [Test]
@@ -572,14 +572,14 @@ namespace CalculatorTests
             var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
         
             Assert.That(report.Persons.First().PrimarySteps.Steps.First().EmergencyFund, Is.EqualTo(10_000));
-            Assert.That(report.Persons.First().PrimarySteps.Steps.Last().EmergencyFund, Is.EqualTo(9_774).Within(1));
+            Assert.That(report.Persons.First().PrimarySteps.Steps.Last().EmergencyFund, Is.EqualTo(10_000));
             Assert.That(report.Persons.Last().PrimarySteps.Steps.First().EmergencyFund, Is.EqualTo(10_000));
-            Assert.That(report.Persons.Last().PrimarySteps.Steps.Last().EmergencyFund, Is.EqualTo(9_774).Within(1));
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2035, 08, 01)));
+            Assert.That(report.Persons.Last().PrimarySteps.Steps.Last().EmergencyFund, Is.EqualTo(10_000));
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2035, 09, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(54));
-            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(526_963));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(356_458));
-            Assert.That(report.SavingsAt100, Is.EqualTo(19_548));
+            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(533_905));
+            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(367_102));
+            Assert.That(report.SavingsAt100, Is.EqualTo(58_285));
         } 
 
         [Test]
