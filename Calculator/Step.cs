@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using Calculator.Input;
 using Calculator.TaxSystem;
-using Calculator.ExternalInterface;
 
 namespace Calculator
 {
@@ -11,7 +9,7 @@ namespace Calculator
     /// Represents 1 month of a persons future life.
     /// Used by RetirementIncrementalApproachCalculator to keep track of a persons finances as the calculator iterates through the persons future. 
     /// </summary>
-    [DebuggerDisplay("{Date} : {Savings}")]
+    [DebuggerDisplay("{Date} : {Investments}")]
     public class Step
     {
         private readonly Step _previousStep;
@@ -26,13 +24,12 @@ namespace Calculator
         private decimal _annualPreTaxPrivatePensionIncome = 0;
         private decimal _monthlyPreTaxPrivatePensionIncome = 0;
         private decimal _preTaxStatePensionIncome = 0;
+        private MoneyPots Pots { get; }
 
         public Step(Step previousStep, DateTime stepDate, Person person, bool calcdMinimum, IAssumptions assumptions, 
             DateTime privatePensionDate, decimal spending, DateTime? givenRetirementDate = null)
         {
             Date = stepDate;
-            Savings = previousStep.Savings;
-            EmergencyFund = previousStep.EmergencyFund;
             PrivatePensionAmount = previousStep.PrivatePensionAmount;
             _previousStep = previousStep;
             _person = person;
@@ -41,22 +38,16 @@ namespace Calculator
             _privatePensionDate = privatePensionDate;
             Spending = spending;
             _givenRetirementDate = givenRetirementDate;
+            Pots = MoneyPots.From(previousStep.Pots, _person.EmergencyFundSpec.RequiredEmergencyFund(Spending));
         }
 
         private Step(DateTime now, int existingSavings, int existingPrivatePension, EmergencyFundSpec emergencyFundSpec, decimal personMonthlySpending)
         {
             Date = now;
 
-            var requiredCashSavings = emergencyFundSpec.RequiredSavings(personMonthlySpending);
-            if (requiredCashSavings > existingSavings)
-            {
-                EmergencyFund = existingSavings;
-            }
-            else
-            {
-                Savings = existingSavings - requiredCashSavings;
-                EmergencyFund = requiredCashSavings;
-            }
+            var requiredCashSavings = emergencyFundSpec.RequiredEmergencyFund(personMonthlySpending);
+            Pots = new MoneyPots(requiredCashSavings);
+            Pots.AssignIncome(existingSavings);
             
             PrivatePensionAmount = existingPrivatePension;
             Spending = personMonthlySpending;
@@ -76,9 +67,9 @@ namespace Calculator
         public decimal AfterTaxPrivatePensionIncome { get; private set; }
         
         public decimal Spending { get; }
-        public decimal Savings { get; private set; }
-        public decimal EmergencyFund { get; private set; }
         public decimal PrivatePensionAmount { get; private set; }
+        public decimal Investments => Pots.Investments;
+        public decimal EmergencyFund => Pots.EmergencyFund;
 
         public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate)
         {
@@ -104,9 +95,9 @@ namespace Calculator
 
         public void UpdateGrowth()
         {
-            var growth = Math.Max(Savings * _assumptions.MonthlyGrowthRate, 0m);
+            var growth = Math.Max(Pots.Investments * _assumptions.MonthlyGrowthRate, 0m);
             Growth = growth;
-            Savings += growth;
+            Pots.AssignIncome(growth);
         }
 
         public void UpdatePrivatePension()
@@ -136,34 +127,17 @@ namespace Calculator
 
         public void UpdateSpending()
         {
-            if (Savings > Spending)
-                Savings -= Spending;
-            else
-            {
-                var diff = Spending - Savings;
-                Savings = 0;
-                if (EmergencyFund > diff)
-                {
-                    EmergencyFund -= diff;
-                }
-                else
-                {
-                    var newDiff = diff - EmergencyFund;
-                    EmergencyFund = 0;
-                    Savings -= newDiff;
-                }
-            }
-
+            Pots.AssignSpending(Spending);
         }
 
         public void SetSavings(decimal savings)
         {
-            Savings = savings;
+            Pots.Investments = savings;
         }
         
-        public void SetEmergencyFund(decimal savings)
+        public void SetEmergencyFund(decimal emergencyFund)
         {
-            EmergencyFund = savings;
+            Pots.EmergencyFund = emergencyFund;
         }
 
         public void PayTaxAndBankTheRemainder()
@@ -179,49 +153,8 @@ namespace Calculator
 
             var newIncome = AfterTaxSalary + AfterTaxPrivatePensionIncome + AfterTaxStatePension;
 
-            var requiredCash = _person.EmergencyFundSpec.RequiredSavings(Spending);
-
-            var newlyRequiredCash = requiredCash - EmergencyFund;
-
-            if(newlyRequiredCash > 0 && newIncome >= newlyRequiredCash)//income more than fills the cash requirement then assign the relevant amount to cash and remainder to investments
-            {
-                EmergencyFund = requiredCash;
-                Savings += newIncome - newlyRequiredCash;
-            }
-            else if(newlyRequiredCash > 0 && newIncome < newlyRequiredCash) //income fails to fill the cash requirement then assign all income to cash.
-            {
-                EmergencyFund += newIncome;
-            }
-            else
-            {
-                Savings += newIncome;
-            }
-            
-            RebalanceInvestmentsAndCashSavings();
-        }
-
-        private void RebalanceInvestmentsAndCashSavings()
-        {
-            var requiredCash = _person.EmergencyFundSpec.RequiredSavings(Spending);
-            if (EmergencyFund < requiredCash)
-            {
-                var newlyRequiredAmount = requiredCash - EmergencyFund;
-                if (Savings > newlyRequiredAmount)
-                {
-                    EmergencyFund = requiredCash;
-                    Savings -= newlyRequiredAmount;
-                }
-                else
-                {
-                    EmergencyFund += Savings;
-                    Savings = 0;
-                }
-            }
-            else
-            {
-                Savings += EmergencyFund - requiredCash;
-                EmergencyFund = requiredCash;
-            }
+            Pots.AssignIncome(newIncome);
+            Pots.Rebalance();
         }
     }
 }

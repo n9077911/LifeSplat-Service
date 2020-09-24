@@ -78,7 +78,7 @@ namespace Calculator
                     foreach (var resultPerson in result.Persons)
                     {
                         resultPerson.MinimumPossibleRetirementDate = result.PrimaryPerson.CalcMinimumSteps.CurrentStep.Date;
-                        resultPerson.SavingsAtMinimumPossiblePensionAge =  Convert.ToInt32(result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum());
+                        resultPerson.SavingsAtMinimumPossiblePensionAge =  Convert.ToInt32(result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Investments).Sum());
                     }
                     calcdMinimum = true;
                 }
@@ -101,18 +101,20 @@ namespace Calculator
             var privatePensionAmounts = result.Persons.Select(p => new{p, p.CalcMinimumSteps.CurrentStep.PrivatePensionAmount})
                 .ToDictionary(arg => arg.p, arg=>arg.PrivatePensionAmount);
 
-            var runningInvestments = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Savings).Sum();
+            var runningInvestments = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Investments).Sum();
             var emergencyFund = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.EmergencyFund).Sum();
+            var pots = new MoneyPots(runningInvestments, emergencyFund, result.MonthlySpendingAt(primaryStep.Date));
+
             var emergencyFundMet = false;
             
             for (var month = 1; month <= monthsToDeath; month++)
             {
                 var newIncome = 0m;
                 var monthlySpending = result.MonthlySpendingAt(primaryStep.Date.AddMonths(month));
-
-                (emergencyFund, runningInvestments) = ApplySpending(monthlySpending, emergencyFund, runningInvestments);
-                        
-                newIncome += runningInvestments * _assumptions.MonthlyGrowthRate;
+                var requiredCash = result.Persons.Select(p => p.Person.EmergencyFundSpec.RequiredEmergencyFund(monthlySpending / result.Persons.Count())).Sum();
+                pots = MoneyPots.From(pots, requiredCash);
+                pots.AssignSpending(monthlySpending);
+                newIncome += pots.Investments * _assumptions.MonthlyGrowthRate;
                 
                 foreach (var person in result.Persons)
                 {
@@ -131,89 +133,17 @@ namespace Calculator
                         privatePensionAmounts[person] += monthlyPrivatePensionGrowth;
                 }
                 
-                var requiredCash = result.Persons.Select(p => p.Person.EmergencyFundSpec.RequiredSavings(monthlySpending / result.Persons.Count())).Sum();
-                
-                (emergencyFund, runningInvestments) = AssignIncomeToRelevantPot(requiredCash, newIncome, emergencyFund, runningInvestments);
-                (emergencyFund, runningInvestments) = RebalanceInvestmentsAndCashSavings(requiredCash, emergencyFund, runningInvestments);
+                pots.AssignIncome(newIncome);
+                pots.Rebalance();
 
-                if (emergencyFund >= requiredCash)
+                if (pots.EmergencyFund >= requiredCash)
                     emergencyFundMet = true;
                     
-                if (emergencyFundMet && runningInvestments <= minimumCash)
+                if (emergencyFundMet && pots.Investments <= minimumCash)
                     return false;
             }
 
             return emergencyFundMet;
-        }
-
-        private static (decimal, decimal) ApplySpending(decimal monthlySpending, decimal emergencyFund, decimal investments)
-        {
-            if (investments > monthlySpending)
-                investments -= monthlySpending;
-            else
-            {
-                var spendingToAssign = monthlySpending - investments;
-                investments = 0;
-                if (emergencyFund > spendingToAssign)
-                {
-                    emergencyFund -= spendingToAssign;
-                }
-                else
-                {
-                    spendingToAssign = spendingToAssign - emergencyFund;
-                    emergencyFund = 0;
-                    investments -= spendingToAssign;
-                }
-            }
-
-            return (emergencyFund, investments);
-        }
-
-        private (decimal, decimal) RebalanceInvestmentsAndCashSavings(decimal requiredCash, decimal emergencyFund, decimal investments)
-        {
-            var newlyRequiredAmount = requiredCash - emergencyFund;
-            if (emergencyFund < requiredCash)
-            {
-                if (investments > newlyRequiredAmount)
-                {
-                    emergencyFund = requiredCash;
-                    investments -= newlyRequiredAmount;
-                }
-                else
-                {
-                    emergencyFund += investments;
-                    investments = 0;
-                }
-            }
-            else
-            {
-                investments += emergencyFund - requiredCash;
-                emergencyFund = requiredCash;
-            }
-
-            return (emergencyFund, investments);
-        }
-
-        private static (decimal, decimal) AssignIncomeToRelevantPot(decimal requiredCash, decimal newIncome, decimal emergencyFund, decimal investments)
-        {
-
-            var newlyRequiredCash = requiredCash - emergencyFund;
-
-            if (newlyRequiredCash > 0 && newIncome >= newlyRequiredCash) //income more than fills the cash requirement then assign the relevant amount to cash and remainder to investments
-            {
-                emergencyFund = requiredCash;
-                investments += newIncome - newlyRequiredCash;
-            }
-            else if (newlyRequiredCash > 0 && newIncome < newlyRequiredCash) //income fails to fill the cash requirement then assign all income to cash.
-            {
-                emergencyFund += newIncome;
-            }
-            else
-            {
-                investments += newIncome;
-            }
-
-            return (emergencyFund, investments);
         }
 
         private int MonthsToDeath(DateTime dob, DateTime now)

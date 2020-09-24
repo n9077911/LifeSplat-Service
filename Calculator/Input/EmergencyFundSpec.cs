@@ -23,7 +23,7 @@ namespace Calculator.Input
                 _amount = decimal.Parse(amount == "" ? "0" : amount);
         }
 
-        public decimal RequiredSavings(decimal spending)
+        public decimal RequiredEmergencyFund(decimal spending)
         {
             if (_isMonths)
                 return spending * _months;
