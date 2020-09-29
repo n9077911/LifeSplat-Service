@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ServiceLayer.Models;
 using ServiceLayer.Models.DTO;
 
@@ -18,9 +17,9 @@ namespace ServiceLayer.Controllers
 
         // GET: api/TaxResults
         [HttpGet("{amount}")]
-        public async Task<ActionResult<TaxResultDto>> GetTaxResult(int amount)
+        public TaxResultDto GetTaxResult(int amount)
         {
-            return await Task.Run(() => _taxCalculator.TaxFor(amount));
+            return _taxCalculator.TaxFor(amount);
         }
     }
 }

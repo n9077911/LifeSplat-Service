@@ -23,23 +23,15 @@ namespace Calculator.Output
             NationalInsuranceBill = Convert.ToInt32(taxResult.NationalInsurance);
             IncomeTaxBill = Convert.ToInt32(taxResult.IncomeTax);
 
-            CalcMinimumSteps = new StepsReport(person, StepType.CalcMinimum, now, assumptions, monthlySpendingAt, PrivatePensionDate);
-            TargetSteps = new StepsReport(person, StepType.GivenDate, now, assumptions, monthlySpendingAt, PrivatePensionDate);
-            PrimarySteps = targetDateGiven ? TargetSteps : CalcMinimumSteps;
-            StepReports = new List<StepsReport> {CalcMinimumSteps};
-            if(targetDateGiven)
-                StepReports.Add(TargetSteps);
+            StepReport = targetDateGiven 
+                ? new StepsReport(person, StepType.GivenDate, now, assumptions, monthlySpendingAt, PrivatePensionDate) 
+                : new StepsReport(person, StepType.CalcMinimum, now, assumptions, monthlySpendingAt, PrivatePensionDate);
+            
         }
 
         public Person Person { get; }
 
-        public List<StepsReport> StepReports { get; }
-
-        public StepsReport CalcMinimumSteps { get; }
-        public StepsReport TargetSteps { get; }
-        //Between calc minimum and target retirement date steps... which are considered primary? i.e. which does the user want to see.
-        public StepsReport PrimarySteps { get; }
-
+        public StepsReport StepReport { get; }
 
         public decimal MonthlySalaryAfterDeductions { get; }
         public int NationalInsuranceBill { get; }
@@ -63,5 +55,9 @@ namespace Calculator.Output
         public int SavingsCombinedAtPrivatePensionAge { get; set; }
         public int SavingsCombinedAtStatePensionAge { get; set; }
         public int PrivatePensionPotAtPrivatePensionAge { get; set; }
+        public void UpdateMinimumPossibleRetirementDate(in DateTime minimumPossibleRetirementDate)
+        {
+            MinimumPossibleRetirementDate = minimumPossibleRetirementDate;
+        }
     }
 }

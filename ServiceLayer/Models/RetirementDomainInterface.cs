@@ -3,6 +3,7 @@ using System.Linq;
 using Calculator;
 using Calculator.ExternalInterface;
 using Calculator.Input;
+using System.Threading.Tasks;
 using ServiceLayer.Models.DTO;
 
 namespace ServiceLayer.Models
@@ -19,7 +20,7 @@ namespace ServiceLayer.Models
             _retirementCalculator = retirementCalculator;
         }
 
-        public RetirementReportDto RetirementReportFor(int? targetRetirementAge, string emergencyFund, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
+        public async Task<RetirementReportDto> RetirementReportForAsync(int? targetRetirementAge, string emergencyFund, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
         {
             var emergencyFundSpec = new EmergencyFundSpec(emergencyFund);
             if (persons.Count() == 2)
@@ -28,10 +29,10 @@ namespace ServiceLayer.Models
             var personsStatuses = persons.Select(p => PersonStatus(p, emergencyFundSpec));
             var spendingStepInputs = spendingSteps.Select(dto =>
             {
-                var date = dto.Date ?? personsStatuses.First().Dob.AddYears(dto.Age.Value);
+                var date = dto.Date ?? personsStatuses.First().Dob.AddYears(dto.Age);
                 return new SpendingStep(date, dto.Amount);
             });
-            var retirementReport = _retirementCalculator.ReportForTargetAge(personsStatuses, spendingStepInputs, targetRetirementAge);
+            var retirementReport = await _retirementCalculator.ReportForTargetAgeAsync(personsStatuses, spendingStepInputs, targetRetirementAge);
 
             var result = new RetirementReportDto(retirementReport);
             return result;

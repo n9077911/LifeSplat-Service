@@ -7,10 +7,7 @@ namespace Calculator.Output
     public interface IPersonReport
     {
         Person Person { get; }
-        List<StepsReport> StepReports { get; }
-        StepsReport CalcMinimumSteps { get; }
-        StepsReport TargetSteps { get; }
-        StepsReport PrimarySteps { get; }
+        StepsReport StepReport { get; }
         decimal MonthlySalaryAfterDeductions { get; }
         int NationalInsuranceBill { get; }
         int IncomeTaxBill { get; }
@@ -31,5 +28,6 @@ namespace Calculator.Output
         int SavingsCombinedAtPrivatePensionAge { get; set; }
         int SavingsCombinedAtStatePensionAge { get; set; }
         int PrivatePensionPotAtPrivatePensionAge { get; set; }
+        void UpdateMinimumPossibleRetirementDate(in DateTime minimumPossibleRetirementDate);
     }
 }

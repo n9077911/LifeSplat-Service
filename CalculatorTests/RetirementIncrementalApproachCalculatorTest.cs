@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using CalculatorTests.Stubs;
 using NUnit.Framework;
 using Calculator;
@@ -20,11 +22,11 @@ namespace CalculatorTests
         private readonly FixedStatePensionAmountCalculator _fixedStatePensionAmountCalculator = new FixedStatePensionAmountCalculator(9110.4m);
 
         [Test]
-        public void KnowsWhenASalariedWorkerCanRetire_ThisYear()
+        public async Task KnowsWhenASalariedWorkerCanRetire_ThisYear()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _fixedStatePensionAmountCalculator);
-            var report = calc.ReportFor(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
-                new []{new SpendingStep(_fixedDateProvider.Now(), 100)});
+            var report = await calc.ReportForAsync(new Family(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
+                new []{new SpendingStep(_fixedDateProvider.Now(), 100)}));
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2020, 02, 1)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(38));
@@ -36,11 +38,11 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void KnowsWhenASalariedWorkerCanRetire_NextYear()
+        public async Task KnowsWhenASalariedWorkerCanRetire_NextYear()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var report = calc.ReportFor(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)}, new[]{new SpendingStep(_fixedDateProvider.Now(), 2_500)});
+            var report = await calc.ReportForAsync(new Family(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)}, new[]{new SpendingStep(_fixedDateProvider.Now(), 2_500)}));
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2021, 12, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(40));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("1 Year and 11 Months"));
@@ -48,7 +50,7 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void KnowsWhenTwoSimplePeopleCanRetire()
+        public async Task KnowsWhenTwoSimplePeopleCanRetire()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
@@ -58,7 +60,7 @@ namespace CalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)};
-            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
         
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2038, 04, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(56));
@@ -66,12 +68,12 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void KnowsWhenASalariedWorkerCanRetire_CloseToStatePensionAge()
+        public async Task KnowsWhenASalariedWorkerCanRetire_CloseToStatePensionAge()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var report = calc.ReportFor(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
-                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+            var report = await calc.ReportForAsync(new Family(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
+                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2048, 08, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(67));
@@ -82,13 +84,12 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void KnowsWhenAWorkerCanRetire_ConsideringExistingSavings()
+        public async Task KnowsWhenAWorkerCanRetire_ConsideringExistingSavings()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var report = calc.ReportFor(new Person
-                {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
-                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+            var report = await calc.ReportForAsync(new Family(new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
+                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2042, 12, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(61));
@@ -99,13 +100,12 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenAWorkerCanRetire_ConsideringEmergencyFundRequirement()
+        public async Task KnowsWhenAWorkerCanRetire_ConsideringEmergencyFundRequirement()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
             var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), EmergencyFundSpec = new EmergencyFundSpec("10000")};
-            var report = calc.ReportFor(person,
-                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+            var report = await calc.ReportForAsync(new Family(person, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2043, 12, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(62));
@@ -117,13 +117,13 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenAWorkerCanRetire_ConsideringEmergencyFundRequirement_And_DownwardSpendingStep()
+        public async Task KnowsWhenAWorkerCanRetire_ConsideringEmergencyFundRequirement_And_DownwardSpendingStep()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
             var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), EmergencyFundSpec = new EmergencyFundSpec("10000")};
-            var report = calc.ReportFor(person,
-                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000), new SpendingStep(_fixedDateProvider.Now().AddYears(10), 15_000)});
+            var report = await calc.ReportForAsync(new Family(person,
+                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000), new SpendingStep(_fixedDateProvider.Now().AddYears(10), 15_000)}));
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2037, 01, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(55));
@@ -135,29 +135,28 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenAWorkerCanRetire_ConsideringVeryLargeEmergencyFundRequirement()
+        public async Task KnowsWhenAWorkerCanRetire_ConsideringVeryLargeEmergencyFundRequirement()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
             var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), EmergencyFundSpec = new EmergencyFundSpec("1000000")};
-            var report = calc.ReportFor(person,
-                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+            var report = await calc.ReportForAsync(new Family(person, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(0001, 01, 01)));
             Assert.That(report.SavingsAt100, Is.EqualTo(520_809));
         }
 
         [Test]
-        public void KnowsWhenAWorkerCanRetire_ConsideringPrivatePension_CalcMinimumMode()
+        public async Task KnowsWhenAWorkerCanRetire_ConsideringPrivatePension_CalcMinimumMode()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
-            var report = calc.ReportFor(new Person
+            var report = await calc.ReportForAsync(new Family(new Person
             {
                 ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30),
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             },
-                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+                new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2039, 08, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(58));
@@ -169,10 +168,10 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenAHighEarningWomanCanRetire()
+        public async Task KnowsWhenAHighEarningWomanCanRetire()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, new PensionAgeCalc(), _statePensionCalculator);
-            var report = calc.ReportFor(new Person
+            var report = await calc.ReportForAsync(new Family(new Person
             {
                 Salary = 100_000, 
                 Dob = new DateTime(1981, 05, 30), 
@@ -181,7 +180,7 @@ namespace CalculatorTests
                 ExistingPrivatePension = 100_000,
                 EmployerContribution = 0.03m,
                 EmployeeContribution = 0.05m,
-            }, new []{new SpendingStep(_fixedDateProvider.Now(), 40_000), new SpendingStep(_fixedDateProvider.Now().AddYears(10), 30_000)});
+            }, new []{new SpendingStep(_fixedDateProvider.Now(), 40_000), new SpendingStep(_fixedDateProvider.Now().AddYears(10), 30_000)}));
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 12, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
@@ -195,18 +194,18 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenAComplexPersonCanRetire_CalculatingAtEndOfTheMonth()
+        public async Task KnowsWhenAComplexPersonCanRetire_CalculatingAtEndOfTheMonth()
         {
             var eomDate = new FixedDateProvider(new DateTime(2020, 5, 31));
             var calc = new RetirementIncrementalApproachCalculator(eomDate, _assumptions, _pensionAgeCalc,
                 new StatePensionAmountCalculator(eomDate, new TwentyTwentyTaxSystem()));
             
-            var report = calc.ReportFor(new Person
+            var report = await calc.ReportForAsync(new Family(new Person
             {
                 ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30),
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             },
-            new []{new SpendingStep(eomDate.Now(), 20_000), new SpendingStep(eomDate.Now(), 18_000)});
+            new []{new SpendingStep(eomDate.Now(), 20_000), new SpendingStep(eomDate.Now(), 18_000)}));
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2036, 04, 28)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(54));
@@ -218,15 +217,15 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void KnowsWhenAWorkerCanRetire_WithTargetRetirementDateGiven()
+        public async Task KnowsWhenAWorkerCanRetire_WithTargetRetirementDateGiven()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
-            var status = new Person
+            var status = new []{new Person
             {
                 ExistingSavings = 50_000, Salary = 100_000, Dob = new DateTime(1981, 05, 30),
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
-            };
-            var report = calc.ReportFor(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, new DateTime(2026, 05, 30));
+            }};
+            var report = await calc.ReportForAsync(new Family(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}), new DateTime(2026, 05, 30));
 
             Assert.That(report.TargetRetirementDate, Is.EqualTo(new DateTime(2026, 05, 30)));
             Assert.That(report.TargetRetirementAge, Is.EqualTo(45));
@@ -239,16 +238,16 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void Reconciles_RetirementDateGivenMode_WithCalcMinimumMode()
+        public async Task Reconciles_RetirementDateGivenMode_WithCalcMinimumMode()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
-            var status = new Person
+            var person = new[]{new Person
             {
                 ExistingSavings = 50_000, Salary = 100_000, Dob = new DateTime(1981, 05, 30),
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
-            };
+            }};
 
-            var report = calc.ReportFor(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+            var report = await calc.ReportForAsync(new Family(person, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
             Assert.That(report.SavingsAt100, Is.EqualTo(1_612));
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(150_664));
@@ -256,7 +255,7 @@ namespace CalculatorTests
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
 
             //validate earliest possible retirement date
-            var report2 = calc.ReportFor(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, report.MinimumPossibleRetirementDate);
+            var report2 = await calc.ReportForAsync(new Family(person, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}), report.MinimumPossibleRetirementDate);
             Assert.That(report2.SavingsAt100, Is.EqualTo(report.SavingsAt100));
             Assert.That(report2.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge));
             Assert.That(report2.PrimaryPerson.AnnualStatePension, Is.EqualTo(report.PrimaryPerson.AnnualStatePension));
@@ -264,7 +263,7 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void Reconcile_RetirementAgeGivenMode_With_CalcMinimumMode_WhenMinimumComesBeforeTarget()
+        public async Task Reconcile_RetirementAgeGivenMode_With_CalcMinimumMode_WhenMinimumComesBeforeTarget()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
             var status = new Person
@@ -273,13 +272,13 @@ namespace CalculatorTests
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             };
 
-            var report = calc.ReportForTargetAge(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 50);
+            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 50);
             Assert.That(report.SavingsAt100, Is.EqualTo(3_199_745));
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
 
-            var report2 = calc.ReportFor(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+            var report2 = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
             Assert.That(report2.SavingsAt100, Is.EqualTo(1_612));
             Assert.That(report2.MinimumPossibleRetirementDate, Is.EqualTo(report.MinimumPossibleRetirementDate));
             Assert.That(report2.MinimumPossibleRetirementAge, Is.EqualTo(report.MinimumPossibleRetirementAge));
@@ -287,7 +286,7 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void KnowsWhenAWorkerCanRetire_WhenMinimumComesAfterTarget()
+        public async Task KnowsWhenAWorkerCanRetire_WhenMinimumComesAfterTarget()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
             var status = new Person
@@ -296,7 +295,7 @@ namespace CalculatorTests
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             };
 
-            var report = calc.ReportForTargetAge(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 42);
+            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 42);
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
@@ -304,33 +303,33 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void KnowsWhenSomeoneWillGoBankrupt_WhenCalculatingMinimum()
+        public async Task KnowsWhenSomeoneWillGoBankrupt_WhenCalculatingMinimum()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
             var status = new Person {Salary = 20_000, Dob = new DateTime(1981, 05, 30)};
 
-            var report = calc.ReportForTargetAge(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2076, 06, 01)));
             Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2020, 02, 01)));
         }
 
         [Test]
-        public void KnowsWhenSomeoneWillGoBankrupt_WhenTargetDateGiven()
+        public async Task KnowsWhenSomeoneWillGoBankrupt_WhenTargetDateGiven()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
             var status = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30)};
 
-            var report = calc.ReportForTargetAge(status, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 42);
+            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 42);
 
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2034, 06, 01)));
             Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2026, 09, 01)));
         }
         
         [Test]
-        public void KnowsWhenTwoComplexWorkingPeopleCanRetire()
+        public async Task KnowsWhenTwoComplexWorkingPeopleCanRetire()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
@@ -341,7 +340,7 @@ namespace CalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
-            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
         
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 07, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
@@ -352,7 +351,7 @@ namespace CalculatorTests
         
         //currently one of 2 tests that that inspects the separate person reports.
         [Test]
-        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_WithSecondPersonOlderThanFirstPerson()
+        public async Task KnowsWhenTwoComplexWorkingPeopleCanRetire_WithSecondPersonOlderThanFirstPerson()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
@@ -363,7 +362,7 @@ namespace CalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
-            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
         
             Assert.That(report.Persons[0].MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 05, 01)));
             Assert.That(report.Persons[0].MinimumPossibleRetirementAge, Is.EqualTo(48));
@@ -386,7 +385,7 @@ namespace CalculatorTests
 
         //currently one of 2 tests that that inspects the separate person reports.
         [Test]
-        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_WithFirstPersonOlderThanFirstPerson()
+        public async Task KnowsWhenTwoComplexWorkingPeopleCanRetire_WithFirstPersonOlderThanFirstPerson()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
@@ -397,7 +396,7 @@ namespace CalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
-            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
         
             Assert.That(report.Persons[0].MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 02, 01)));
             Assert.That(report.Persons[0].MinimumPossibleRetirementAge, Is.EqualTo(58));
@@ -419,8 +418,10 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_WhoChooseToRetire_After_PrivatePensionAge()
+        public async Task KnowsWhenTwoComplexWorkingPeopleCanRetire_WhoChooseToRetire_After_PrivatePensionAge()
         {
+            //.44 with target date
+            //.35 without target date
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
             var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
@@ -428,10 +429,12 @@ namespace CalculatorTests
             var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m};
 
+            var startNew = Stopwatch.StartNew();
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
-            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs), new DateTime(2044, 06, 01));
-        
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs), new DateTime(2044, 06, 01));
+            Console.WriteLine(startNew.Elapsed);
+            
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 07, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
             Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
@@ -444,7 +447,7 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenTwoComplexPeopleCanRetire_WhoChooseToRetire_Before_PrivatePensionAge()
+        public async Task KnowsWhenTwoComplexPeopleCanRetire_WhoChooseToRetire_Before_PrivatePensionAge()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
@@ -455,7 +458,7 @@ namespace CalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
-            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs), new DateTime(2034, 06, 01));
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs), new DateTime(2034, 06, 01));
         
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 07, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
@@ -469,7 +472,7 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenTwoIdenticalPeopleCanRetire()
+        public async Task KnowsWhenTwoIdenticalPeopleCanRetire()
         {
             //two identical people should be able to retire at the same time as an identical individuals
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
@@ -482,10 +485,10 @@ namespace CalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
-            var couple = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            var couple = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
             IEnumerable<Person> personStatuses1 = new[] {person1};
             IEnumerable<SpendingStep> spendingStepInputs1 = new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)};
-            var single = calc.ReportFor(new Family(personStatuses1, spendingStepInputs1));
+            var single = await calc.ReportForAsync(new Family(personStatuses1, spendingStepInputs1));
 
             Assert.That(couple.MinimumPossibleRetirementDate, Is.EqualTo(single.MinimumPossibleRetirementDate));
             Assert.That(couple.MinimumPossibleRetirementAge, Is.EqualTo(single.MinimumPossibleRetirementAge));
@@ -494,7 +497,7 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void KnowsWhenTwoPeopleCanRetire_ConsideringGivenNiContributions()
+        public async Task KnowsWhenTwoPeopleCanRetire_ConsideringGivenNiContributions()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
             
@@ -503,7 +506,7 @@ namespace CalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
-            var couple = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            var couple = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
             Assert.That(couple.Persons[0].AnnualStatePension, Is.EqualTo(3_904));
             Assert.That(couple.Persons[1].AnnualStatePension, Is.EqualTo(5_206));
             Assert.That(couple.Persons[0].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(0));
@@ -512,7 +515,7 @@ namespace CalculatorTests
         }
 
         [Test]
-        public void KnowsWhenTwoPeopleCanRetire_ConsidersSteppedSpending()
+        public async Task KnowsWhenTwoPeopleCanRetire_ConsidersSteppedSpending()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
@@ -527,7 +530,7 @@ namespace CalculatorTests
             var person2 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30)};
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
-            var report = calc.ReportFor(new Family(personStatuses, spendingSteps));
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingSteps));
             
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 06, 01)));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(400_203));
@@ -535,7 +538,7 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenTwoPeopleCanRetire_WhenTodayDayIsGreaterThanBirthDate()
+        public async Task KnowsWhenTwoPeopleCanRetire_WhenTodayDayIsGreaterThanBirthDate()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
@@ -547,7 +550,7 @@ namespace CalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new[]{new SpendingStep(new DateTime(2020, 1, todayDay), 20000)};
-            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
             
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2026, 09, 01)));
             Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(420_051));
@@ -555,7 +558,7 @@ namespace CalculatorTests
         }
         
         [Test]
-        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_ConsideringEmergencyFundRequirement()
+        public async Task KnowsWhenTwoComplexWorkingPeopleCanRetire_ConsideringEmergencyFundRequirement()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
@@ -566,12 +569,12 @@ namespace CalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000), new SpendingStep(_fixedDateProvider.Now(), 50_000)};
-            var report = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
         
-            Assert.That(report.Persons.First().PrimarySteps.Steps.First().EmergencyFund, Is.EqualTo(10_000));
-            Assert.That(report.Persons.First().PrimarySteps.Steps.Last().EmergencyFund, Is.EqualTo(10_000));
-            Assert.That(report.Persons.Last().PrimarySteps.Steps.First().EmergencyFund, Is.EqualTo(10_000));
-            Assert.That(report.Persons.Last().PrimarySteps.Steps.Last().EmergencyFund, Is.EqualTo(10_000));
+            Assert.That(report.Persons.First().StepReport.Steps.First().EmergencyFund, Is.EqualTo(10_000));
+            Assert.That(report.Persons.First().StepReport.Steps.Last().EmergencyFund, Is.EqualTo(10_000));
+            Assert.That(report.Persons.Last().StepReport.Steps.First().EmergencyFund, Is.EqualTo(10_000));
+            Assert.That(report.Persons.Last().StepReport.Steps.Last().EmergencyFund, Is.EqualTo(10_000));
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2035, 09, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(54));
             Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(533_905));
@@ -580,7 +583,7 @@ namespace CalculatorTests
         } 
 
         [Test]
-        public void KnowsWhenTwoComplexWorkingPeopleCanRetire_ConsideringEmergencyFundRequirement_ExpressedAsANumberOfMonths()
+        public async Task KnowsWhenTwoComplexWorkingPeopleCanRetire_ConsideringEmergencyFundRequirement_ExpressedAsANumberOfMonths()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
 
@@ -591,7 +594,7 @@ namespace CalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 50_000)};
-            var reportExpressedAsANumber = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            var reportExpressedAsANumber = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
             
             person1.EmergencyFundSpec =  new EmergencyFundSpec("24m"); //each person spends 25k, so 24m*25k == 50k
             person2.EmergencyFundSpec = new EmergencyFundSpec("24m");
@@ -599,7 +602,7 @@ namespace CalculatorTests
             personStatuses = new[] {person1, person2};
             spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 50_000)};
 
-            var reportExpressedAsMonths = calc.ReportFor(new Family(personStatuses, spendingStepInputs));
+            var reportExpressedAsMonths = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
         
             Assert.That(reportExpressedAsANumber.SavingsAt100, Is.EqualTo(reportExpressedAsMonths.SavingsAt100));
         } 
