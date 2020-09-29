@@ -20,12 +20,9 @@ namespace ServiceLayer.Controllers
         [HttpPost("Report")]
         public async Task<RetirementReportDto> Report([FromBody] string body)
         {
-            return await Task.Run(() =>
-            {
-                var options = new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
-                var request = JsonSerializer.Deserialize<RetirementReportRequestDto>(body, options);
-                return _retirement.RetirementReportFor(request.TargetRetirementAge, request.EmergencyFund, request.SpendingSteps, request.Persons);
-            });
+            var options = new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
+            var request = JsonSerializer.Deserialize<RetirementReportRequestDto>(body, options);
+            return await _retirement.RetirementReportForAsync(request.TargetRetirementAge, request.EmergencyFund, request.SpendingSteps, request.Persons);
         }
     }
 }

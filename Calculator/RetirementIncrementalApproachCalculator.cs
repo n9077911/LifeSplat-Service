@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Calculator.ExternalInterface;
 using Calculator.Input;
 using Calculator.Output;
@@ -31,24 +32,38 @@ namespace Calculator
             _now = dateProvider.Now();
         }
 
-        public IRetirementReport ReportForTargetAge(Person person, IEnumerable<SpendingStep> spendingStepInputs, int? retirementAge = null)
-        {
-            return ReportForTargetAge(new[] {person}, spendingStepInputs, retirementAge);
-        }
-
-        public IRetirementReport ReportForTargetAge(IEnumerable<Person> personStatus, IEnumerable<SpendingStep> spendingStepInputs, int? retirementAge = null)
+        public async Task<IRetirementReport> ReportForTargetAgeAsync(IEnumerable<Person> personStatus, IEnumerable<SpendingStep> spendingStepInputs, int? retirementAge = null)
         {
             var retirementDate = retirementAge.HasValue && retirementAge.Value != 0 ? personStatus.First().Dob.AddYears(retirementAge.Value) : (DateTime?) null;
-            return ReportFor(new Family(personStatus, spendingStepInputs), retirementDate);
+            return await ReportForAsync(new Family(personStatus, spendingStepInputs), retirementDate);
         }
 
-        public IRetirementReport ReportFor(Person person, IEnumerable<SpendingStep> spendingStepInputs, DateTime? givenRetirementDate = null)
+        public async Task<IRetirementReport> ReportForAsync(Family family, DateTime? givenRetirementDate = null)
         {
-            IEnumerable<Person> personStatuses = new[] {person};
-            return ReportFor(new Family(personStatuses, spendingStepInputs), givenRetirementDate);
+            if (givenRetirementDate != null)
+            {
+                var retirementDateTask = Task.Run(() => ReportFor(family, false, givenRetirementDate));
+                var earliestPossibleTask = Task.Run(() => ReportFor(family, true));
+
+                await retirementDateTask;
+                await earliestPossibleTask;
+
+                var retirementDateResult = retirementDateTask.Result;
+                var earliestPossible = earliestPossibleTask.Result;
+
+                retirementDateResult.UpdateMinimumPossibleInfo(earliestPossible.MinimumPossibleRetirementDate, earliestPossible.SavingsAtMinimumPossiblePensionAge);
+
+                retirementDateResult.ProcessResults(givenRetirementDate, _now);
+
+                return retirementDateResult;
+            }
+
+            var report = ReportFor(family);
+            report.ProcessResults(givenRetirementDate, _now);
+            return report;
         }
 
-        public IRetirementReport ReportFor(Family family, DateTime? givenRetirementDate = null)
+        private IRetirementReport ReportFor(Family family, bool exitOnceMinCalcd = false, DateTime? givenRetirementDate = null)
         {
             _incomeTaxCalculator = new IncomeTaxCalculator();
             var result = new RetirementReport(_pensionAgeCalc, _incomeTaxCalculator, family, _now, givenRetirementDate, _assumptions);
@@ -60,53 +75,49 @@ namespace Calculator
             for (var month = 1; month <= MonthsToDeath(family.PrimaryPerson.Dob, _now); month++)
             {
                 foreach (var person in result.Persons)
-                    foreach (var stepDescription in person.StepReports)
-                    {
-                        stepDescription.NewStep(calcdMinimum, result, result.Persons.Count, givenRetirementDate);
-                        stepDescription.UpdateSpending();
-                        stepDescription.UpdateGrowth();
-                        stepDescription.UpdateStatePensionAmount(_statePensionAmountCalculator, person.StatePensionDate);
-                        stepDescription.UpdatePrivatePension();
-                        stepDescription.UpdateSalary(person.MonthlySalaryAfterDeductions);
-                        stepDescription.ProcessTaxableIncomeIntoSavings();
-                    }
+                {
+                    person.StepReport.NewStep(calcdMinimum, result, result.Persons.Count, givenRetirementDate);
+                    person.StepReport.UpdateSpending();
+                    person.StepReport.UpdateGrowth();
+                    person.StepReport.UpdateStatePensionAmount(_statePensionAmountCalculator, person.StatePensionDate);
+                    person.StepReport.UpdatePrivatePension();
+                    person.StepReport.UpdateSalary(person.MonthlySalaryAfterDeductions);
+                    person.StepReport.ProcessTaxableIncomeIntoSavings();
+                }
 
                 result.BalanceSavings();
-                
-                if (!calcdMinimum && IsThatEnoughTillDeath(emergencyFund, result))
+
+                if (givenRetirementDate == null && !calcdMinimum && IsThatEnoughTillDeath(emergencyFund, result))
                 {
                     foreach (var resultPerson in result.Persons)
                     {
-                        resultPerson.MinimumPossibleRetirementDate = result.PrimaryPerson.CalcMinimumSteps.CurrentStep.Date;
-                        resultPerson.SavingsAtMinimumPossiblePensionAge =  Convert.ToInt32(result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Investments).Sum());
+                        resultPerson.MinimumPossibleRetirementDate = result.PrimaryPerson.StepReport.CurrentStep.Date;
+                        resultPerson.SavingsAtMinimumPossiblePensionAge = Convert.ToInt32(result.Persons.Select(p => p.StepReport.CurrentStep.Investments).Sum());
                     }
+
+                    if (exitOnceMinCalcd)
+                        return result;
                     calcdMinimum = true;
                 }
             }
 
-            result.UpdateResultsBasedOnSetDates();
-            result.UpdatePersonResults();
-            result.TimeToRetirement = new DateAmount(_now, result.MinimumPossibleRetirementDate);
-            result.TargetRetirementDate = givenRetirementDate;
-            result.TargetRetirementAge = result.TargetRetirementDate.HasValue ? AgeCalc.Age(family.PrimaryPerson.Dob, result.TargetRetirementDate.Value) : (int?) null;
-
             return result;
         }
-        
+
         private bool IsThatEnoughTillDeath(int minimumCash, IRetirementReport result)
         {
-            var primaryStep = result.PrimaryPerson.CalcMinimumSteps.CurrentStep;
+            var primaryStep = result.PrimaryPerson.StepReport.CurrentStep;
             var monthsToDeath = MonthsToDeath(result.PrimaryPerson.Person.Dob, primaryStep.Date);
 
-            var privatePensionAmounts = result.Persons.Select(p => new{p, p.CalcMinimumSteps.CurrentStep.PrivatePensionAmount})
-                .ToDictionary(arg => arg.p, arg=>arg.PrivatePensionAmount);
+            var privatePensionAmounts = result.Persons.Select(p => new {p, p.StepReport.CurrentStep.PrivatePensionAmount})
+                .ToDictionary(arg => arg.p, arg => arg.PrivatePensionAmount);
 
-            var runningInvestments = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.Investments).Sum();
-            var emergencyFund = result.Persons.Select(p => p.CalcMinimumSteps.CurrentStep.EmergencyFund).Sum();
+            var runningInvestments = result.Persons.Select(p => p.StepReport.CurrentStep.Investments).Sum();
+            var emergencyFund = result.Persons.Select(p => p.StepReport.CurrentStep.EmergencyFund).Sum();
             var pots = new MoneyPots(runningInvestments, emergencyFund, result.MonthlySpendingAt(primaryStep.Date));
 
             var emergencyFundMet = false;
-            
+
             for (var month = 1; month <= monthsToDeath; month++)
             {
                 var newIncome = 0m;
@@ -115,13 +126,13 @@ namespace Calculator
                 pots = MoneyPots.From(pots, requiredCash);
                 pots.AssignSpending(monthlySpending);
                 newIncome += pots.Investments * _assumptions.MonthlyGrowthRate;
-                
+
                 foreach (var person in result.Persons)
                 {
                     var annualisedPrivatePensionGrowth = privatePensionAmounts[person] * _assumptions.AnnualGrowthRate;
                     var monthlyPrivatePensionGrowth = privatePensionAmounts[person] * _assumptions.MonthlyGrowthRate;
-                    var annualStatePension = person.CalcMinimumSteps.CurrentStep.PredictedStatePensionAnnual;
-                    
+                    var annualStatePension = person.StepReport.CurrentStep.PredictedStatePensionAnnual;
+
                     var taxResult = _incomeTaxCalculator.TaxFor(0, annualisedPrivatePensionGrowth, annualStatePension);
 
                     if (primaryStep.Date.AddMonths(month) > person.StatePensionDate)
@@ -132,13 +143,13 @@ namespace Calculator
                     else
                         privatePensionAmounts[person] += monthlyPrivatePensionGrowth;
                 }
-                
+
                 pots.AssignIncome(newIncome);
                 pots.Rebalance();
 
                 if (pots.EmergencyFund >= requiredCash)
                     emergencyFundMet = true;
-                    
+
                 if (emergencyFundMet && pots.Investments <= minimumCash)
                     return false;
             }

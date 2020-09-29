@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Calculator.Input;
 using Calculator.Output;
 
@@ -10,6 +11,6 @@ namespace Calculator.ExternalInterface
     /// </summary>
     public interface IRetirementCalculator
     {
-        IRetirementReport ReportForTargetAge(IEnumerable<Person> personStatus, IEnumerable<SpendingStep> spendingStepInputs, int? retirementAge = null);
+        Task<IRetirementReport> ReportForTargetAgeAsync(IEnumerable<Person> personStatus, IEnumerable<SpendingStep> spendingStepInputs, int? retirementAge = null);
     }
 }

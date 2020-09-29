@@ -24,5 +24,7 @@ namespace Calculator.Output
         List<IPersonReport> Persons { get; }
         List<SpendingStepReport> SpendingSteps { get; }
         decimal MonthlySpendingAt(DateTime date);
+        void UpdateMinimumPossibleInfo(DateTime minimumPossibleRetirementDate, int savingsAtMinimumPossiblePensionAge);
+        void ProcessResults(DateTime? givenRetirementDate, DateTime now);
     }
 }
