@@ -92,7 +92,7 @@ namespace Calculator
         }
 
         private bool PersonHasQuitWork() => _givenRetirementDate.HasValue ? Date > _givenRetirementDate : _calcdMinimum;
-
+        
         public void UpdateGrowth()
         {
             var growth = Math.Max(Pots.Investments * _assumptions.MonthlyGrowthRate, 0m);
@@ -155,6 +155,13 @@ namespace Calculator
 
             Pots.AssignIncome(newIncome);
             Pots.Rebalance();
+        }
+
+        public void Take25()
+        {
+            var take25 = PrivatePensionAmount * .25m;
+            Pots.AssignIncome(take25);
+            PrivatePensionAmount = PrivatePensionAmount - take25;
         }
     }
 }

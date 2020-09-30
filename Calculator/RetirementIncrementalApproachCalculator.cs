@@ -77,10 +77,14 @@ namespace Calculator
                 foreach (var person in result.Persons)
                 {
                     person.StepReport.NewStep(calcdMinimum, result, result.Persons.Count, givenRetirementDate);
+
+                    if (person.Take25WhenRetired(calcdMinimum, person.StepReport.CurrentStep.Date, givenRetirementDate))
+                        person.StepReport.Take25();
+                    
                     person.StepReport.UpdateSpending();
+                    person.StepReport.UpdatePrivatePension();
                     person.StepReport.UpdateGrowth();
                     person.StepReport.UpdateStatePensionAmount(_statePensionAmountCalculator, person.StatePensionDate);
-                    person.StepReport.UpdatePrivatePension();
                     person.StepReport.UpdateSalary(person.MonthlySalaryAfterDeductions);
                     person.StepReport.ProcessTaxableIncomeIntoSavings();
                 }
@@ -111,6 +115,8 @@ namespace Calculator
 
             var privatePensionAmounts = result.Persons.Select(p => new {p, p.StepReport.CurrentStep.PrivatePensionAmount})
                 .ToDictionary(arg => arg.p, arg => arg.PrivatePensionAmount);
+            var taken25 = result.Persons.Select(p => new {p, taken = false})
+                .ToDictionary(arg => arg.p, arg => arg.taken);
 
             var runningInvestments = result.Persons.Select(p => p.StepReport.CurrentStep.Investments).Sum();
             var emergencyFund = result.Persons.Select(p => p.StepReport.CurrentStep.EmergencyFund).Sum();
@@ -122,13 +128,22 @@ namespace Calculator
             {
                 var newIncome = 0m;
                 var monthlySpending = result.MonthlySpendingAt(primaryStep.Date.AddMonths(month));
-                var requiredCash = result.Persons.Select(p => p.Person.EmergencyFundSpec.RequiredEmergencyFund(monthlySpending / result.Persons.Count())).Sum();
+                var requiredCash = result.Persons.Select(p => p.Person.EmergencyFundSpec.RequiredEmergencyFund(monthlySpending / result.Persons.Count)).Sum();
                 pots = MoneyPots.From(pots, requiredCash);
                 pots.AssignSpending(monthlySpending);
+                
                 newIncome += pots.Investments * _assumptions.MonthlyGrowthRate;
 
                 foreach (var person in result.Persons)
                 {
+                    if (_assumptions.Take25 && !taken25[person] && primaryStep.Date.AddMonths(month) > person.PrivatePensionDate)
+                    {
+                        var take25 = privatePensionAmounts[person]*.25m;
+                        pots.AssignIncome(take25);
+                        privatePensionAmounts[person] -= take25;
+                        taken25[person] = true;
+                    }
+
                     var annualisedPrivatePensionGrowth = privatePensionAmounts[person] * _assumptions.AnnualGrowthRate;
                     var monthlyPrivatePensionGrowth = privatePensionAmounts[person] * _assumptions.MonthlyGrowthRate;
                     var annualStatePension = person.StepReport.CurrentStep.PredictedStatePensionAnnual;
@@ -150,7 +165,7 @@ namespace Calculator
                 if (pots.EmergencyFund >= requiredCash)
                     emergencyFundMet = true;
 
-                if (emergencyFundMet && pots.Investments <= minimumCash)
+                if ((pots.Investments + pots.EmergencyFund <= minimumCash) || (emergencyFundMet && pots.Investments  <= minimumCash))
                     return false;
             }
 

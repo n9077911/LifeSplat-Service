@@ -40,7 +40,7 @@ namespace ServiceLayer
             services.AddSingleton<IDateProvider, DateProvider>();
             services.AddSingleton<IPensionAgeCalc, PensionAgeCalc>();
             services.AddSingleton<IStatePensionAmountCalculator, StatePensionAmountCalculator>();
-            services.AddSingleton<IAssumptions, SafeWithdrawalNoInflationAssumptions>();
+            services.AddTransient<IAssumptions>(x => Assumptions.SafeWithdrawalNoInflationTake25Assumptions());
             services.AddSingleton<IRetirementCalculator, RetirementIncrementalApproachCalculator>();
             services.AddSingleton<IRetirementDomainInterface, RetirementDomainInterface>();
             services.AddControllers();
