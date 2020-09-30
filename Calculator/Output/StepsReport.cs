@@ -79,5 +79,10 @@ namespace Calculator.Output
         {
             CurrentStep.PayTaxAndBankTheRemainder();
         }
+
+        public void Take25()
+        {
+            CurrentStep.Take25();
+        }
     }
 }

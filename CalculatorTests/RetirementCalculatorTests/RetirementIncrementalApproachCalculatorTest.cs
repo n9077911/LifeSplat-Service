@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using CalculatorTests.Stubs;
-using NUnit.Framework;
 using Calculator;
 using Calculator.Input;
 using Calculator.StatePensionCalculator;
 using Calculator.TaxSystem;
+using CalculatorTests.Stubs;
+using NUnit.Framework;
 
-namespace CalculatorTests
+namespace CalculatorTests.RetirementCalculatorTests
 {
     [TestFixture]
     public class RetirementIncrementalApproachCalculatorTest
     {
         private readonly FixedDateProvider _fixedDateProvider = new FixedDateProvider(new DateTime(2020, 1, 1));
         private readonly StatePensionAmountCalculator _statePensionCalculator = new StatePensionAmountCalculator(new FixedDateProvider(new DateTime(2020, 1, 1)), new TwentyTwentyTaxSystem());
-        private readonly SafeWithdrawalNoInflationAssumptions _assumptions = new SafeWithdrawalNoInflationAssumptions();
+        private readonly IAssumptions _assumptions = Assumptions.SafeWithdrawalNoInflationAssumptions();
         private readonly StubPensionAgeCalc _pensionAgeCalc = new StubPensionAgeCalc(new DateTime(2049, 05, 30));
         private readonly FixedStatePensionAmountCalculator _fixedStatePensionAmountCalculator = new FixedStatePensionAmountCalculator(9110.4m);
 
@@ -606,5 +606,23 @@ namespace CalculatorTests
         
             Assert.That(reportExpressedAsANumber.SavingsAt100, Is.EqualTo(reportExpressedAsMonths.SavingsAt100));
         } 
+        
+        //Written to fix bug
+        //whereby person was bankrupt during working years BUT their huge pension hid the fact they had been bankrupt. 
+        //This led to the algorithm thinking a person can retire earlier than that could
+        [Test]
+        public async Task KnowsWhenSomeoneCantRetire_WhenTheyHaveAHugePension()
+        {
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
+
+            var person1 = new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30), ExistingPrivatePension = 200_000,
+                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, EmergencyFundSpec = new EmergencyFundSpec("6m")};
+
+            var report = await calc.ReportForAsync(new Family(new[] {person1}, new []{new SpendingStep(_fixedDateProvider.Now(), 10_000)}));
+        
+            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2027, 01, 01)));
+            Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(97_959));
+            Assert.That(report.SavingsAt100, Is.EqualTo(1_050_439));
+        }
     }
 }

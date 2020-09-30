@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Calculator;
 using Calculator.Output;
 
 namespace ServiceLayer.Models.DTO
@@ -28,7 +27,7 @@ namespace ServiceLayer.Models.DTO
             foreach (var personReport in retirementReport.Persons)
             {
                 var steps = new List<List<object>>();
-                foreach (var step in personReport.PrimarySteps.Steps)
+                foreach (var step in personReport.StepReport.Steps)
                 {
                     steps.Add(new List<object>
                         {

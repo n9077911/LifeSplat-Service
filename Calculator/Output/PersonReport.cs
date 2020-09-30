@@ -9,6 +9,8 @@ namespace Calculator.Output
     internal class PersonReport : IPersonReport
     {
         private const decimal Monthly = 12;
+        private bool taken25 = false;
+        private bool take25 = false;
 
         public PersonReport(IPensionAgeCalc pensionAgeCalc, IIncomeTaxCalculator incomeTaxCalculator, Person person, DateTime now, bool targetDateGiven, IAssumptions assumptions, decimal monthlySpendingAt)
         {
@@ -26,7 +28,8 @@ namespace Calculator.Output
             StepReport = targetDateGiven 
                 ? new StepsReport(person, StepType.GivenDate, now, assumptions, monthlySpendingAt, PrivatePensionDate) 
                 : new StepsReport(person, StepType.CalcMinimum, now, assumptions, monthlySpendingAt, PrivatePensionDate);
-            
+
+            take25 = assumptions.Take25;
         }
 
         public Person Person { get; }
@@ -58,6 +61,19 @@ namespace Calculator.Output
         public void UpdateMinimumPossibleRetirementDate(in DateTime minimumPossibleRetirementDate)
         {
             MinimumPossibleRetirementDate = minimumPossibleRetirementDate;
+        }
+
+        public bool Take25WhenRetired(in bool calcdMinimum, in DateTime now, DateTime? givenRetirementDate)
+        {
+            if (take25 && !taken25 && 
+                ((calcdMinimum && now > PrivatePensionDate) 
+                || (givenRetirementDate != null && now > givenRetirementDate  && now > PrivatePensionDate)))
+            {
+                taken25 = true;
+                return true;
+            }
+
+            return false;
         }
     }
 }

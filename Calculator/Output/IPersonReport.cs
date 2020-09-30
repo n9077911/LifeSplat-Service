@@ -29,5 +29,6 @@ namespace Calculator.Output
         int SavingsCombinedAtStatePensionAge { get; set; }
         int PrivatePensionPotAtPrivatePensionAge { get; set; }
         void UpdateMinimumPossibleRetirementDate(in DateTime minimumPossibleRetirementDate);
+        bool Take25WhenRetired(in bool calcdMinimum, in DateTime now, DateTime? givenRetirementDate);
     }
 }
