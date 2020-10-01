@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
 using Calculator;
 using Calculator.TaxSystem;
 
@@ -6,6 +7,28 @@ namespace CalculatorTests
 {
     public class TaxCalculatorTests
     {
+        [Test]
+        public void CalculatesRentalIncomeTax()
+        {
+            //only rental income where income is below tax band
+            Assert.That(new IncomeTaxCalculator().TaxFor(0m, rentalIncome: new RentalIncome(12000, 5000)).IncomeTax, Is.EqualTo(0));
+            //only rental income where tax falls in 20% bracket
+            Assert.That(new IncomeTaxCalculator().TaxFor(0m, rentalIncome: new RentalIncome(50_000, 5000)).IncomeTax, Is.EqualTo(6498.2m));
+            //only rental income where tax falls in 40% bracket
+            Assert.That(new IncomeTaxCalculator().TaxFor(0m, rentalIncome: new RentalIncome(100_000, 10_000)).IncomeTax, Is.EqualTo(25496.4m));
+
+            
+            //personal allowance is breached due to rental properties but 
+            Assert.That(new IncomeTaxCalculator().TaxFor(3_000m, rentalIncome: new RentalIncome(10_000, 5_000)).IncomeTax, Is.EqualTo(0));
+            Assert.That(new IncomeTaxCalculator().TaxFor(3_000m, rentalIncome: new RentalIncome(10_000, 0)).IncomeTax, Is.EqualTo(98.2));
+            
+            //rental puts you in 100k bracket
+            Assert.That(new IncomeTaxCalculator().TaxFor(90_000, rentalIncome: new RentalIncome(20_000, 10_000)).IncomeTax, Is.EqualTo(31_496.4m));
+
+            //all income types
+            Assert.That(new IncomeTaxCalculator().TaxFor(90_000, 10_000, 10_000, new RentalIncome(20_000, 10_000)).IncomeTax, Is.EqualTo(42500m));
+        }
+        
         [Test]
         public void CalculatesCorrectTax()
         {

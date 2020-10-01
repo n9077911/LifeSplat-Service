@@ -1,4 +1,5 @@
-﻿using Calculator.TaxSystem;
+﻿using System.Collections.Generic;
+using Calculator.TaxSystem;
 
 namespace Calculator.ExternalInterface
 {
@@ -7,6 +8,6 @@ namespace Calculator.ExternalInterface
         /// <summary>
         /// Generates a report detailing the tax a person pays
         /// </summary>
-        ITaxResult TaxFor(decimal payeSalary, decimal privatePension = 0, decimal statePension = 0);
+        ITaxResult TaxFor(decimal payeSalary, decimal privatePension = 0, decimal statePension = 0, RentalIncome rentalIncome = null);
     }
 }

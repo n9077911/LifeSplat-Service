@@ -4,6 +4,7 @@ namespace Calculator.TaxSystem
     {
         Salary,
         PrivatePension,
-        StatePension
+        StatePension,
+        RentalIncome
     }
 }
