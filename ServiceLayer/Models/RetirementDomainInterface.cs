@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Calculator;
 using Calculator.ExternalInterface;
@@ -23,23 +24,26 @@ namespace ServiceLayer.Models
         public async Task<RetirementReportDto> RetirementReportForAsync(int? targetRetirementAge, string emergencyFund, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
         {
             var emergencyFundSpec = new EmergencyFundSpec(emergencyFund);
-            if (persons.Count() == 2)
+            var personList = persons.ToList();
+            if (personList.Count == 2)
                 emergencyFundSpec = emergencyFundSpec.SplitInTwo();
-            
-            var personsStatuses = persons.Select(p => PersonStatus(p, emergencyFundSpec));
-            var spendingStepInputs = spendingSteps.Select(dto =>
-            {
-                var date = dto.Date ?? personsStatuses.First().Dob.AddYears(dto.Age);
-                return new SpendingStep(date, dto.Amount);
-            });
-            var retirementReport = await _retirementCalculator.ReportForTargetAgeAsync(personsStatuses, spendingStepInputs, targetRetirementAge);
 
-            var result = new RetirementReportDto(retirementReport);
-            return result;
+            var person = personList.Select(p => PersonStatus(p, emergencyFundSpec));
+            var spendingStepInputs = spendingSteps.Select(dto => new SpendingStep(person.First().Dob.AddYears(dto.Age), dto.Amount));
+
+            var retirementReport = await _retirementCalculator.ReportForTargetAgeAsync(person, spendingStepInputs, targetRetirementAge);
+
+            return new RetirementReportDto(retirementReport);
         }
 
         private static Person PersonStatus(PersonDto dto, EmergencyFundSpec emergencyFundSpec)
         {
+            var rentalInfos = dto.RentalInfo.Select(infoDto => new RentalInfo()
+            {
+                CurrentValue = infoDto.CurrentValue, Expenses = infoDto.Expenses, GrossIncome = infoDto.GrossIncome,
+                Repayment = infoDto.Repayment, MortgagePayments = infoDto.MortgagePayments, OutstandingMortgage = infoDto.OutstandingMortgage, RemainingTerm = infoDto.RemainingTerm
+            });
+
             var personStatus = new Person
             {
                 Dob = dto.Dob,
@@ -51,7 +55,9 @@ namespace ServiceLayer.Models
                 EmployerContribution = dto.EmployerContribution / 100m,
                 EmployeeContribution = dto.EmployeeContribution / 100m,
                 NiContributingYears = dto.NiContributingYears,
+                RentalPortfolio = new RentalPortfolio(rentalInfos.ToList()),
             };
+            
             return personStatus;
         }
     }

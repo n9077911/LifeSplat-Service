@@ -11,7 +11,8 @@ namespace Calculator.Output
         decimal MonthlySalaryAfterDeductions { get; }
         int NationalInsuranceBill { get; }
         int IncomeTaxBill { get; }
-        int AfterTaxSalary { get; }
+        int RentalTaxBill { get; }
+        int TakeHomeSalary { get; }
         DateTime StatePensionDate { get; set; }
         DateTime PrivatePensionDate { get; set; }
         int BankruptAge { get; set; }

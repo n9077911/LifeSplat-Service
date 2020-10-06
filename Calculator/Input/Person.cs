@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Calculator.Input
 {
@@ -13,6 +14,7 @@ namespace Calculator.Input
         public int Salary { get; set; }
         public DateTime Dob { get; set; }
         public Sex Sex { get; set; }
+        public RentalPortfolio RentalPortfolio { get; set; } = new RentalPortfolio(new List<RentalInfo>());
         public EmergencyFundSpec EmergencyFundSpec { get; set; } = new EmergencyFundSpec("0"); //Cash needed for emergency fund.
 
         public decimal EmployeeContribution
@@ -36,5 +38,17 @@ namespace Calculator.Input
                 _employerContribution = value;
             }
         }
+    }
+
+
+    public class RentalInfo
+    {
+        public int GrossIncome { get; set; }
+        public int Expenses { get; set; }
+        public int MortgagePayments { get; set; }
+        public int OutstandingMortgage { get; set; }
+        public bool Repayment { get; set; }
+        public bool RemainingTerm { get; set; }
+        public decimal CurrentValue { get; set; }
     }
 }

@@ -10,7 +10,7 @@ namespace Calculator.TaxSystem
     /// </summary>
     public class IncomeTaxCalculator : IIncomeTaxCalculator
     {
-        public ITaxResult TaxFor(decimal payeSalary, decimal privatePension = 0, decimal statePension = 0, RentalIncome rentalIncome = null)
+        public ITaxResult TaxFor(decimal payeSalary, decimal privatePension = 0, decimal statePension = 0, RentalIncomeForTax rentalIncome = null)
         {
             var result = new TaxResult();
 
@@ -39,22 +39,27 @@ namespace Calculator.TaxSystem
             }
         }
 
-        private static void AddIncomeTax(decimal payeSalary, decimal privatePension, decimal statePension, RentalIncome rentalIncome, TaxResult result)
+        private static void AddIncomeTax(decimal payeSalary, decimal privatePension, decimal statePension, RentalIncomeForTax rentalIncome, TaxResult result)
         {
             var taxBands = TaxBands.InitialEngland2020();
-
             
-            taxBands.UpdatePersonalAllowance(payeSalary, privatePension, statePension, rentalIncome?.Income ?? 0);
+            taxBands.UpdatePersonalAllowance(payeSalary, privatePension, statePension, rentalIncome?.GetIncomeToPayTaxOn() ?? 0);
             taxBands = UpdateTaxResultWithIncome(result, payeSalary, IncomeType.Salary, taxBands);
             taxBands = UpdateTaxResultWithIncome(result, privatePension, IncomeType.PrivatePension, taxBands);
             taxBands = UpdateTaxResultWithIncome(result, statePension, IncomeType.StatePension, taxBands);
-            UpdateTaxResultWithIncome(result, rentalIncome?.Income ?? 0, IncomeType.RentalIncome, taxBands, rentalIncome?.InterestPayments ?? 0);
+            UpdateTaxResultWithIncome(result, rentalIncome?.GetIncomeToPayTaxOn() ?? 0, IncomeType.RentalIncome, taxBands, rentalIncome?.GetNetIncome(),
+                rentalIncome?.TaxDeductibleFinancingCosts() ?? 0);
         }
 
-        private static TaxBands UpdateTaxResultWithIncome(TaxResult result, decimal income, IncomeType incomeType, TaxBands taxBands, decimal interestPayments = 0)
+        private static TaxBands UpdateTaxResultWithIncome(TaxResult result, decimal incomeToCalcTaxOn, IncomeType incomeType, TaxBands taxBands, decimal? incomeToRecord = null, decimal financingCosts = 0)
         {
-            decimal incomeTracker = income;
-            result.AddIncomeFor(incomeTracker, incomeType);
+            decimal incomeTracker = incomeToCalcTaxOn;
+            
+            if(incomeToRecord.HasValue && incomeToRecord != incomeToCalcTaxOn)
+                result.AddIncomeFor(incomeToRecord.Value, incomeType);
+            else
+                result.AddIncomeFor(incomeTracker, incomeType);
+            
             decimal totalTaxPaid = 0;
             if (incomeTracker > taxBands.ExtraHighBand)
             {
@@ -81,24 +86,12 @@ namespace Calculator.TaxSystem
 
             if (IncomeType.RentalIncome == incomeType)
             {
-                var taxCredit = interestPayments * .2m;
+                var taxCredit = financingCosts * .2m;
                 var usableTaxCredit = Math.Min(taxCredit, totalTaxPaid);
                 result.AddRentalTaxCredit(usableTaxCredit);
             }
 
-            return taxBands.Subtract(income);
-        }
-    }
-
-    public class RentalIncome
-    {
-        public decimal Income { get; }
-        public decimal InterestPayments { get;  }
-
-        public RentalIncome(int income, int interestPayments)
-        {
-            Income = income;
-            InterestPayments = interestPayments;
+            return taxBands.Subtract(incomeToCalcTaxOn);
         }
     }
 }

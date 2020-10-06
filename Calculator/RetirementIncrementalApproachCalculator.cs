@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Calculator.ExternalInterface;
 using Calculator.Input;
@@ -148,8 +149,11 @@ namespace Calculator
                     var monthlyPrivatePensionGrowth = privatePensionAmounts[person] * _assumptions.MonthlyGrowthRate;
                     var annualStatePension = person.StepReport.CurrentStep.PredictedStatePensionAnnual;
 
-                    var taxResult = _incomeTaxCalculator.TaxFor(0, annualisedPrivatePensionGrowth, annualStatePension);
+                    var taxResult = _incomeTaxCalculator.TaxFor(0, annualisedPrivatePensionGrowth, annualStatePension, person.Person.RentalPortfolio.RentalIncome());
 
+                    var rentalIncome = taxResult.AfterTaxIncomeFor(IncomeType.RentalIncome);
+                    newIncome += rentalIncome / _monthly;
+                    
                     if (primaryStep.Date.AddMonths(month) > person.StatePensionDate)
                         newIncome += taxResult.AfterTaxIncomeFor(IncomeType.StatePension) / _monthly;
 

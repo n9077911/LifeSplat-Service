@@ -36,6 +36,7 @@ namespace ServiceLayer.Models.DTO
                             Decimal.Round(step.EmergencyFund),
                             Decimal.Round(step.AfterTaxStatePension),
                             Decimal.Round(step.AfterTaxSalary),
+                            Decimal.Round(step.AfterTaxRentalIncome),
                             Decimal.Round(step.Growth),
                             Decimal.Round(step.AfterTaxPrivatePensionIncome),
                             Decimal.Round(step.PrivatePensionAmount),
@@ -60,19 +61,20 @@ namespace ServiceLayer.Models.DTO
                     PrivateRetirementDate = personReport.PrivatePensionDate,
                     NationalInsuranceBill = personReport.NationalInsuranceBill,
                     IncomeTaxBill = personReport.IncomeTaxBill,
+                    RentalTaxBill = personReport.RentalTaxBill,
                     AnnualStatePension = personReport.AnnualStatePension,
                     CalculatedNiContributingYears = personReport.NiContributingYears,
                     GivenNiContributingYears = personReport.Person.NiContributingYears,
                     PrivatePensionPot = personReport.PrivatePensionPotAtPrivatePensionAge,
                     PrivatePensionSafeWithdrawal = personReport.PrivatePensionSafeWithdrawal,
-                    AfterTaxSalary = personReport.AfterTaxSalary,
+                    AfterTaxSalary = personReport.TakeHomeSalary,
                     Steps = steps,
                 });
             }
 
             StepsHeaders = new List<string>
             {
-                "Date", "Cash", "CashSavings", "StatePension", "AfterTaxSalary", "Growth", "PrivatePensionGrowth",
+                "Date", "Cash", "CashSavings", "StatePension", "AfterTaxSalary", "AfterTaxRentalIncome", "Growth", "PrivatePensionGrowth",
                 "PrivatePensionAmount", "Spending"
             };
         }
@@ -97,6 +99,7 @@ namespace ServiceLayer.Models.DTO
         public int PrivatePensionSafeWithdrawal { get; set;}
         public int NationalInsuranceBill { get; set;}
         public int IncomeTaxBill { get; set;}
+        public int RentalTaxBill { get; set;}
         public int AfterTaxSalary { get; set; }
         public List<List<object>> Steps { get; set; }
         public int CalculatedNiContributingYears { get; set; }

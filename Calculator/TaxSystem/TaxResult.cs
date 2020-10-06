@@ -22,13 +22,20 @@ namespace Calculator.TaxSystem
 
         public decimal TotalTaxFor(IncomeType type)
         {
-            return _taxPerIncomeType.ContainsKey(type) ? _taxPerIncomeType[type] : 0;
+            var totalTaxFor = _taxPerIncomeType.ContainsKey(type) ? _taxPerIncomeType[type] : 0;
+            return type != IncomeType.RentalIncome ? totalTaxFor : totalTaxFor - _rentalTaxCredit;
         }
 
         public decimal AfterTaxIncomeFor(IncomeType type)
         {
             if(_incomePerIncomeType.ContainsKey(type) && _taxPerIncomeType.ContainsKey(type))
-                return _incomePerIncomeType[type] - _taxPerIncomeType[type];
+            {
+                var afterTaxIncomeFor = _incomePerIncomeType[type] - _taxPerIncomeType[type];
+                if(type == IncomeType.RentalIncome)
+                    return afterTaxIncomeFor + _rentalTaxCredit;
+                return afterTaxIncomeFor;
+            }
+
             return 0;
         }
 

@@ -8,6 +8,6 @@ namespace Calculator.ExternalInterface
         /// <summary>
         /// Generates a report detailing the tax a person pays
         /// </summary>
-        ITaxResult TaxFor(decimal payeSalary, decimal privatePension = 0, decimal statePension = 0, RentalIncome rentalIncome = null);
+        ITaxResult TaxFor(decimal payeSalary, decimal privatePension = 0, decimal statePension = 0, RentalIncomeForTax rentalIncome = null);
     }
 }
