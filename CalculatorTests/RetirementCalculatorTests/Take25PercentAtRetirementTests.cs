@@ -91,7 +91,6 @@ namespace CalculatorTests.RetirementCalculatorTests
             var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs), new DateTime(2035, 03, 01));
             
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2032, 08, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(51));
             Assert.That(report.SavingsAt100, Is.EqualTo(1_462_789));
         }
     }

@@ -21,15 +21,15 @@ namespace CalculatorTests.RetirementCalculatorTests
         public async Task KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome()
         {
             //can retire early - based mainly on rental income
-            await KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome(20_000, null, new DateTime(2020, 02, 01), 4_699_401);
+            await KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome(20_000, null, new DateTime(2020, 12, 01), 2_694_490);
             //can retire early - no target date
-            await KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome(60_000, null, new DateTime(2030, 04, 01), 532_980);
+            await KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome(60_000, null, new DateTime(2035, 05, 01), 309_543);
             //can retire early - target date shortly after minimum
-            await KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome(60_000, new DateTime(2032, 04, 01), new DateTime(2030, 04, 01), 1_477_651);
+            await KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome(60_000, new DateTime(2036, 04, 01), new DateTime(2035, 05, 01), 677_278);
             //can retire early - target date in old age
-            await KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome(60_000, new DateTime(2060, 04, 01), new DateTime(2030, 04, 01), 8_546_809);
+            await KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome(60_000, new DateTime(2060, 04, 01), new DateTime(2035, 05, 01), 6_082_580);
             //can retire early - target date leads to bankruptcy
-            await KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome(60_000, new DateTime(2028, 04, 01), new DateTime(2030, 04, 01), -137_330);
+            await KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome(60_000, new DateTime(2028, 04, 01), new DateTime(2035, 05, 01), -826_393);
         }
 
         private async Task KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome(int spending, DateTime? targetRetirement, DateTime minimumPossible, int savings)

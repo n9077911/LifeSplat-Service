@@ -75,11 +75,10 @@ namespace Calculator.Output
         {
             foreach (var personReport in Persons)
             {
-                personReport.PrivatePensionSafeWithdrawal = Convert.ToInt32(personReport.PrivatePensionPotAtPrivatePensionAge * _assumptions.AnnualGrowthRate); 
+                personReport.PrivatePensionSafeWithdrawal = Convert.ToInt32(personReport.PrivatePensionPotAtCrystallisationAge * _assumptions.AnnualGrowthRate); 
                 personReport.AnnualStatePension = Convert.ToInt32(personReport.StepReport.Steps.Last().PredictedStatePensionAnnual);
                 personReport.NiContributingYears = personReport.StepReport.Steps.Last().NiContributingYears;
                 personReport.StatePensionDate = personReport.StatePensionDate;
-                personReport.PrivatePensionDate = personReport.PrivatePensionDate;
             
                 personReport.BankruptAge = AgeCalc.Age(personReport.Person.Dob, BankruptDate);
                 personReport.StatePensionAge = AgeCalc.Age(personReport.Person.Dob, personReport.StatePensionDate);

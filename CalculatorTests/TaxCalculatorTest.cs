@@ -19,15 +19,15 @@ namespace CalculatorTests
             
             //personal allowance is breached due to rental properties but 
             Assert.That(new IncomeTaxCalculator().TaxFor(3_000m, rentalIncome: new RentalIncomeForTax(10_000, 0, 5_000)).IncomeTax, Is.EqualTo(0));
-            Assert.That(new IncomeTaxCalculator().TaxFor(3_000m, rentalIncome: new RentalIncomeForTax(10_000, 0, 0)).IncomeTax, Is.EqualTo(98.2));
+            Assert.That(new IncomeTaxCalculator().TaxFor(3_000m, rentalIncome: new RentalIncomeForTax(11_000, 0, 0)).IncomeTax, Is.EqualTo(98.2));
             
             //rental puts you in 100k bracket
             Assert.That(new IncomeTaxCalculator().TaxFor(90_000, rentalIncome: new RentalIncomeForTax(20_000, 0, 10_000)).IncomeTax, Is.EqualTo(31_496.4m));
 
             //applies the property allowance when appropriate
             var taxReport = new IncomeTaxCalculator().TaxFor(10_000, rentalIncome: new RentalIncomeForTax(11_000, 400, 2_000));
-            Assert.That(taxReport.IncomeTax, Is.EqualTo(1_218.2m));
-            Assert.That(taxReport.AfterTaxIncomeFor(IncomeType.RentalIncome), Is.EqualTo(8981.8m));
+            Assert.That(taxReport.IncomeTax, Is.EqualTo(1_498.2m));
+            Assert.That(taxReport.AfterTaxIncomeFor(IncomeType.RentalIncome), Is.EqualTo(7_101.8m));
 
             //all income types
             var taxResult = new IncomeTaxCalculator().TaxFor(90_000, 10_000, 10_000, new RentalIncomeForTax(20_000, 0, 10_000));

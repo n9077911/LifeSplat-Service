@@ -80,7 +80,7 @@ namespace Calculator
                     person.StepReport.NewStep(calcdMinimum, result, result.Persons.Count, givenRetirementDate);
 
                     if (person.Take25WhenRetired(calcdMinimum, person.StepReport.CurrentStep.Date, givenRetirementDate))
-                        person.StepReport.Take25();
+                        person.Take25();
                     
                     person.StepReport.UpdateSpending();
                     person.StepReport.UpdatePrivatePension();
@@ -139,9 +139,10 @@ namespace Calculator
                 {
                     if (_assumptions.Take25 && !taken25[person] && primaryStep.Date.AddMonths(month) > person.PrivatePensionDate)
                     {
-                        var take25 = privatePensionAmounts[person]*.25m;
-                        pots.AssignIncome(take25);
-                        privatePensionAmounts[person] -= take25;
+                        var take25Result = new Take25Rule(_assumptions.LifeTimeAllowance).Result(privatePensionAmounts[person]);
+
+                        pots.AssignIncome(take25Result.TaxFreeAmount);
+                        privatePensionAmounts[person] = take25Result.NewPensionPot;
                         taken25[person] = true;
                     }
 

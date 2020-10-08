@@ -49,9 +49,11 @@ namespace Calculator.Output
 
         public DateTime StatePensionDate { get; set; }
         public DateTime PrivatePensionDate { get; set; }
+        public DateTime PrivatePensionPotCrystallisationDate{ get; set; }
         public int BankruptAge { get; set; }
         public int StatePensionAge { get; set; }
         public int PrivatePensionAge { get; set; }
+        public int PrivatePensionCrystallisationAge { get; set; }
         public int AnnualStatePension { get; set; }
         public int NiContributingYears { get; set; }
         public int PrivatePensionPotCombinedAtPrivatePensionAge { get; set; }
@@ -64,6 +66,11 @@ namespace Calculator.Output
         public int SavingsCombinedAtPrivatePensionAge { get; set; }
         public int SavingsCombinedAtStatePensionAge { get; set; }
         public int PrivatePensionPotAtPrivatePensionAge { get; set; }
+        public int PrivatePensionPotAtCrystallisationAge { get; set; }
+        public int PrivatePensionPotBeforeTake25AtPensionCrystallisationDate { get; set; }
+        public int Take25LumpSum { get; set; }
+        public int LifeTimeAllowanceTaxCharge { get; set; }
+        
         public void UpdateMinimumPossibleRetirementDate(in DateTime minimumPossibleRetirementDate)
         {
             MinimumPossibleRetirementDate = minimumPossibleRetirementDate;
@@ -80,6 +87,18 @@ namespace Calculator.Output
             }
 
             return false;
+        }
+
+        public void Take25()
+        {
+            var take25Result = StepReport.Take25();
+            
+            LifeTimeAllowanceTaxCharge = Convert.ToInt32(take25Result.LtaCharge);
+            PrivatePensionPotAtCrystallisationAge = Convert.ToInt32(take25Result.NewPensionPot);
+            PrivatePensionPotBeforeTake25AtPensionCrystallisationDate = Convert.ToInt32(take25Result.PensionPotBeforeTake25);
+            Take25LumpSum = Convert.ToInt32(take25Result.TaxFreeAmount);
+            PrivatePensionPotCrystallisationDate = StepReport.CurrentStep.Date;
+            PrivatePensionCrystallisationAge = AgeCalc.Age(Person.Dob, PrivatePensionPotCrystallisationDate);
         }
     }
 }

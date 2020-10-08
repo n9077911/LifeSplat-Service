@@ -7,5 +7,6 @@ namespace Calculator.Input
         decimal MonthlyGrowthRate { get; }
         ///At pension age take 25% tax free
         bool Take25 { get; set; }
+        int LifeTimeAllowance { get; }
     }
 }
