@@ -7,7 +7,7 @@ using Calculator;
 using Calculator.Input;
 using Calculator.StatePensionCalculator;
 using Calculator.TaxSystem;
-using CalculatorTests.Stubs;
+using CalculatorTests.Utilities;
 using NUnit.Framework;
 
 namespace CalculatorTests.RetirementCalculatorTests

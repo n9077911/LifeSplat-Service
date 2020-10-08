@@ -36,6 +36,7 @@ namespace ServiceLayer.Models.DTO
                             Decimal.Round(step.EmergencyFund),
                             Decimal.Round(step.AfterTaxStatePension),
                             Decimal.Round(step.AfterTaxSalary),
+                            Decimal.Round(step.AfterTaxRentalIncome),
                             Decimal.Round(step.Growth),
                             Decimal.Round(step.AfterTaxPrivatePensionIncome),
                             Decimal.Round(step.PrivatePensionAmount),
@@ -56,23 +57,32 @@ namespace ServiceLayer.Models.DTO
                     BankruptAge = personReport.BankruptAge,
                     StateRetirementAge = personReport.StatePensionAge,
                     PrivateRetirementAge = personReport.PrivatePensionAge,
+                    PrivateRetirementCrystallisationAge = personReport.PrivatePensionCrystallisationAge,
                     StateRetirementDate = personReport.StatePensionDate,
                     PrivateRetirementDate = personReport.PrivatePensionDate,
+                    PrivateRetirementCrystallisationDate = personReport.PrivatePensionPotCrystallisationDate,
                     NationalInsuranceBill = personReport.NationalInsuranceBill,
                     IncomeTaxBill = personReport.IncomeTaxBill,
+                    RentalTaxBill = personReport.RentalTaxBill,
                     AnnualStatePension = personReport.AnnualStatePension,
                     CalculatedNiContributingYears = personReport.NiContributingYears,
                     GivenNiContributingYears = personReport.Person.NiContributingYears,
                     PrivatePensionPot = personReport.PrivatePensionPotAtPrivatePensionAge,
+                    PrivatePensionPotAtCrystallisation = personReport.PrivatePensionPotAtCrystallisationAge,
+                    PrivatePensionPotAtCrystallisationBeforeTake25 = personReport.PrivatePensionPotBeforeTake25AtPensionCrystallisationDate,
                     PrivatePensionSafeWithdrawal = personReport.PrivatePensionSafeWithdrawal,
-                    AfterTaxSalary = personReport.AfterTaxSalary,
+                    Take25LumpSum = personReport.Take25LumpSum,
+                    LifeTimeAllowanceTaxCharge = personReport.LifeTimeAllowanceTaxCharge,
+                    AfterTaxSalary = personReport.TakeHomeSalary,
+                    TakeHomeRentalIncome = personReport.TakeHomeRentalIncome,
+                    
                     Steps = steps,
                 });
             }
 
             StepsHeaders = new List<string>
             {
-                "Date", "Cash", "CashSavings", "StatePension", "AfterTaxSalary", "Growth", "PrivatePensionGrowth",
+                "Date", "Cash", "CashSavings", "StatePension", "AfterTaxSalary", "AfterTaxRentalIncome", "Growth", "PrivatePensionGrowth",
                 "PrivatePensionAmount", "Spending"
             };
         }
@@ -90,14 +100,22 @@ namespace ServiceLayer.Models.DTO
         public int BankruptAge { get; set; }
         public int StateRetirementAge { get; set; }
         public int PrivateRetirementAge { get; set;}
+        public int PrivateRetirementCrystallisationAge { get; set;}
         public DateTime StateRetirementDate { get; set;}
         public DateTime PrivateRetirementDate { get; set;}
+        public DateTime PrivateRetirementCrystallisationDate { get; set;}
         public int AnnualStatePension { get; set;}
         public int PrivatePensionPot { get; set;}
+        public int PrivatePensionPotAtCrystallisation { get; set;}
+        public int PrivatePensionPotAtCrystallisationBeforeTake25 { get; set;}
         public int PrivatePensionSafeWithdrawal { get; set;}
+        public int Take25LumpSum { get; set;}
+        public int LifeTimeAllowanceTaxCharge { get; set;}
         public int NationalInsuranceBill { get; set;}
         public int IncomeTaxBill { get; set;}
+        public int RentalTaxBill { get; set;}
         public int AfterTaxSalary { get; set; }
+        public int TakeHomeRentalIncome { get; set; }
         public List<List<object>> Steps { get; set; }
         public int CalculatedNiContributingYears { get; set; }
         public int? GivenNiContributingYears { get; set; }

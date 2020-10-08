@@ -63,6 +63,7 @@ namespace Calculator
         public int NiContributingYears { get; private set; }
         public decimal Growth { get; private set; }
         public decimal AfterTaxSalary { get; private set; }
+        public decimal AfterTaxRentalIncome { get; private set; }
         public decimal AfterTaxStatePension { get; private set; }
         public decimal AfterTaxPrivatePensionIncome { get; private set; }
         
@@ -146,22 +147,26 @@ namespace Calculator
             //this will not be accurate on years where someone quits work or starts receiving a pension.
             //In that case the fact they work\receive pension for a partial year would mean their real tax bill is less that calculated here
             var incomeTaxCalculator = new IncomeTaxCalculator();
-            var afterTax = incomeTaxCalculator.TaxFor(_preTaxSalary*12, _annualPreTaxPrivatePensionIncome, _preTaxStatePensionIncome*12);
+            var afterTax = incomeTaxCalculator.TaxFor(_preTaxSalary*12, _annualPreTaxPrivatePensionIncome, _preTaxStatePensionIncome*12, _person.RentalPortfolio.RentalIncome());
             AfterTaxSalary = afterTax.AfterTaxIncomeFor(IncomeType.Salary)/12;
             AfterTaxPrivatePensionIncome = _monthlyPreTaxPrivatePensionIncome - (afterTax.TotalTaxFor(IncomeType.PrivatePension)/12);
             AfterTaxStatePension = afterTax.AfterTaxIncomeFor(IncomeType.StatePension)/12;
+            AfterTaxRentalIncome = afterTax.AfterTaxIncomeFor(IncomeType.RentalIncome)/12;
 
-            var newIncome = AfterTaxSalary + AfterTaxPrivatePensionIncome + AfterTaxStatePension;
+            var newIncome = AfterTaxSalary + AfterTaxPrivatePensionIncome + AfterTaxStatePension + AfterTaxRentalIncome;
 
             Pots.AssignIncome(newIncome);
             Pots.Rebalance();
         }
 
-        public void Take25()
+        public Take25Result Take25()
         {
-            var take25 = PrivatePensionAmount * .25m;
-            Pots.AssignIncome(take25);
-            PrivatePensionAmount = PrivatePensionAmount - take25;
+            var take25Result = new Take25Rule(_assumptions.LifeTimeAllowance).Result(PrivatePensionAmount);
+
+            Pots.AssignIncome(take25Result.TaxFreeAmount);
+            PrivatePensionAmount = take25Result.NewPensionPot;
+
+            return take25Result;
         }
     }
 }

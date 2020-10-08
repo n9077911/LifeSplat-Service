@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using Calculator.ExternalInterface;
 using Calculator.Input;
 using Calculator.StatePensionCalculator;
+using Calculator.TaxSystem;
 
 namespace Calculator.Output
 {
     internal class PersonReport : IPersonReport
     {
         private const decimal Monthly = 12;
-        private bool taken25 = false;
-        private bool take25 = false;
+        private bool _taken25 = false;
+        private readonly bool _take25 = false;
 
         public PersonReport(IPensionAgeCalc pensionAgeCalc, IIncomeTaxCalculator incomeTaxCalculator, Person person, DateTime now, bool targetDateGiven, IAssumptions assumptions, decimal monthlySpendingAt)
         {
@@ -19,17 +20,20 @@ namespace Calculator.Output
             PrivatePensionDate = pensionAgeCalc.PrivatePensionDate(StatePensionDate);
             var salaryAfterDeductions = person.Salary * (1 - person.EmployeeContribution);
             var taxResult = incomeTaxCalculator.TaxFor(salaryAfterDeductions);
+            var taxResultWithRental = incomeTaxCalculator.TaxFor(salaryAfterDeductions, rentalIncome: person.RentalPortfolio.RentalIncome());
             MonthlySalaryAfterDeductions = salaryAfterDeductions / Monthly;
 
-            AfterTaxSalary = Convert.ToInt32(taxResult.AfterTaxIncome * (1 - person.EmployeeContribution));
             NationalInsuranceBill = Convert.ToInt32(taxResult.NationalInsurance);
             IncomeTaxBill = Convert.ToInt32(taxResult.IncomeTax);
-
+            RentalTaxBill = Convert.ToInt32(taxResultWithRental.TotalTaxFor(IncomeType.RentalIncome));
+            TakeHomeSalary = Convert.ToInt32(taxResult.AfterTaxIncome);
+            TakeHomeRentalIncome = Convert.ToInt32(person.RentalPortfolio.TotalNetIncome() - RentalTaxBill);
+            
             StepReport = targetDateGiven 
                 ? new StepsReport(person, StepType.GivenDate, now, assumptions, monthlySpendingAt, PrivatePensionDate) 
                 : new StepsReport(person, StepType.CalcMinimum, now, assumptions, monthlySpendingAt, PrivatePensionDate);
 
-            take25 = assumptions.Take25;
+            _take25 = assumptions.Take25;
         }
 
         public Person Person { get; }
@@ -39,13 +43,17 @@ namespace Calculator.Output
         public decimal MonthlySalaryAfterDeductions { get; }
         public int NationalInsuranceBill { get; }
         public int IncomeTaxBill { get; }
-        public int AfterTaxSalary { get; }
+        public int RentalTaxBill { get; }
+        public int TakeHomeSalary { get; }
+        public int TakeHomeRentalIncome { get; }
 
         public DateTime StatePensionDate { get; set; }
         public DateTime PrivatePensionDate { get; set; }
+        public DateTime PrivatePensionPotCrystallisationDate{ get; set; }
         public int BankruptAge { get; set; }
         public int StatePensionAge { get; set; }
         public int PrivatePensionAge { get; set; }
+        public int PrivatePensionCrystallisationAge { get; set; }
         public int AnnualStatePension { get; set; }
         public int NiContributingYears { get; set; }
         public int PrivatePensionPotCombinedAtPrivatePensionAge { get; set; }
@@ -58,6 +66,11 @@ namespace Calculator.Output
         public int SavingsCombinedAtPrivatePensionAge { get; set; }
         public int SavingsCombinedAtStatePensionAge { get; set; }
         public int PrivatePensionPotAtPrivatePensionAge { get; set; }
+        public int PrivatePensionPotAtCrystallisationAge { get; set; }
+        public int PrivatePensionPotBeforeTake25AtPensionCrystallisationDate { get; set; }
+        public int Take25LumpSum { get; set; }
+        public int LifeTimeAllowanceTaxCharge { get; set; }
+        
         public void UpdateMinimumPossibleRetirementDate(in DateTime minimumPossibleRetirementDate)
         {
             MinimumPossibleRetirementDate = minimumPossibleRetirementDate;
@@ -65,15 +78,27 @@ namespace Calculator.Output
 
         public bool Take25WhenRetired(in bool calcdMinimum, in DateTime now, DateTime? givenRetirementDate)
         {
-            if (take25 && !taken25 && 
+            if (_take25 && !_taken25 && 
                 ((calcdMinimum && now > PrivatePensionDate) 
                 || (givenRetirementDate != null && now > givenRetirementDate  && now > PrivatePensionDate)))
             {
-                taken25 = true;
+                _taken25 = true;
                 return true;
             }
 
             return false;
+        }
+
+        public void Take25()
+        {
+            var take25Result = StepReport.Take25();
+            
+            LifeTimeAllowanceTaxCharge = Convert.ToInt32(take25Result.LtaCharge);
+            PrivatePensionPotAtCrystallisationAge = Convert.ToInt32(take25Result.NewPensionPot);
+            PrivatePensionPotBeforeTake25AtPensionCrystallisationDate = Convert.ToInt32(take25Result.PensionPotBeforeTake25);
+            Take25LumpSum = Convert.ToInt32(take25Result.TaxFreeAmount);
+            PrivatePensionPotCrystallisationDate = StepReport.CurrentStep.Date;
+            PrivatePensionCrystallisationAge = AgeCalc.Age(Person.Dob, PrivatePensionPotCrystallisationDate);
         }
     }
 }

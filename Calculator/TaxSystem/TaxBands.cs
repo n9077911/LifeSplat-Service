@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Calculator.TaxSystem
 {
@@ -27,9 +29,9 @@ namespace Calculator.TaxSystem
             return new TaxBands(12_509, 37_500, 150_000, 100_000);
         }
 
-        public void UpdatePersonalAllowance(decimal payeSalary, decimal privatePension, decimal statePension)
+        public void UpdatePersonalAllowance(decimal payeSalary, decimal privatePension, decimal statePension, decimal rentalIncome)
         {
-            var totalIncome = payeSalary + privatePension + statePension;
+            var totalIncome = payeSalary + privatePension + statePension + rentalIncome;
             if (totalIncome > _personalAllowanceWithdrawalLimit)
             {
                 PersonalAllowance = Math.Max(0m, PersonalAllowance - (totalIncome - _personalAllowanceWithdrawalLimit) / 2);

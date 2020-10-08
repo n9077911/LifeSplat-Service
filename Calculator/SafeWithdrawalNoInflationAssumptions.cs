@@ -9,6 +9,7 @@ namespace Calculator
         public decimal AnnualGrowthRate { get; set; }
         public decimal MonthlyGrowthRate => ConvertAnnualRateToMonthly(AnnualGrowthRate);
         public bool Take25 { get; set; }
+        public int LifeTimeAllowance { get; } = 1_073_100;
 
         public static Assumptions SafeWithdrawalNoInflationAssumptions()
         {

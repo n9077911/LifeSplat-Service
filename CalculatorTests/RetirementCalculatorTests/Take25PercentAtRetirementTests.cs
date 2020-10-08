@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Calculator;
 using Calculator.Input;
 using Calculator.TaxSystem;
-using CalculatorTests.Stubs;
+using CalculatorTests.Utilities;
 using NUnit.Framework;
 
 namespace CalculatorTests.RetirementCalculatorTests
@@ -28,8 +29,8 @@ namespace CalculatorTests.RetirementCalculatorTests
                 EmployeeContribution = 0.05m, EmployerContribution = 0.03m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
-            IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 70_000)};
-            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
+            IEnumerable<SpendingStep> stepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 70_000)};
+            var report = await calc.ReportForAsync(new Family(personStatuses, stepInputs));
             
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2055, 03, 01)));
             Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(73));
@@ -90,7 +91,6 @@ namespace CalculatorTests.RetirementCalculatorTests
             var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs), new DateTime(2035, 03, 01));
             
             Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2032, 08, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(51));
             Assert.That(report.SavingsAt100, Is.EqualTo(1_462_789));
         }
     }

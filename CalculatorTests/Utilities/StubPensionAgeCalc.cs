@@ -2,7 +2,7 @@ using System;
 using Calculator;
 using Calculator.StatePensionCalculator;
 
-namespace CalculatorTests.Stubs
+namespace CalculatorTests.Utilities
 {
     public class StubPensionAgeCalc : IPensionAgeCalc
     {
