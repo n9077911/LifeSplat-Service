@@ -25,7 +25,7 @@ namespace Calculator.Output
             
             var monthlySpendingAt = MonthlySpendingAt(now)/family.Persons.Count;
             foreach (var person in family.Persons)
-                Persons.Add(new PersonReport(pensionAgeCalc, incomeTaxCalculator, person, now, givenRetirementDate.HasValue, _assumptions, monthlySpendingAt));
+                Persons.Add(new PersonReport(pensionAgeCalc, incomeTaxCalculator, person, now, givenRetirementDate, _assumptions, monthlySpendingAt));
         }
 
         public List<SpendingStepReport> SpendingSteps { get; } = new List<SpendingStepReport>();
@@ -81,8 +81,6 @@ namespace Calculator.Output
                 personReport.StatePensionDate = personReport.StatePensionDate;
             
                 personReport.BankruptAge = AgeCalc.Age(personReport.Person.Dob, BankruptDate);
-                personReport.StatePensionAge = AgeCalc.Age(personReport.Person.Dob, personReport.StatePensionDate);
-                personReport.PrivatePensionAge = AgeCalc.Age(personReport.Person.Dob, personReport.PrivatePensionDate);
             }
         }
 
@@ -131,7 +129,6 @@ namespace Calculator.Output
                 person.PrivatePensionPotCombinedAtPrivatePensionAge = Convert.ToInt32(PrivatePensionPotForIthStep(stepIndex));
                 person.PrivatePensionPotAtPrivatePensionAge = Convert.ToInt32(person.StepReport.Steps[stepIndex].PrivatePensionAmount);
             }
-
             return privatePensionSet;
         }
 
@@ -156,6 +153,13 @@ namespace Calculator.Output
                 person.StepReport.SetSavings(calcMinSavings / Persons.Count);
                 person.StepReport.SetEmergencyFund(calcMinEmergencyFund / Persons.Count);
             }
+        }
+
+        public IPersonReport PersonReportFor(Person person)
+        {
+            if (person == null)
+                return null;
+            return Persons.First(report => report.Person == person);
         }
     }
 

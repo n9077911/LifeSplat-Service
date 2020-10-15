@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Calculator.Input;
+using Calculator.StatePensionCalculator;
 
 namespace Calculator.Output
 {
@@ -80,9 +81,29 @@ namespace Calculator.Output
             CurrentStep.PayTaxAndBankTheRemainder();
         }
 
-        public Take25Result Take25()
+        public Take25Result CalcTake25()
         {
-            return CurrentStep.Take25();
+            return CurrentStep.CalcTake25();
+        }
+
+        public void Take25(Take25Result take25Result)
+        {
+            CurrentStep.Take25(take25Result);
+        }
+
+        public void UpdateChildBenefit(IPersonReport partner)
+        {
+            CurrentStep.CalculateChildBenefit(partner);
+        }
+
+        public decimal CalcLtaCharge()
+        {
+            return CurrentStep.CalcLtaCharge();
+        }
+
+        public void PayLtaCharge(in decimal ltaCharge)
+        {
+            CurrentStep.PayLtaCharge(ltaCharge);
         }
     }
 }

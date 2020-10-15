@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -79,8 +80,8 @@ namespace Calculator
                 {
                     person.StepReport.NewStep(calcdMinimum, result, result.Persons.Count, givenRetirementDate);
 
-                    if (person.Take25WhenRetired(calcdMinimum, person.StepReport.CurrentStep.Date, givenRetirementDate))
-                        person.Take25();
+                    if (person.Retired(calcdMinimum, person.StepReport.CurrentStep.Date, givenRetirementDate))
+                        person.CrystallisePension();
                     
                     person.StepReport.UpdateSpending();
                     person.StepReport.UpdatePrivatePension();
@@ -90,9 +91,16 @@ namespace Calculator
                     person.StepReport.ProcessTaxableIncomeIntoSavings();
                 }
 
+                var personWithClaim = result.PersonReportFor(family.PersonWithChildBenefitClaim());
+                if(personWithClaim != null)
+                {
+                    var personWithoutClaim = result.PersonReportFor(family.PersonWithoutChildBenefitClaim());
+                    personWithClaim.StepReport.UpdateChildBenefit(personWithoutClaim);
+                }
+
                 result.BalanceSavings();
 
-                if (givenRetirementDate == null && !calcdMinimum && IsThatEnoughTillDeath(emergencyFund, result))
+                if (givenRetirementDate == null && !calcdMinimum && IsThatEnoughTillDeath(emergencyFund, result, family))
                 {
                     foreach (var resultPerson in result.Persons)
                     {
@@ -109,14 +117,14 @@ namespace Calculator
             return result;
         }
 
-        private bool IsThatEnoughTillDeath(int minimumCash, IRetirementReport result)
+        private bool IsThatEnoughTillDeath(int minimumCash, IRetirementReport result, Family family)
         {
             var primaryStep = result.PrimaryPerson.StepReport.CurrentStep;
             var monthsToDeath = MonthsToDeath(result.PrimaryPerson.Person.Dob, primaryStep.Date);
 
             var privatePensionAmounts = result.Persons.Select(p => new {p, p.StepReport.CurrentStep.PrivatePensionAmount})
                 .ToDictionary(arg => arg.p, arg => arg.PrivatePensionAmount);
-            var taken25 = result.Persons.Select(p => new {p, taken = false})
+            var pensionCrystallised = result.Persons.Select(p => new {p, taken = false})
                 .ToDictionary(arg => arg.p, arg => arg.taken);
 
             var runningInvestments = result.Persons.Select(p => p.StepReport.CurrentStep.Investments).Sum();
@@ -128,42 +136,57 @@ namespace Calculator
             for (var month = 1; month <= monthsToDeath; month++)
             {
                 var newIncome = 0m;
-                var monthlySpending = result.MonthlySpendingAt(primaryStep.Date.AddMonths(month));
+                var futureStepDate = primaryStep.Date.AddMonths(month);
+                var monthlySpending = result.MonthlySpendingAt(futureStepDate);
                 var requiredCash = result.Persons.Select(p => p.Person.EmergencyFundSpec.RequiredEmergencyFund(monthlySpending / result.Persons.Count)).Sum();
                 pots = MoneyPots.From(pots, requiredCash);
                 pots.AssignSpending(monthlySpending);
                 
                 newIncome += pots.Investments * _assumptions.MonthlyGrowthRate;
 
+                var biggestIncome = 0m;
                 foreach (var person in result.Persons)
                 {
-                    if (_assumptions.Take25 && !taken25[person] && primaryStep.Date.AddMonths(month) > person.PrivatePensionDate)
+                    if (!pensionCrystallised[person] && futureStepDate > person.PrivatePensionDate)
                     {
-                        var take25Result = new Take25Rule(_assumptions.LifeTimeAllowance).Result(privatePensionAmounts[person]);
+                        var ltaCharge = LtaChargeRule.Calc(privatePensionAmounts[person], _assumptions.LifeTimeAllowance);
+                        privatePensionAmounts[person] += ltaCharge;
 
-                        pots.AssignIncome(take25Result.TaxFreeAmount);
-                        privatePensionAmounts[person] = take25Result.NewPensionPot;
-                        taken25[person] = true;
+                        if (_assumptions.Take25)
+                        {
+                            var take25Result = new Take25Rule(_assumptions.LifeTimeAllowance).Result(privatePensionAmounts[person]);
+                            pots.AssignIncome(take25Result.TaxFreeAmount);
+                            privatePensionAmounts[person] = take25Result.NewPensionPot;
+                        }
+
+                        pensionCrystallised[person] = true;
                     }
 
                     var annualisedPrivatePensionGrowth = privatePensionAmounts[person] * _assumptions.AnnualGrowthRate;
                     var monthlyPrivatePensionGrowth = privatePensionAmounts[person] * _assumptions.MonthlyGrowthRate;
                     var annualStatePension = person.StepReport.CurrentStep.PredictedStatePensionAnnual;
+                    var incomeToPayTaxOn = person.Person.RentalPortfolio.RentalIncome().GetIncomeToPayTaxOn();
+                    var totalIncome = annualisedPrivatePensionGrowth + monthlyPrivatePensionGrowth + annualStatePension + incomeToPayTaxOn; 
+                    if (totalIncome > biggestIncome)
+                        biggestIncome = totalIncome;
 
                     var taxResult = _incomeTaxCalculator.TaxFor(0, annualisedPrivatePensionGrowth, annualStatePension, person.Person.RentalPortfolio.RentalIncome());
 
                     var rentalIncome = taxResult.AfterTaxIncomeFor(IncomeType.RentalIncome);
                     newIncome += rentalIncome / _monthly;
                     
-                    if (primaryStep.Date.AddMonths(month) > person.StatePensionDate)
+                    if (futureStepDate > person.StatePensionDate)
                         newIncome += taxResult.AfterTaxIncomeFor(IncomeType.StatePension) / _monthly;
 
-                    if (primaryStep.Date.AddMonths(month) > person.PrivatePensionDate)
+                    if (futureStepDate > person.PrivatePensionDate)
                         newIncome += monthlyPrivatePensionGrowth - (taxResult.TotalTaxFor(IncomeType.PrivatePension) / _monthly);
                     else
                         privatePensionAmounts[person] += monthlyPrivatePensionGrowth;
                 }
 
+                if(family.PersonWithChildBenefitClaim()!=null)
+                    newIncome += ChildBenefitCalc.Amount(futureStepDate, family.PersonWithChildBenefitClaim().Children, biggestIncome);
+                
                 pots.AssignIncome(newIncome);
                 pots.Rebalance();
 

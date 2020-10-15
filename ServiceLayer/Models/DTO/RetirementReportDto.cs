@@ -40,6 +40,7 @@ namespace ServiceLayer.Models.DTO
                             Decimal.Round(step.Growth),
                             Decimal.Round(step.AfterTaxPrivatePensionIncome),
                             Decimal.Round(step.PrivatePensionAmount),
+                            Decimal.Round(step.ChildBenefit),
                             Decimal.Round(step.Spending),
                         }
                     );
@@ -57,6 +58,7 @@ namespace ServiceLayer.Models.DTO
                     BankruptAge = personReport.BankruptAge,
                     StateRetirementAge = personReport.StatePensionAge,
                     PrivateRetirementAge = personReport.PrivatePensionAge,
+                    TargetRetirementAge = personReport.TargetRetirementAge,
                     PrivateRetirementCrystallisationAge = personReport.PrivatePensionCrystallisationAge,
                     StateRetirementDate = personReport.StatePensionDate,
                     PrivateRetirementDate = personReport.PrivatePensionDate,
@@ -69,7 +71,7 @@ namespace ServiceLayer.Models.DTO
                     GivenNiContributingYears = personReport.Person.NiContributingYears,
                     PrivatePensionPot = personReport.PrivatePensionPotAtPrivatePensionAge,
                     PrivatePensionPotAtCrystallisation = personReport.PrivatePensionPotAtCrystallisationAge,
-                    PrivatePensionPotAtCrystallisationBeforeTake25 = personReport.PrivatePensionPotBeforeTake25AtPensionCrystallisationDate,
+                    PrivatePensionPotBeforeCrystallisation = personReport.PrivatePensionPotBeforeCrystallisation,
                     PrivatePensionSafeWithdrawal = personReport.PrivatePensionSafeWithdrawal,
                     Take25LumpSum = personReport.Take25LumpSum,
                     LifeTimeAllowanceTaxCharge = personReport.LifeTimeAllowanceTaxCharge,
@@ -83,7 +85,7 @@ namespace ServiceLayer.Models.DTO
             StepsHeaders = new List<string>
             {
                 "Date", "Cash", "CashSavings", "StatePension", "AfterTaxSalary", "AfterTaxRentalIncome", "Growth", "PrivatePensionGrowth",
-                "PrivatePensionAmount", "Spending"
+                "PrivatePensionAmount", "ChildBenefit", "Spending"
             };
         }
     }
@@ -107,7 +109,7 @@ namespace ServiceLayer.Models.DTO
         public int AnnualStatePension { get; set;}
         public int PrivatePensionPot { get; set;}
         public int PrivatePensionPotAtCrystallisation { get; set;}
-        public int PrivatePensionPotAtCrystallisationBeforeTake25 { get; set;}
+        public int PrivatePensionPotBeforeCrystallisation { get; set;}
         public int PrivatePensionSafeWithdrawal { get; set;}
         public int Take25LumpSum { get; set;}
         public int LifeTimeAllowanceTaxCharge { get; set;}
@@ -119,5 +121,6 @@ namespace ServiceLayer.Models.DTO
         public List<List<object>> Steps { get; set; }
         public int CalculatedNiContributingYears { get; set; }
         public int? GivenNiContributingYears { get; set; }
+        public int? TargetRetirementAge { get; set; }
     }
 }

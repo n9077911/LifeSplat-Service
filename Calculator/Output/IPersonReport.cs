@@ -14,11 +14,12 @@ namespace Calculator.Output
         int RentalTaxBill { get; }
         int TakeHomeSalary { get; }
         DateTime StatePensionDate { get; set; }
-        DateTime PrivatePensionDate { get; set; }
+        DateTime PrivatePensionDate { get; }
         int BankruptAge { get; set; }
-        int StatePensionAge { get; set; }
-        int PrivatePensionAge { get; set; }
-        int PrivatePensionCrystallisationAge { get; set; }
+        int StatePensionAge { get; }
+        int PrivatePensionAge { get; }
+        int? TargetRetirementAge { get; }
+        int PrivatePensionCrystallisationAge { get; }
         int AnnualStatePension { get; set; }
         int NiContributingYears { get; set; }
         int PrivatePensionPotCombinedAtPrivatePensionAge { get; set; }
@@ -31,13 +32,14 @@ namespace Calculator.Output
         int SavingsCombinedAtStatePensionAge { get; set; }
         int PrivatePensionPotAtPrivatePensionAge { get; set; }
         int TakeHomeRentalIncome { get; }
-        DateTime PrivatePensionPotCrystallisationDate { get; set; }
-        int PrivatePensionPotAtCrystallisationAge { get; set; }
-        int PrivatePensionPotBeforeTake25AtPensionCrystallisationDate { get; set; }
+        DateTime PrivatePensionPotCrystallisationDate { get; }
+        int PrivatePensionPotAtCrystallisationAge { get; }
+        int PrivatePensionPotBeforeCrystallisation { get; }
         int Take25LumpSum { get; set; }
-        int LifeTimeAllowanceTaxCharge { get; set; }
+        int LifeTimeAllowanceTaxCharge { get; }
+        DateTime? TargetRetirementDate { get; }
         void UpdateMinimumPossibleRetirementDate(in DateTime minimumPossibleRetirementDate);
-        bool Take25WhenRetired(in bool calcdMinimum, in DateTime now, DateTime? givenRetirementDate);
-        void Take25();
+        bool Retired(in bool calcdMinimum, in DateTime now, DateTime? givenRetirementDate);
+        void CrystallisePension();
     }
 }

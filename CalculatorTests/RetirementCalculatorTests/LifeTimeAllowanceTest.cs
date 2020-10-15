@@ -30,14 +30,14 @@ namespace CalculatorTests.RetirementCalculatorTests
             Assert.That(report.Persons[0].LifeTimeAllowanceTaxCharge, Is.EqualTo(285_544));
             Assert.That(report.Persons[0].Take25LumpSum, Is.EqualTo(268_275));
             Assert.That(report.Persons[0].PrivatePensionPotAtCrystallisationAge, Is.EqualTo(1_661_456));
-            Assert.That(report.Persons[0].PrivatePensionPotBeforeTake25AtPensionCrystallisationDate, Is.EqualTo(2_215_275));
+            Assert.That(report.Persons[0].PrivatePensionPotBeforeCrystallisation, Is.EqualTo(2_215_275));
             
             Assert.That(report.Persons[1].LifeTimeAllowanceTaxCharge, Is.EqualTo(392_445));
             Assert.That(report.Persons[1].Take25LumpSum, Is.EqualTo(268_275));
             Assert.That(report.Persons[1].PrivatePensionPotAtCrystallisationAge, Is.EqualTo(1_982_161));
-            Assert.That(report.Persons[1].PrivatePensionPotBeforeTake25AtPensionCrystallisationDate, Is.EqualTo(2_642_881));
+            Assert.That(report.Persons[1].PrivatePensionPotBeforeCrystallisation, Is.EqualTo(2_642_881));
             
-            Assert.That(report.SavingsAt100, Is.EqualTo(8_463_781));
+            Assert.That(report.SavingsAt100, Is.EqualTo(8_463_709));
         }
         
         [Test]
@@ -58,12 +58,12 @@ namespace CalculatorTests.RetirementCalculatorTests
             Assert.That(report.Persons[0].LifeTimeAllowanceTaxCharge, Is.EqualTo(0));
             Assert.That(report.Persons[0].Take25LumpSum, Is.EqualTo(28_881));
             Assert.That(report.Persons[0].PrivatePensionPotAtCrystallisationAge, Is.EqualTo(86_642));
-            Assert.That(report.Persons[0].PrivatePensionPotBeforeTake25AtPensionCrystallisationDate, Is.EqualTo(115_523));
+            Assert.That(report.Persons[0].PrivatePensionPotBeforeCrystallisation, Is.EqualTo(115_523));
             
             Assert.That(report.Persons[1].LifeTimeAllowanceTaxCharge, Is.EqualTo(0));
             Assert.That(report.Persons[1].Take25LumpSum, Is.EqualTo(34_455));
             Assert.That(report.Persons[1].PrivatePensionPotAtCrystallisationAge, Is.EqualTo(103_366));
-            Assert.That(report.Persons[1].PrivatePensionPotBeforeTake25AtPensionCrystallisationDate, Is.EqualTo(137_822));
+            Assert.That(report.Persons[1].PrivatePensionPotBeforeCrystallisation, Is.EqualTo(137_822));
             
             Assert.That(report.SavingsAt100, Is.EqualTo(115_260));
         }

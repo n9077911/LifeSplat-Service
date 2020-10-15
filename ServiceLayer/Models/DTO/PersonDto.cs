@@ -11,9 +11,10 @@ namespace ServiceLayer.Models.DTO
         public decimal EmployerContribution { get; set; }
         public decimal EmployeeContribution { get; set; }
         public int? NiContributingYears { get; set; }
-        public DateTime Dob { get; set; }
+        public string Dob { get; set; }
         public bool Female { get; set; }
         public List<RentalInfoDto> RentalInfo { get; set; }
+        public List<DateTime> ChildrenDobs { get; set; }
     }
 
     public class RentalInfoDto

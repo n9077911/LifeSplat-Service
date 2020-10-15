@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Calculator.Input;
 
@@ -25,6 +26,26 @@ namespace CalculatorTests.Utilities
             Persons[0].RentalPortfolio = new RentalPortfolio(RentalInfo0);
             Persons[1].RentalPortfolio = new RentalPortfolio(RentalInfo1);
             return new Family(Persons, Spending);
+        }
+
+        public FamilyBuilder WithChild(DateTime dob)
+        {
+            Persons[0].Children.Add(dob);
+            return this;
+        }
+
+        public FamilyBuilder WithSalary(int salary1, int salary2)
+        {
+            Persons[0].Salary = salary1;
+            Persons[1].Salary = salary2;
+            return this;
+        }
+
+        public FamilyBuilder WithEmployeePension(decimal pension1, decimal pension2)
+        {
+            Persons[0].EmployeeContribution = pension1;
+            Persons[1].EmployeeContribution = pension2;
+            return this;
         }
     }
 }

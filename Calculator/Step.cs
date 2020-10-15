@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using Calculator.Input;
+using Calculator.Output;
+using Calculator.StatePensionCalculator;
 using Calculator.TaxSystem;
 
 namespace Calculator
@@ -26,7 +28,7 @@ namespace Calculator
         private decimal _preTaxStatePensionIncome = 0;
         private MoneyPots Pots { get; }
 
-        public Step(Step previousStep, DateTime stepDate, Person person, bool calcdMinimum, IAssumptions assumptions, 
+        public Step(Step previousStep, DateTime stepDate, Person person, bool calcdMinimum, IAssumptions assumptions,
             DateTime privatePensionDate, decimal spending, DateTime? givenRetirementDate = null)
         {
             Date = stepDate;
@@ -48,7 +50,7 @@ namespace Calculator
             var requiredCashSavings = emergencyFundSpec.RequiredEmergencyFund(personMonthlySpending);
             Pots = new MoneyPots(requiredCashSavings);
             Pots.AssignIncome(existingSavings);
-            
+
             PrivatePensionAmount = existingPrivatePension;
             Spending = personMonthlySpending;
         }
@@ -62,11 +64,12 @@ namespace Calculator
         public decimal PredictedStatePensionAnnual { get; private set; }
         public int NiContributingYears { get; private set; }
         public decimal Growth { get; private set; }
+        public decimal ChildBenefit { get; private set; }
         public decimal AfterTaxSalary { get; private set; }
         public decimal AfterTaxRentalIncome { get; private set; }
         public decimal AfterTaxStatePension { get; private set; }
         public decimal AfterTaxPrivatePensionIncome { get; private set; }
-        
+
         public decimal Spending { get; }
         public decimal PrivatePensionAmount { get; private set; }
         public decimal Investments => Pots.Investments;
@@ -88,12 +91,12 @@ namespace Calculator
 
             if (Date > personStatePensionDate)
             {
-                _preTaxStatePensionIncome = PredictedStatePensionAnnual/_monthly;
+                _preTaxStatePensionIncome = PredictedStatePensionAnnual / _monthly;
             }
         }
 
         private bool PersonHasQuitWork() => _givenRetirementDate.HasValue ? Date > _givenRetirementDate : _calcdMinimum;
-        
+
         public void UpdateGrowth()
         {
             var growth = Math.Max(Pots.Investments * _assumptions.MonthlyGrowthRate, 0m);
@@ -113,7 +116,7 @@ namespace Calculator
             }
             else
                 PrivatePensionAmount += privatePensionGrowth;
-            
+
             if (!PersonHasQuitWork())
                 PrivatePensionAmount += (_person.Salary / _monthly) * (_person.EmployeeContribution + _person.EmployerContribution);
         }
@@ -135,10 +138,22 @@ namespace Calculator
         {
             Pots.Investments = savings;
         }
-        
+
         public void SetEmergencyFund(decimal emergencyFund)
         {
             Pots.EmergencyFund = emergencyFund;
+        }
+
+        public decimal PreTaxIncome()
+        {
+            return (_preTaxSalary * 12) + _annualPreTaxPrivatePensionIncome + (_preTaxStatePensionIncome * 12) + _person.RentalPortfolio.RentalIncome().GetIncomeToPayTaxOn();
+        }
+        
+        public void CalculateChildBenefit(IPersonReport personReport)
+        {
+            var maxIncome = Math.Max(PreTaxIncome(), personReport?.StepReport.CurrentStep.PreTaxIncome() ?? 0);
+            ChildBenefit = ChildBenefitCalc.Amount(Date, _person.Children, maxIncome);
+            Pots.AssignIncome(ChildBenefit);
         }
 
         public void PayTaxAndBankTheRemainder()
@@ -147,26 +162,38 @@ namespace Calculator
             //this will not be accurate on years where someone quits work or starts receiving a pension.
             //In that case the fact they work\receive pension for a partial year would mean their real tax bill is less that calculated here
             var incomeTaxCalculator = new IncomeTaxCalculator();
-            var afterTax = incomeTaxCalculator.TaxFor(_preTaxSalary*12, _annualPreTaxPrivatePensionIncome, _preTaxStatePensionIncome*12, _person.RentalPortfolio.RentalIncome());
-            AfterTaxSalary = afterTax.AfterTaxIncomeFor(IncomeType.Salary)/12;
-            AfterTaxPrivatePensionIncome = _monthlyPreTaxPrivatePensionIncome - (afterTax.TotalTaxFor(IncomeType.PrivatePension)/12);
-            AfterTaxStatePension = afterTax.AfterTaxIncomeFor(IncomeType.StatePension)/12;
-            AfterTaxRentalIncome = afterTax.AfterTaxIncomeFor(IncomeType.RentalIncome)/12;
+            var afterTax = incomeTaxCalculator.TaxFor(_preTaxSalary * 12, _annualPreTaxPrivatePensionIncome, _preTaxStatePensionIncome * 12, _person.RentalPortfolio.RentalIncome());
+            AfterTaxSalary = afterTax.AfterTaxIncomeFor(IncomeType.Salary) / 12;
+            AfterTaxPrivatePensionIncome = _monthlyPreTaxPrivatePensionIncome - (afterTax.TotalTaxFor(IncomeType.PrivatePension) / 12);
+            AfterTaxStatePension = afterTax.AfterTaxIncomeFor(IncomeType.StatePension) / 12;
+            AfterTaxRentalIncome = afterTax.AfterTaxIncomeFor(IncomeType.RentalIncome) / 12;
 
             var newIncome = AfterTaxSalary + AfterTaxPrivatePensionIncome + AfterTaxStatePension + AfterTaxRentalIncome;
 
             Pots.AssignIncome(newIncome);
-            Pots.Rebalance();
         }
 
-        public Take25Result Take25()
+        public Take25Result CalcTake25()
         {
             var take25Result = new Take25Rule(_assumptions.LifeTimeAllowance).Result(PrivatePensionAmount);
+            return take25Result;
+        }
 
+        public void Take25(Take25Result take25Result)
+        {
             Pots.AssignIncome(take25Result.TaxFreeAmount);
             PrivatePensionAmount = take25Result.NewPensionPot;
+        }
 
-            return take25Result;
+        public decimal CalcLtaCharge()
+        {
+            return LtaChargeRule.Calc(PrivatePensionAmount, _assumptions.LifeTimeAllowance);
+            
+        }
+
+        public void PayLtaCharge(decimal ltaCharge)
+        {
+            PrivatePensionAmount -= ltaCharge;
         }
     }
 }

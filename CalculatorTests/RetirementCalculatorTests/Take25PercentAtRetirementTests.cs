@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Calculator;
 using Calculator.Input;
+using Calculator.StatePensionCalculator;
 using Calculator.TaxSystem;
 using CalculatorTests.Utilities;
 using NUnit.Framework;

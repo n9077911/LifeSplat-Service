@@ -163,7 +163,7 @@ namespace CalculatorTests.RetirementCalculatorTests
             Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
             Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
             Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(133_987));
-            Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(5_359));
+            Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(5_411));
             Assert.That(report.SavingsAt100, Is.EqualTo(1_946));
         }
         
