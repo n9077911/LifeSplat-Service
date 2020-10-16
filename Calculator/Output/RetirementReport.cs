@@ -9,12 +9,15 @@ namespace Calculator.Output
 {
     internal class RetirementReport : IRetirementReport, ISpendingForDate
     {
+        private readonly Family _family;
         private readonly IAssumptions _assumptions;
 
         public RetirementReport(IPensionAgeCalc pensionAgeCalc, IIncomeTaxCalculator incomeTaxCalculator, Family family, DateTime now, DateTime? givenRetirementDate, IAssumptions assumptions)
         {
+            _family = family;
             _assumptions = assumptions;
             TimeToRetirement = new DateAmount(DateTime.MinValue, DateTime.MinValue); 
+            TargetRetirementDate = givenRetirementDate; 
     
             var spendingStepInputs = family.SpendingStepInputs.OrderBy(input => input.Date).ToList();
             for (int i = 0; i < spendingStepInputs.Count; i++)
@@ -35,13 +38,14 @@ namespace Calculator.Output
         public DateTime? TargetRetirementDate { get; set; }
         public int? TargetRetirementAge { get; set; }
 
-        public DateTime MinimumPossibleRetirementDate => PrimaryPerson.MinimumPossibleRetirementDate;
-        public int MinimumPossibleRetirementAge => PrimaryPerson.MinimumPossibleRetirementAge;
-        public int SavingsAtPrivatePensionAge => PrimaryPerson.SavingsCombinedAtPrivatePensionAge;
-        public int SavingsAtStatePensionAge => PrimaryPerson.SavingsCombinedAtStatePensionAge;
-        public int SavingsAtMinimumPossiblePensionAge => PrimaryPerson.SavingsAtMinimumPossiblePensionAge;
-        public int PrivatePensionPotAtPrivatePensionAge => PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge;
-        public int PrivatePensionPotAtStatePensionAge => PrimaryPerson.PrivatePensionPotCombinedAtStatePensionAge;
+        public DateTime FinancialIndependenceDate => PrimaryPerson.FinancialIndependenceDate;
+        public int FinancialIndependenceAge => PrimaryPerson.FinancialIndependenceAge;
+        
+        public int SavingsCombinedAtFinancialIndependenceAge => Persons.Count > 1 ? PrimaryPerson.SavingsAtFinancialIndependenceAge + Persons[1].SavingsAtFinancialIndependenceAge : PrimaryPerson.SavingsAtFinancialIndependenceAge;
+        public int PrivatePensionCombinedAtFinancialIndependenceAge => Persons.Count > 1 ? PrimaryPerson.PrivatePensionPotAtFinancialIndependenceAge + Persons[1].PrivatePensionPotAtFinancialIndependenceAge : PrimaryPerson.PrivatePensionPotAtFinancialIndependenceAge;
+        public int? SavingsCombinedAtTargetRetirementAge => Persons.Count > 1 ? PrimaryPerson.SavingsAtTargetRetirementAge + Persons[1].SavingsAtTargetRetirementAge : PrimaryPerson.SavingsAtTargetRetirementAge;
+        public int? PrivatePensionCombinedAtTargetRetirementAge => Persons.Count > 1 ? PrimaryPerson.PrivatePensionPotAtTargetRetirementAge + Persons[1].PrivatePensionPotAtTargetRetirementAge : PrimaryPerson.PrivatePensionPotAtTargetRetirementAge;
+        
         public int SavingsAt100 { get; private set; }
 
         public IPersonReport PrimaryPerson => Persons.First();
@@ -54,19 +58,26 @@ namespace Calculator.Output
             return spendingStep.Spending / 12m;
         }
 
-        public void UpdateMinimumPossibleInfo(DateTime minimumPossibleRetirementDate, int savingsAtMinimumPossiblePensionAge)
+        public int CurrentSavingsRate()
         {
-            PrimaryPerson.SavingsAtMinimumPossiblePensionAge = savingsAtMinimumPossiblePensionAge;
-            PrimaryPerson.UpdateMinimumPossibleRetirementDate(minimumPossibleRetirementDate);
-            Persons.Last().SavingsAtMinimumPossiblePensionAge = savingsAtMinimumPossiblePensionAge;
-            Persons.Last().UpdateMinimumPossibleRetirementDate(minimumPossibleRetirementDate);
+            var spending = (decimal)_family.SpendingStepInputs.First().NewAmount;
+            var earnings = Persons.Sum(p => p.TakeHomeSalary + p.PensionContributions);
+            var savings = earnings-spending;
+            var oneMinusRatio = savings/earnings;
+            return Convert.ToInt32(oneMinusRatio * 100);
+        }
+
+        public void UpdateFinancialIndependenceDate(DateTime financialIndependenceDate)
+        {
+            PrimaryPerson.UpdateFinancialIndependenceDate(financialIndependenceDate);
+            Persons.Last().UpdateFinancialIndependenceDate(financialIndependenceDate);
         }
 
         public void ProcessResults(DateTime? givenRetirementDate, DateTime now)
         {
             UpdateResultsBasedOnSetDates();
             UpdatePersonResults();
-            TimeToRetirement = new DateAmount(now, MinimumPossibleRetirementDate);
+            TimeToRetirement = new DateAmount(now, FinancialIndependenceDate);
             TargetRetirementDate = givenRetirementDate;
             TargetRetirementAge = TargetRetirementDate.HasValue ? AgeCalc.Age(PrimaryPerson.Person.Dob, TargetRetirementDate.Value) : (int?) null;
         }
@@ -87,7 +98,8 @@ namespace Calculator.Output
         private void UpdateResultsBasedOnSetDates()
         {
             var bankrupt = false;
-            var detailsSet = Persons.Select(p => new DetailsSet{Person = p, PrivatePensionSet = false, StatePensionSet=false}).ToList();
+            var financialIndependenceSet = false;
+            var targetRetirementSet = false;
             
             for (int stepIndex = 0; stepIndex < PrimaryPerson.StepReport.Steps.Count; stepIndex++)
             {
@@ -98,47 +110,47 @@ namespace Calculator.Output
                     BankruptDate = stepDate;
                 }
 
-                foreach (var details in detailsSet)
+                if (!financialIndependenceSet && stepDate >= FinancialIndependenceDate)
                 {
-                    details.PrivatePensionSet = UpdatePrivatePensionDetails(details.Person, stepDate, details.PrivatePensionSet, stepIndex);
-                    details.StatePensionSet = UpdateStatePensionDetails(details.Person, stepDate, details.StatePensionSet, stepIndex);
+                    var index = stepIndex;
+                    Persons.ForEach(report => UpdateFinancialIndependenceDetails(report, index));
+                    financialIndependenceSet = true;
+                }
+                
+                if (!targetRetirementSet && stepDate >= TargetRetirementDate)
+                {
+                    var index = stepIndex;
+                    Persons.ForEach(report => UpdateTargetRetirementDateDetails(report, index));
+                    targetRetirementSet = true;
                 }
             }
 
             SavingsAt100 = Convert.ToInt32(TotalSavingsForIthStep(PrimaryPerson.StepReport.Steps.Count-1));
         }
 
-        private bool UpdateStatePensionDetails(IPersonReport person, DateTime stepDate, bool statePensionSet, int stepIndex)
+        private void UpdateFinancialIndependenceDetails(IPersonReport person, int stepIndex)
         {
-            if (stepDate >= person.StatePensionDate && !statePensionSet)
-            {
-                statePensionSet = true;
-                person.SavingsCombinedAtStatePensionAge = Convert.ToInt32(Math.Max(0, TotalSavingsForIthStep(stepIndex)));
-                person.PrivatePensionPotCombinedAtStatePensionAge = Convert.ToInt32(PrivatePensionPotForIthStep(stepIndex));
-            }
-
-            return statePensionSet;
+            person.SavingsAtFinancialIndependenceAge = Convert.ToInt32(Math.Max(0, TotalSavingsForIthStep(stepIndex, person)));
+            person.PrivatePensionPotAtFinancialIndependenceAge = Convert.ToInt32(PrivatePensionPotForIthStep(stepIndex, person));
+        }
+        
+        private void UpdateTargetRetirementDateDetails(IPersonReport person, int stepIndex)
+        {
+            person.SavingsAtTargetRetirementAge = Convert.ToInt32(Math.Max(0, TotalSavingsForIthStep(stepIndex, person)));
+            person.PrivatePensionPotAtTargetRetirementAge = Convert.ToInt32(PrivatePensionPotForIthStep(stepIndex, person));
         }
 
-        private bool UpdatePrivatePensionDetails(IPersonReport person, DateTime stepDate, bool privatePensionSet, int stepIndex)
+        private decimal TotalSavingsForIthStep(int i, IPersonReport person = null)
         {
-            if (stepDate >= person.PrivatePensionDate && !privatePensionSet)
-            {
-                privatePensionSet = true;
-                person.SavingsCombinedAtPrivatePensionAge = Convert.ToInt32(Math.Max(0, TotalSavingsForIthStep(stepIndex)));
-                person.PrivatePensionPotCombinedAtPrivatePensionAge = Convert.ToInt32(PrivatePensionPotForIthStep(stepIndex));
-                person.PrivatePensionPotAtPrivatePensionAge = Convert.ToInt32(person.StepReport.Steps[stepIndex].PrivatePensionAmount);
-            }
-            return privatePensionSet;
-        }
-
-        private decimal TotalSavingsForIthStep(int i)
-        {
+            if (person != null)
+                return person.StepReport.Steps[i].Investments + person.StepReport.Steps[i].EmergencyFund;
             return Persons.Select(p => p.StepReport.Steps[i].Investments + p.StepReport.Steps[i].EmergencyFund).Sum();
         }
         
-        private decimal PrivatePensionPotForIthStep(int i)
+        private decimal PrivatePensionPotForIthStep(int i, IPersonReport person = null)
         {
+            if (person != null)
+                return person.StepReport.Steps[i].PrivatePensionAmount;
             return Persons.Select(p => p.StepReport.Steps[i].PrivatePensionAmount).Sum();
         }
         
@@ -163,13 +175,6 @@ namespace Calculator.Output
         }
     }
 
-    public class DetailsSet
-    {
-        public IPersonReport Person { get; set; }
-        public bool PrivatePensionSet { get; set; }
-        public bool StatePensionSet { get; set; }
-    }
-    
     public interface ISpendingForDate
     {
         decimal MonthlySpendingAt(DateTime date);

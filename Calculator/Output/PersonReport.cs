@@ -48,36 +48,39 @@ namespace Calculator.Output
         public int RentalTaxBill { get; }
         public int TakeHomeSalary { get; }
         public int TakeHomeRentalIncome { get; }
+        public int PensionContributions => Convert.ToInt32(Person.EmployeeContribution * Person.Salary + Person.EmployerContribution * Person.Salary);
 
         public DateTime StatePensionDate { get; set; }
-        public DateTime PrivatePensionDate { get; set; }
+        public DateTime PrivatePensionDate { get; }
         public DateTime PrivatePensionPotCrystallisationDate{ get; set; }
-        public DateTime? TargetRetirementDate { get; set; }
+        public DateTime? TargetRetirementDate { get; }
+        public DateTime FinancialIndependenceDate { get; set; }
+
         public int BankruptAge { get; set; }
-        public int PrivatePensionCrystallisationAge { get; set; }
         public int AnnualStatePension { get; set; }
         public int NiContributingYears { get; set; }
-        public int PrivatePensionPotCombinedAtPrivatePensionAge { get; set; }
-        public int PrivatePensionPotCombinedAtStatePensionAge { get; set; }
         public int PrivatePensionSafeWithdrawal { get; set; }
 
-        public DateTime MinimumPossibleRetirementDate { get; set; }
-        public int MinimumPossibleRetirementAge => AgeCalc.Age(Person.Dob, MinimumPossibleRetirementDate);
+        public int PrivatePensionCrystallisationAge { get; set; }
+        public int FinancialIndependenceAge => AgeCalc.Age(Person.Dob, FinancialIndependenceDate);
         public int StatePensionAge => AgeCalc.Age(Person.Dob, StatePensionDate);
         public int PrivatePensionAge => AgeCalc.Age(Person.Dob, PrivatePensionDate);
         public int? TargetRetirementAge => TargetRetirementDate.HasValue ? AgeCalc.Age(Person.Dob, TargetRetirementDate.Value) : (int?)null;
-        public int SavingsAtMinimumPossiblePensionAge { get; set; }
-        public int SavingsCombinedAtPrivatePensionAge { get; set; }
-        public int SavingsCombinedAtStatePensionAge { get; set; }
-        public int PrivatePensionPotAtPrivatePensionAge { get; set; }
+        
+        public int SavingsAtFinancialIndependenceAge { get; set; }
+        public int PrivatePensionPotAtFinancialIndependenceAge { get; set; }        
+        public int? SavingsAtTargetRetirementAge { get; set; }
+        public int? PrivatePensionPotAtTargetRetirementAge { get; set; }
+        
         public int PrivatePensionPotAtCrystallisationAge { get; set; }
         public int PrivatePensionPotBeforeCrystallisation { get; set; }
+        
         public int Take25LumpSum { get; set; }
         public int LifeTimeAllowanceTaxCharge { get; set; }
         
-        public void UpdateMinimumPossibleRetirementDate(in DateTime minimumPossibleRetirementDate)
+        public void UpdateFinancialIndependenceDate(in DateTime minimumPossibleRetirementDate)
         {
-            MinimumPossibleRetirementDate = minimumPossibleRetirementDate;
+            FinancialIndependenceDate = minimumPossibleRetirementDate;
         }
 
         public bool Retired(in bool calcdMinimum, in DateTime now, DateTime? givenRetirementDate)

@@ -11,20 +11,22 @@ namespace Calculator.Output
         DateTime? TargetRetirementDate { get; }
         int? TargetRetirementAge { get; }
         
-        DateTime MinimumPossibleRetirementDate { get; }
-        int MinimumPossibleRetirementAge { get; }
-        int SavingsAtPrivatePensionAge { get; }
-        int SavingsAtStatePensionAge { get; }
-        int SavingsAtMinimumPossiblePensionAge { get; }
+        DateTime FinancialIndependenceDate { get; }
+        int FinancialIndependenceAge { get; }
         int SavingsAt100 { get; }
-        int PrivatePensionPotAtPrivatePensionAge { get; }
-        int PrivatePensionPotAtStatePensionAge { get; }
         
         IPersonReport PrimaryPerson { get; }
         List<IPersonReport> Persons { get; }
         List<SpendingStepReport> SpendingSteps { get; }
+        
+        int SavingsCombinedAtFinancialIndependenceAge { get; }
+        int PrivatePensionCombinedAtFinancialIndependenceAge { get; }
+        int? SavingsCombinedAtTargetRetirementAge { get; }
+        int? PrivatePensionCombinedAtTargetRetirementAge { get; }
+        
         decimal MonthlySpendingAt(DateTime date);
-        void UpdateMinimumPossibleInfo(DateTime minimumPossibleRetirementDate, int savingsAtMinimumPossiblePensionAge);
+        void UpdateFinancialIndependenceDate(DateTime financialIndependenceDate);
         void ProcessResults(DateTime? givenRetirementDate, DateTime now);
+        int CurrentSavingsRate();
     }
 }

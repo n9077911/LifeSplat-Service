@@ -51,9 +51,9 @@ namespace Calculator
                 await earliestPossibleTask;
 
                 var retirementDateResult = retirementDateTask.Result;
-                var earliestPossible = earliestPossibleTask.Result;
+                var earliestPossibleReport = earliestPossibleTask.Result;
 
-                retirementDateResult.UpdateMinimumPossibleInfo(earliestPossible.MinimumPossibleRetirementDate, earliestPossible.SavingsAtMinimumPossiblePensionAge);
+                retirementDateResult.UpdateFinancialIndependenceDate(earliestPossibleReport.FinancialIndependenceDate);
 
                 retirementDateResult.ProcessResults(givenRetirementDate, _now);
 
@@ -102,11 +102,7 @@ namespace Calculator
 
                 if (givenRetirementDate == null && !calcdMinimum && IsThatEnoughTillDeath(emergencyFund, result, family))
                 {
-                    foreach (var resultPerson in result.Persons)
-                    {
-                        resultPerson.MinimumPossibleRetirementDate = result.PrimaryPerson.StepReport.CurrentStep.Date;
-                        resultPerson.SavingsAtMinimumPossiblePensionAge = Convert.ToInt32(result.Persons.Select(p => p.StepReport.CurrentStep.Investments).Sum());
-                    }
+                    result.Persons.ForEach((p)=> p.FinancialIndependenceDate = result.PrimaryPerson.StepReport.CurrentStep.Date);
 
                     if (exitOnceMinCalcd)
                         return result;

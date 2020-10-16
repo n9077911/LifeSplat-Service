@@ -28,10 +28,9 @@ namespace CalculatorTests.RetirementCalculatorTests
             var report = await calc.ReportForAsync(new Family(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
                 new []{new SpendingStep(_fixedDateProvider.Now(), 100)}));
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2020, 02, 1)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(38));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2020, 02, 1)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(38));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("0 Years and 1 Month"));
-            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(1361));
             Assert.That(report.SavingsAt100, Is.EqualTo(577_990));
             //Knows when someone will not go bankrupt
             Assert.That(report.BankruptDate, Is.EqualTo(DateTime.MaxValue));
@@ -43,8 +42,8 @@ namespace CalculatorTests.RetirementCalculatorTests
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc,
                 _fixedStatePensionAmountCalculator);
             var report = await calc.ReportForAsync(new Family(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)}, new[]{new SpendingStep(_fixedDateProvider.Now(), 2_500)}));
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2021, 12, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(40));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2021, 12, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(40));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("1 Year and 11 Months"));
             Assert.That(report.SavingsAt100, Is.EqualTo(429_008));
         }
@@ -62,8 +61,8 @@ namespace CalculatorTests.RetirementCalculatorTests
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)};
             var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
         
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2038, 04, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(56));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2038, 04, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(56));
             Assert.That(report.SavingsAt100, Is.EqualTo(5_455));
         }
 
@@ -75,8 +74,8 @@ namespace CalculatorTests.RetirementCalculatorTests
             var report = await calc.ReportForAsync(new Family(new Person {Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
                 new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2048, 08, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(67));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2048, 08, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(67));
             Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
             Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("28 Years and 7 Months"));
@@ -91,8 +90,8 @@ namespace CalculatorTests.RetirementCalculatorTests
             var report = await calc.ReportForAsync(new Family(new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30)},
                 new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2042, 12, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(61));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2042, 12, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(61));
             Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
             Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("22 Years and 11 Months"));
@@ -107,12 +106,10 @@ namespace CalculatorTests.RetirementCalculatorTests
             var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), EmergencyFundSpec = new EmergencyFundSpec("10000")};
             var report = await calc.ReportForAsync(new Family(person, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2043, 12, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(62));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2043, 12, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(62));
             Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
             Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
-            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(211_209));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(209_872));
             Assert.That(report.SavingsAt100, Is.EqualTo(12_640));
         }
         
@@ -125,12 +122,10 @@ namespace CalculatorTests.RetirementCalculatorTests
             var report = await calc.ReportForAsync(new Family(person,
                 new []{new SpendingStep(_fixedDateProvider.Now(), 20_000), new SpendingStep(_fixedDateProvider.Now().AddYears(10), 15_000)}));
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2037, 01, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(55));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2037, 01, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(55));
             Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
             Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
-            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(208_018));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(119_903));
             Assert.That(report.SavingsAt100, Is.EqualTo(16_850));
         }
         
@@ -142,7 +137,7 @@ namespace CalculatorTests.RetirementCalculatorTests
             var person = new Person {ExistingSavings = 50_000, Salary = 30_000, Dob = new DateTime(1981, 05, 30), EmergencyFundSpec = new EmergencyFundSpec("1000000")};
             var report = await calc.ReportForAsync(new Family(person, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(0001, 01, 01)));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(0001, 01, 01)));
             Assert.That(report.SavingsAt100, Is.EqualTo(520_809));
         }
 
@@ -158,11 +153,10 @@ namespace CalculatorTests.RetirementCalculatorTests
             },
                 new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2039, 08, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(58));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2039, 08, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(58));
             Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
             Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
-            Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(133_987));
             Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(5_411));
             Assert.That(report.SavingsAt100, Is.EqualTo(1_946));
         }
@@ -182,13 +176,12 @@ namespace CalculatorTests.RetirementCalculatorTests
                 EmployeeContribution = 0.05m,
             }, new []{new SpendingStep(_fixedDateProvider.Now(), 40_000), new SpendingStep(_fixedDateProvider.Now().AddYears(10), 30_000)}));
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 12, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2030, 12, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(49));
             Assert.That(report.PrimaryPerson.StatePensionAge, Is.EqualTo(68));
             Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
             Assert.That(report.PrimaryPerson.StatePensionDate, Is.EqualTo(new DateTime(2049, 05, 30)));
             Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
-            Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(364_855));
             Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(14_594));
             Assert.That(report.TimeToRetirement.ToString(), Is.EqualTo("10 Years and 11 Months"));
         }
@@ -207,11 +200,10 @@ namespace CalculatorTests.RetirementCalculatorTests
             },
             new []{new SpendingStep(eomDate.Now(), 20_000), new SpendingStep(eomDate.Now(), 18_000)}));
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2036, 04, 28)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(54));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2036, 04, 28)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(54));
             Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
             Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
-            Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(122_972));
             Assert.That(report.PrimaryPerson.PrivatePensionSafeWithdrawal, Is.EqualTo(4_919));
             Assert.That(report.SavingsAt100, Is.EqualTo(5_794));
         }
@@ -229,11 +221,9 @@ namespace CalculatorTests.RetirementCalculatorTests
 
             Assert.That(report.TargetRetirementDate, Is.EqualTo(new DateTime(2026, 05, 30)));
             Assert.That(report.TargetRetirementAge, Is.EqualTo(45));
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2025, 09, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(44));
             Assert.That(report.PrimaryPerson.AnnualStatePension, Is.EqualTo(5_987));
-            Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(159_647));
-            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(288_832));
             Assert.That(report.SavingsAt100, Is.EqualTo(410_947));
         }
 
@@ -249,17 +239,13 @@ namespace CalculatorTests.RetirementCalculatorTests
 
             var report = await calc.ReportForAsync(new Family(person, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}));
             Assert.That(report.SavingsAt100, Is.EqualTo(1_612));
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
-            Assert.That(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(150_664));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.PrimaryPerson.AnnualStatePension, Is.EqualTo(5_987));
-            Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
 
             //validate earliest possible retirement date
-            var report2 = await calc.ReportForAsync(new Family(person, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}), report.MinimumPossibleRetirementDate);
+            var report2 = await calc.ReportForAsync(new Family(person, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}), report.FinancialIndependenceDate);
             Assert.That(report2.SavingsAt100, Is.EqualTo(report.SavingsAt100));
-            Assert.That(report2.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(report.PrimaryPerson.PrivatePensionPotCombinedAtPrivatePensionAge));
             Assert.That(report2.PrimaryPerson.AnnualStatePension, Is.EqualTo(report.PrimaryPerson.AnnualStatePension));
-            Assert.That(report2.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(report.SavingsAtMinimumPossiblePensionAge));
         }
 
         [Test]
@@ -274,15 +260,13 @@ namespace CalculatorTests.RetirementCalculatorTests
 
             var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 50);
             Assert.That(report.SavingsAt100, Is.EqualTo(3_199_745));
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
-            Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2025, 09, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(44));
 
             var report2 = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
             Assert.That(report2.SavingsAt100, Is.EqualTo(1_612));
-            Assert.That(report2.MinimumPossibleRetirementDate, Is.EqualTo(report.MinimumPossibleRetirementDate));
-            Assert.That(report2.MinimumPossibleRetirementAge, Is.EqualTo(report.MinimumPossibleRetirementAge));
-            Assert.That(report2.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(report.SavingsAtMinimumPossiblePensionAge));
+            Assert.That(report2.FinancialIndependenceDate, Is.EqualTo(report.FinancialIndependenceDate));
+            Assert.That(report2.FinancialIndependenceAge, Is.EqualTo(report.FinancialIndependenceAge));
         }
 
         [Test]
@@ -296,9 +280,8 @@ namespace CalculatorTests.RetirementCalculatorTests
             };
 
             var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 42);
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2025, 09, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(44));
-            Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(339_162));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2025, 09, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(44));
             Assert.That(report.SavingsAt100, Is.EqualTo(-525_943));
         }
 
@@ -311,7 +294,7 @@ namespace CalculatorTests.RetirementCalculatorTests
 
             var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2076, 06, 01)));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2076, 06, 01)));
             Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2020, 02, 01)));
         }
 
@@ -324,7 +307,7 @@ namespace CalculatorTests.RetirementCalculatorTests
 
             var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 42);
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2034, 06, 01)));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2034, 06, 01)));
             Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2026, 09, 01)));
         }
         
@@ -342,10 +325,8 @@ namespace CalculatorTests.RetirementCalculatorTests
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
             var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
         
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 07, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
-            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(371_943));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(234_105));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2030, 07, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(49));
             Assert.That(report.SavingsAt100, Is.EqualTo(43_368));
         } 
         
@@ -364,21 +345,11 @@ namespace CalculatorTests.RetirementCalculatorTests
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
             var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
         
-            Assert.That(report.Persons[0].MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 05, 01)));
-            Assert.That(report.Persons[0].MinimumPossibleRetirementAge, Is.EqualTo(48));
-            Assert.That(report.Persons[0].SavingsCombinedAtPrivatePensionAge, Is.EqualTo(354_912));
-            Assert.That(report.Persons[0].SavingsCombinedAtStatePensionAge, Is.EqualTo(208_095));
-            Assert.That(report.Persons[0].PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(179_150));
-            Assert.That(report.Persons[0].PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(358_299));
-            Assert.That(report.Persons[0].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(358_299));
+            Assert.That(report.Persons[0].FinancialIndependenceDate, Is.EqualTo(new DateTime(2030, 05, 01)));
+            Assert.That(report.Persons[0].FinancialIndependenceAge, Is.EqualTo(48));
 
-            Assert.That(report.Persons[1].MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 05, 01)));
-            Assert.That(report.Persons[1].MinimumPossibleRetirementAge, Is.EqualTo(58));
-            Assert.That(report.Persons[1].SavingsCombinedAtPrivatePensionAge, Is.EqualTo(354_912));
-            Assert.That(report.Persons[1].SavingsCombinedAtStatePensionAge, Is.EqualTo(208_095));
-            Assert.That(report.Persons[1].PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(179_150));
-            Assert.That(report.Persons[1].PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(358_299));
-            Assert.That(report.Persons[1].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(358_299));
+            Assert.That(report.Persons[1].FinancialIndependenceDate, Is.EqualTo(new DateTime(2030, 05, 01)));
+            Assert.That(report.Persons[1].FinancialIndependenceAge, Is.EqualTo(58));
             
             Assert.That(report.SavingsAt100, Is.EqualTo(28_077));
         }
@@ -398,21 +369,11 @@ namespace CalculatorTests.RetirementCalculatorTests
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
             var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
         
-            Assert.That(report.Persons[0].MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 02, 01)));
-            Assert.That(report.Persons[0].MinimumPossibleRetirementAge, Is.EqualTo(58));
-            Assert.That(report.Persons[0].SavingsCombinedAtPrivatePensionAge, Is.EqualTo(329_157));
-            Assert.That(report.Persons[0].SavingsCombinedAtStatePensionAge, Is.EqualTo(168_601));
-            Assert.That(report.Persons[0].PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(177_722));
-            Assert.That(report.Persons[0].PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(355_443));
-            Assert.That(report.Persons[0].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(355_443));
+            Assert.That(report.Persons[0].FinancialIndependenceDate, Is.EqualTo(new DateTime(2030, 02, 01)));
+            Assert.That(report.Persons[0].FinancialIndependenceAge, Is.EqualTo(58));
 
-            Assert.That(report.Persons[1].MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 02, 01)));
-            Assert.That(report.Persons[1].MinimumPossibleRetirementAge, Is.EqualTo(48));
-            Assert.That(report.Persons[1].SavingsCombinedAtPrivatePensionAge, Is.EqualTo(329_157));
-            Assert.That(report.Persons[1].SavingsCombinedAtStatePensionAge, Is.EqualTo(168_601));
-            Assert.That(report.Persons[1].PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(177_722));
-            Assert.That(report.Persons[1].PrivatePensionPotCombinedAtPrivatePensionAge, Is.EqualTo(355_443));
-            Assert.That(report.Persons[1].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(355_443));
+            Assert.That(report.Persons[1].FinancialIndependenceDate, Is.EqualTo(new DateTime(2030, 02, 01)));
+            Assert.That(report.Persons[1].FinancialIndependenceAge, Is.EqualTo(48));
             
             Assert.That(report.SavingsAt100, Is.EqualTo(13_485));
         }
@@ -435,15 +396,11 @@ namespace CalculatorTests.RetirementCalculatorTests
             var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs), new DateTime(2044, 06, 01));
             Console.WriteLine(startNew.Elapsed);
             
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 07, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2030, 07, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(49));
             Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
             Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
-            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(1_136_843));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(1_803_063));
             Assert.That(report.SavingsAt100, Is.EqualTo(6_166_623));
-            Assert.That(report.PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(446_625));
-            Assert.That(report.PrivatePensionPotAtStatePensionAge, Is.EqualTo(587_507));
         }
         
         [Test]
@@ -460,15 +417,11 @@ namespace CalculatorTests.RetirementCalculatorTests
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 40_000)};
             var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs), new DateTime(2034, 06, 01));
         
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 07, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(49));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2030, 07, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(49));
             Assert.That(report.PrimaryPerson.PrivatePensionAge, Is.EqualTo(58));
             Assert.That(report.PrimaryPerson.PrivatePensionDate, Is.EqualTo(new DateTime(2039, 05, 30)));
-            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(741_724));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(801_276));
             Assert.That(report.SavingsAt100, Is.EqualTo(2_214_019));
-            Assert.That(report.PrivatePensionPotAtPrivatePensionAge, Is.EqualTo(401_192));
-            Assert.That(report.PrivatePensionPotAtStatePensionAge, Is.EqualTo(401_192));
         }
         
         [Test]
@@ -490,8 +443,8 @@ namespace CalculatorTests.RetirementCalculatorTests
             IEnumerable<SpendingStep> spendingStepInputs1 = new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)};
             var single = await calc.ReportForAsync(new Family(personStatuses1, spendingStepInputs1));
 
-            Assert.That(couple.MinimumPossibleRetirementDate, Is.EqualTo(single.MinimumPossibleRetirementDate));
-            Assert.That(couple.MinimumPossibleRetirementAge, Is.EqualTo(single.MinimumPossibleRetirementAge));
+            Assert.That(couple.FinancialIndependenceDate, Is.EqualTo(single.FinancialIndependenceDate));
+            Assert.That(couple.FinancialIndependenceAge, Is.EqualTo(single.FinancialIndependenceAge));
             Assert.That(couple.TimeToRetirement.ToString(), Is.EqualTo(single.TimeToRetirement.ToString()));
             Assert.That(couple.SavingsAt100, Is.EqualTo(single.SavingsAt100 * 2).Within(1));
         }
@@ -509,8 +462,6 @@ namespace CalculatorTests.RetirementCalculatorTests
             var couple = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
             Assert.That(couple.Persons[0].AnnualStatePension, Is.EqualTo(3_904));
             Assert.That(couple.Persons[1].AnnualStatePension, Is.EqualTo(5_206));
-            Assert.That(couple.Persons[0].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(0));
-            Assert.That(couple.Persons[1].PrivatePensionPotCombinedAtStatePensionAge, Is.EqualTo(0));
             Assert.That(couple.SavingsAt100, Is.EqualTo(31453));
         }
 
@@ -532,8 +483,7 @@ namespace CalculatorTests.RetirementCalculatorTests
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             var report = await calc.ReportForAsync(new Family(personStatuses, spendingSteps));
             
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2030, 06, 01)));
-            Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(400_203));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2030, 06, 01)));
             Assert.That(report.SavingsAt100, Is.EqualTo(41_611));
         }
         
@@ -552,8 +502,7 @@ namespace CalculatorTests.RetirementCalculatorTests
             IEnumerable<SpendingStep> spendingStepInputs = new[]{new SpendingStep(new DateTime(2020, 1, todayDay), 20000)};
             var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
             
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2026, 09, 01)));
-            Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(420_051));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2026, 09, 01)));
             Assert.That(report.SavingsAt100, Is.EqualTo(5_494));
         }
         
@@ -575,10 +524,8 @@ namespace CalculatorTests.RetirementCalculatorTests
             Assert.That(report.Persons.First().StepReport.Steps.Last().EmergencyFund, Is.EqualTo(10_000));
             Assert.That(report.Persons.Last().StepReport.Steps.First().EmergencyFund, Is.EqualTo(10_000));
             Assert.That(report.Persons.Last().StepReport.Steps.Last().EmergencyFund, Is.EqualTo(10_000));
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2035, 09, 01)));
-            Assert.That(report.MinimumPossibleRetirementAge, Is.EqualTo(54));
-            Assert.That(report.SavingsAtPrivatePensionAge, Is.EqualTo(533_905));
-            Assert.That(report.SavingsAtStatePensionAge, Is.EqualTo(367_102));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2035, 09, 01)));
+            Assert.That(report.FinancialIndependenceAge, Is.EqualTo(54));
             Assert.That(report.SavingsAt100, Is.EqualTo(58_285));
         } 
 
@@ -620,8 +567,7 @@ namespace CalculatorTests.RetirementCalculatorTests
 
             var report = await calc.ReportForAsync(new Family(new[] {person1}, new []{new SpendingStep(_fixedDateProvider.Now(), 10_000)}));
         
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2027, 01, 01)));
-            Assert.That(report.SavingsAtMinimumPossiblePensionAge, Is.EqualTo(97_959));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2027, 01, 01)));
             Assert.That(report.SavingsAt100, Is.EqualTo(1_050_439));
         }
     }

@@ -24,7 +24,7 @@ namespace CalculatorTests.RetirementCalculatorTests
             var family = TestPersons.TwoComplexPeople_WithPension(_fixedDateProvider.Now(), 50_000, 1000_000).Family();
             var report = await calc.ReportForAsync(family);
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2031, 11, 01)));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2031, 11, 01)));
             Assert.That(report.Persons[0].PrivatePensionPotCrystallisationDate, Is.EqualTo(new DateTime(2039, 06, 01)));
             
             Assert.That(report.Persons[0].LifeTimeAllowanceTaxCharge, Is.EqualTo(285_544));
@@ -48,7 +48,7 @@ namespace CalculatorTests.RetirementCalculatorTests
             var family = TestPersons.TwoComplexPeople_WithPension(_fixedDateProvider.Now(), 50_000, 0).Family();
             var report = await calc.ReportForAsync(family);
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(new DateTime(2039, 05, 01)));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2039, 05, 01)));
             Assert.That(report.Persons[0].PrivatePensionPotCrystallisationDate, Is.EqualTo(new DateTime(2039, 06, 01)));
             Assert.That(report.Persons[0].PrivatePensionCrystallisationAge, Is.EqualTo(58));
             
