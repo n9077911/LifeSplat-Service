@@ -29,7 +29,7 @@ namespace ServiceLayer.Models
                 emergencyFundSpec = emergencyFundSpec.SplitInTwo();
 
             var person = personList.Select(p => PersonStatus(p, emergencyFundSpec));
-            var spendingStepInputs = spendingSteps.Select(dto => new SpendingStep(person.First().Dob.AddYears(dto.Age), dto.Amount));
+            var spendingStepInputs = spendingSteps.Select(dto => new SpendingStep(dto.Date ?? person.First().Dob.AddYears(dto.Age), dto.Amount));
 
             var retirementReport = await _retirementCalculator.ReportForTargetAgeAsync(person, spendingStepInputs, targetRetirementAge);
 
