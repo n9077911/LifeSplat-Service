@@ -43,8 +43,10 @@ namespace Calculator.Output
         int Take25LumpSum { get; }
         int LifeTimeAllowanceTaxCharge { get; }
         
-        void UpdateFinancialIndependenceDate(in DateTime minimumPossibleRetirementDate);
         bool Retired(in bool calcdMinimum, in DateTime now, DateTime? givenRetirementDate);
+        void UpdateFinancialIndependenceDate(in DateTime minimumPossibleRetirementDate);
         void CrystallisePension();
+        void UpdateWithConclusions(IAssumptions assumptions, DateTime bankruptDate);
+        IPersonReport CopyFormCalcMinimumMode();
     }
 }

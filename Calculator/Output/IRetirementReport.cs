@@ -26,7 +26,8 @@ namespace Calculator.Output
         
         decimal MonthlySpendingAt(DateTime date);
         void UpdateFinancialIndependenceDate(DateTime financialIndependenceDate);
-        void ProcessResults(DateTime? givenRetirementDate, DateTime now);
+        void ProcessResults(DateTime now);
         int CurrentSavingsRate();
+        decimal RequiredEmergencyFund(DateTime date);
     }
 }

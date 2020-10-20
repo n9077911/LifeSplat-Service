@@ -33,9 +33,9 @@ namespace CalculatorTests.RetirementCalculatorTests
             IEnumerable<SpendingStep> stepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 70_000)};
             var report = await calc.ReportForAsync(new Family(personStatuses, stepInputs));
             
-            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2055, 03, 01)));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2055, 02, 01)));
             Assert.That(report.FinancialIndependenceAge, Is.EqualTo(73));
-            Assert.That(report.SavingsAt100, Is.EqualTo(115_546));
+            Assert.That(report.SavingsAt100, Is.EqualTo(101621));
 
         }
         

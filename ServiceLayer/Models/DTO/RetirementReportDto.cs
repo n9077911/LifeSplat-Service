@@ -40,7 +40,7 @@ namespace ServiceLayer.Models.DTO
                 {
                     steps.Add(new List<object>
                         {
-                            step.Date.ToString("yyyy-MM-dd"),
+                            step.StepDate.ToString("yyyy-MM-dd"),
                             Decimal.Round(step.Investments),
                             Decimal.Round(step.EmergencyFund),
                             Decimal.Round(step.AfterTaxStatePension),
