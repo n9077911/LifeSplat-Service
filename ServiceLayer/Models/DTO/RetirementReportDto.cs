@@ -12,7 +12,11 @@ namespace ServiceLayer.Models.DTO
         public int? TargetRetirementAge { get; }
         public DateTime? TargetRetirementDate{ get; }
         public DateTime BankruptDate { get; }
-
+        public int SavingsCombinedAtFinancialIndependenceAge { get; }
+        public int PrivatePensionCombinedAtFinancialIndependenceAge { get; }
+        public int? SavingsCombinedAtTargetRetirementAge { get; }
+        public int? PrivatePensionCombinedAtTargetRetirementAge { get; }
+        public int CurrentSavingsRate { get; }
         public List<string> StepsHeaders { get; }
         public List<PersonReportDto> Person { get; } = new List<PersonReportDto>();
         public List<SpendingStepDto> SpendingSteps {get;}
@@ -23,6 +27,11 @@ namespace ServiceLayer.Models.DTO
             TargetRetirementDate = retirementReport.TargetRetirementDate;
             BankruptDate = retirementReport.BankruptDate;
             SpendingSteps = retirementReport.SpendingSteps.Select(s => new SpendingStepDto{StartDate = s.StartDate, EndDate = s.EndDate, Spending = s.Spending}).ToList();
+            SavingsCombinedAtFinancialIndependenceAge = retirementReport.SavingsCombinedAtFinancialIndependenceAge;
+            PrivatePensionCombinedAtFinancialIndependenceAge = retirementReport.PrivatePensionCombinedAtFinancialIndependenceAge;
+            SavingsCombinedAtTargetRetirementAge = retirementReport.SavingsCombinedAtTargetRetirementAge;
+            PrivatePensionCombinedAtTargetRetirementAge = retirementReport.PrivatePensionCombinedAtTargetRetirementAge;
+            CurrentSavingsRate = retirementReport.CurrentSavingsRate();
             
             foreach (var personReport in retirementReport.Persons)
             {
@@ -31,7 +40,7 @@ namespace ServiceLayer.Models.DTO
                 {
                     steps.Add(new List<object>
                         {
-                            step.Date.ToString("yyyy-MM-dd"),
+                            step.StepDate.ToString("yyyy-MM-dd"),
                             Decimal.Round(step.Investments),
                             Decimal.Round(step.EmergencyFund),
                             Decimal.Round(step.AfterTaxStatePension),
@@ -40,6 +49,7 @@ namespace ServiceLayer.Models.DTO
                             Decimal.Round(step.Growth),
                             Decimal.Round(step.AfterTaxPrivatePensionIncome),
                             Decimal.Round(step.PrivatePensionAmount),
+                            Decimal.Round(step.ChildBenefit),
                             Decimal.Round(step.Spending),
                         }
                     );
@@ -47,16 +57,13 @@ namespace ServiceLayer.Models.DTO
                 
                 Person.Add(new PersonReportDto
                 {
-                    MinimumPossibleRetirementAge = personReport.MinimumPossibleRetirementAge,
-                    MinimumPossibleRetirementDate = personReport.MinimumPossibleRetirementDate,
-                    SavingsCombinedAtPrivatePensionAge = personReport.SavingsCombinedAtPrivatePensionAge,
-                    SavingsCombinedAtStatePensionAge = personReport.SavingsCombinedAtStatePensionAge,
-                    PrivatePensionPotCombinedAtPrivatePensionAge = personReport.PrivatePensionPotCombinedAtPrivatePensionAge,
-                    PrivatePensionPotCombinedAtStatePensionAge = personReport.PrivatePensionPotCombinedAtStatePensionAge,
+                    MinimumPossibleRetirementAge = personReport.FinancialIndependenceAge,
+                    MinimumPossibleRetirementDate = personReport.FinancialIndependenceDate,
                     
                     BankruptAge = personReport.BankruptAge,
                     StateRetirementAge = personReport.StatePensionAge,
                     PrivateRetirementAge = personReport.PrivatePensionAge,
+                    TargetRetirementAge = personReport.TargetRetirementAge,
                     PrivateRetirementCrystallisationAge = personReport.PrivatePensionCrystallisationAge,
                     StateRetirementDate = personReport.StatePensionDate,
                     PrivateRetirementDate = personReport.PrivatePensionDate,
@@ -67,13 +74,13 @@ namespace ServiceLayer.Models.DTO
                     AnnualStatePension = personReport.AnnualStatePension,
                     CalculatedNiContributingYears = personReport.NiContributingYears,
                     GivenNiContributingYears = personReport.Person.NiContributingYears,
-                    PrivatePensionPot = personReport.PrivatePensionPotAtPrivatePensionAge,
                     PrivatePensionPotAtCrystallisation = personReport.PrivatePensionPotAtCrystallisationAge,
-                    PrivatePensionPotAtCrystallisationBeforeTake25 = personReport.PrivatePensionPotBeforeTake25AtPensionCrystallisationDate,
+                    PrivatePensionPotBeforeCrystallisation = personReport.PrivatePensionPotBeforeCrystallisation,
                     PrivatePensionSafeWithdrawal = personReport.PrivatePensionSafeWithdrawal,
                     Take25LumpSum = personReport.Take25LumpSum,
                     LifeTimeAllowanceTaxCharge = personReport.LifeTimeAllowanceTaxCharge,
                     AfterTaxSalary = personReport.TakeHomeSalary,
+                    PensionContributions = personReport.PensionContributions,
                     TakeHomeRentalIncome = personReport.TakeHomeRentalIncome,
                     
                     Steps = steps,
@@ -83,7 +90,7 @@ namespace ServiceLayer.Models.DTO
             StepsHeaders = new List<string>
             {
                 "Date", "Cash", "CashSavings", "StatePension", "AfterTaxSalary", "AfterTaxRentalIncome", "Growth", "PrivatePensionGrowth",
-                "PrivatePensionAmount", "Spending"
+                "PrivatePensionAmount", "ChildBenefit", "Spending"
             };
         }
     }
@@ -92,10 +99,6 @@ namespace ServiceLayer.Models.DTO
     {
         public DateTime MinimumPossibleRetirementDate{ get; set; }
         public int MinimumPossibleRetirementAge { get; set; }
-        public int SavingsCombinedAtPrivatePensionAge { get; set; }
-        public int SavingsCombinedAtStatePensionAge { get; set; }
-        public int PrivatePensionPotCombinedAtStatePensionAge { get; set; }
-        public int PrivatePensionPotCombinedAtPrivatePensionAge { get; set; }
         
         public int BankruptAge { get; set; }
         public int StateRetirementAge { get; set; }
@@ -105,9 +108,8 @@ namespace ServiceLayer.Models.DTO
         public DateTime PrivateRetirementDate { get; set;}
         public DateTime PrivateRetirementCrystallisationDate { get; set;}
         public int AnnualStatePension { get; set;}
-        public int PrivatePensionPot { get; set;}
         public int PrivatePensionPotAtCrystallisation { get; set;}
-        public int PrivatePensionPotAtCrystallisationBeforeTake25 { get; set;}
+        public int PrivatePensionPotBeforeCrystallisation { get; set;}
         public int PrivatePensionSafeWithdrawal { get; set;}
         public int Take25LumpSum { get; set;}
         public int LifeTimeAllowanceTaxCharge { get; set;}
@@ -115,9 +117,11 @@ namespace ServiceLayer.Models.DTO
         public int IncomeTaxBill { get; set;}
         public int RentalTaxBill { get; set;}
         public int AfterTaxSalary { get; set; }
+        public int PensionContributions { get; set; }
         public int TakeHomeRentalIncome { get; set; }
         public List<List<object>> Steps { get; set; }
         public int CalculatedNiContributingYears { get; set; }
         public int? GivenNiContributingYears { get; set; }
+        public int? TargetRetirementAge { get; set; }
     }
 }

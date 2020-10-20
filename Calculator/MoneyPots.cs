@@ -62,5 +62,10 @@ namespace Calculator
         {
             return new MoneyPots(pots.Investments, pots.EmergencyFund, requiredEmergencyFund);
         }
+
+        public MoneyPots Copy()
+        {
+            return new MoneyPots(Investments, EmergencyFund, _requiredEmergencyFund);
+        }
     }
 }

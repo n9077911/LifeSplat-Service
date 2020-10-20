@@ -1,3 +1,5 @@
+using System;
+
 namespace Calculator.TaxSystem
 {
     public class RentalIncomeForTax
@@ -17,14 +19,14 @@ namespace Calculator.TaxSystem
         public decimal GetIncomeToPayTaxOn()
         {
             if (BetterToApplyPropertyAllowance())
-                return _grossIncome  - _allowance;
+                return Math.Max(0, _grossIncome  - _allowance);
             
-            return _grossIncome  - _expenses;
+            return Math.Max(0, _grossIncome  - _expenses);
         }
         
         public decimal GetNetIncome()
         {
-            return _grossIncome  - _expenses - _financingCosts;
+            return Math.Max(0, _grossIncome  - _expenses - _financingCosts);
         }
 
         public decimal TaxDeductibleFinancingCosts()

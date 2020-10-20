@@ -29,7 +29,7 @@ namespace ServiceLayer.Models
                 emergencyFundSpec = emergencyFundSpec.SplitInTwo();
 
             var person = personList.Select(p => PersonStatus(p, emergencyFundSpec));
-            var spendingStepInputs = spendingSteps.Select(dto => new SpendingStep(person.First().Dob.AddYears(dto.Age), dto.Amount));
+            var spendingStepInputs = spendingSteps.Select(dto => new SpendingStep(dto.Date ?? person.First().Dob.AddYears(dto.Age), dto.Amount));
 
             var retirementReport = await _retirementCalculator.ReportForTargetAgeAsync(person, spendingStepInputs, targetRetirementAge);
 
@@ -41,12 +41,13 @@ namespace ServiceLayer.Models
             var rentalInfos = dto.RentalInfo.Select(infoDto => new RentalInfo()
             {
                 CurrentValue = infoDto.CurrentValue, Expenses = infoDto.Expenses, GrossIncome = infoDto.GrossIncome,
-                Repayment = infoDto.Repayment, MortgagePayments = infoDto.MortgagePayments, OutstandingMortgage = infoDto.OutstandingMortgage, RemainingTerm = infoDto.RemainingTerm
+                Repayment = infoDto.Repayment, MortgagePayments = infoDto.MortgagePayments, OutstandingMortgage = infoDto.OutstandingMortgage, 
+                RemainingTerm = infoDto.RemainingTerm
             });
 
             var personStatus = new Person
             {
-                Dob = dto.Dob,
+                Dob = DateTime.Parse(dto.Dob),
                 Salary = dto.Salary,
                 Sex = dto.Female ? Sex.Female : Sex.Male,
                 EmergencyFundSpec = emergencyFundSpec,
@@ -56,6 +57,7 @@ namespace ServiceLayer.Models
                 EmployeeContribution = dto.EmployeeContribution / 100m,
                 NiContributingYears = dto.NiContributingYears,
                 RentalPortfolio = new RentalPortfolio(rentalInfos.ToList()),
+                Children = dto.ChildrenDobs,
             };
             
             return personStatus;

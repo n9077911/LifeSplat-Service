@@ -45,7 +45,7 @@ namespace CalculatorTests.RetirementCalculatorTests
 
             var report = await calc.ReportForAsync(twoComplexPeople, targetRetirement);
 
-            Assert.That(report.MinimumPossibleRetirementDate, Is.EqualTo(minimumPossible));
+            Assert.That(report.FinancialIndependenceDate, Is.EqualTo(minimumPossible));
             Assert.That(report.SavingsAt100, Is.EqualTo(savings));
         }
     }
