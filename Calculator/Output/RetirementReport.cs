@@ -73,9 +73,13 @@ namespace Calculator.Output
         {
             var spending = (decimal)_family.SpendingStepInputs.First().NewAmount;
             var earnings = Persons.Sum(p => p.TakeHomeSalary + p.PensionContributions);
+         
+            if (earnings <= 1)
+                return 0;
+            
             var savings = earnings-spending;
-            var oneMinusRatio = savings/earnings;
-            return Convert.ToInt32(oneMinusRatio * 100);
+            var ratio = savings/earnings;
+            return Convert.ToInt32(ratio * 100);
         }
 
         public decimal RequiredEmergencyFund(DateTime date)
