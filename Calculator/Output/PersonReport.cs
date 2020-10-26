@@ -20,7 +20,7 @@ namespace Calculator.Output
             StatePensionDate = pensionAgeCalc.StatePensionDate(person.Dob, person.Sex);
             PrivatePensionDate = pensionAgeCalc.PrivatePensionDate(StatePensionDate);
             TargetRetirementDate = givenRetirementDate;
-            var salaryAfterDeductions = person.Salary * (1 - person.EmployeeContribution);
+            var salaryAfterDeductions = person.EmployeeContribution.SubtractContribution(person.Salary);
             var taxResult = incomeTaxCalculator.TaxFor(salaryAfterDeductions);
             var taxResultWithRental = incomeTaxCalculator.TaxFor(salaryAfterDeductions, rentalIncome: person.RentalPortfolio.RentalIncome());
             MonthlySalaryAfterDeductions = salaryAfterDeductions / Monthly;
@@ -76,7 +76,7 @@ namespace Calculator.Output
         public int RentalTaxBill { get; }
         public int TakeHomeSalary { get; }
         public int TakeHomeRentalIncome { get; }
-        public int PensionContributions => Convert.ToInt32(Person.EmployeeContribution * Person.Salary + Person.EmployerContribution * Person.Salary);
+        public int PensionContributions => Convert.ToInt32(Person.EmployeeContribution.Amount(Person.Salary) + Person.EmployerContribution.Amount(Person.Salary));
 
         public DateTime StatePensionDate { get; set; }
         public DateTime PrivatePensionDate { get; }

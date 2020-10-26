@@ -154,7 +154,10 @@ namespace Calculator
                 PrivatePensionAmount += privatePensionGrowth;
 
             if (!PersonHasQuitWork())
-                PrivatePensionAmount += (_person.Salary / _monthly) * (_person.EmployeeContribution + _person.EmployerContribution);
+            {
+                var monthlySalary = _person.Salary / _monthly;
+                PrivatePensionAmount += _person.EmployeeContribution.Amount(monthlySalary) + _person.EmployerContribution.Amount(monthlySalary);
+            }
         }
 
         public void UpdateSalary(decimal preTaxSalary)

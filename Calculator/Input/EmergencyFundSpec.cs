@@ -2,7 +2,7 @@ namespace Calculator.Input
 {
     public class EmergencyFundSpec
     {
-        private readonly decimal _amount;
+        private readonly Money _amount;
         private readonly decimal _months;
         private readonly bool _isMonths;
 
@@ -17,10 +17,12 @@ namespace Calculator.Input
                 _months = decimal.Parse(amount.Substring(0, amount.Length - 1));
                 _isMonths = true;
             }
-            else if (amount.EndsWith('k') || amount.EndsWith('K'))
-                _amount = decimal.Parse(amount.Substring(0, amount.Length - 1))*1000;
             else
-                _amount = decimal.Parse(amount == "" ? "0" : amount);
+            {
+                _amount = Money.Create(amount);
+                _isMonths = false;
+            }
+            
         }
 
         public decimal RequiredEmergencyFund(decimal spending)

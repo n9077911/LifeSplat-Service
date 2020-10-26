@@ -8,6 +8,7 @@ using Calculator.Input;
 using Calculator.StatePensionCalculator;
 using Calculator.TaxSystem;
 using CalculatorTests.Utilities;
+using CSharpFunctionalExtensions;
 using NUnit.Framework;
 
 namespace CalculatorTests.RetirementCalculatorTests
@@ -258,18 +259,18 @@ namespace CalculatorTests.RetirementCalculatorTests
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             };
 
-            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 50);
+            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, (Age)50);
             Assert.That(report.SavingsAt100, Is.EqualTo(3_199_745));
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.FinancialIndependenceAge, Is.EqualTo(44));
 
-            var report2 = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+            var report2 = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, Maybe<Age>.None);
             Assert.That(report2.SavingsAt100, Is.EqualTo(1_612));
             Assert.That(report2.FinancialIndependenceDate, Is.EqualTo(report.FinancialIndependenceDate));
             Assert.That(report2.FinancialIndependenceAge, Is.EqualTo(report.FinancialIndependenceAge));
         }
 
-        [Test]
+        [Test] 
         public async Task KnowsWhenAWorkerCanRetire_WhenMinimumComesAfterTarget()
         {
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
@@ -279,7 +280,7 @@ namespace CalculatorTests.RetirementCalculatorTests
                 ExistingPrivatePension = 30_000, EmployerContribution = .03m, EmployeeContribution = .05m
             };
 
-            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 42);
+            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, (Age)42);
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2025, 09, 01)));
             Assert.That(report.FinancialIndependenceAge, Is.EqualTo(44));
             Assert.That(report.SavingsAt100, Is.EqualTo(-525_943));
@@ -292,7 +293,7 @@ namespace CalculatorTests.RetirementCalculatorTests
                 _fixedStatePensionAmountCalculator);
             var status = new Person {Salary = 20_000, Dob = new DateTime(1981, 05, 30)};
 
-            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)});
+            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, Maybe<Age>.None);
 
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2076, 06, 01)));
             Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2020, 02, 01)));
@@ -305,7 +306,7 @@ namespace CalculatorTests.RetirementCalculatorTests
                 _fixedStatePensionAmountCalculator);
             var status = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30)};
 
-            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, 42);
+            var report = await calc.ReportForTargetAgeAsync(new []{status}, new []{new SpendingStep(_fixedDateProvider.Now(), 20_000)}, Age.Create(42));
 
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2034, 06, 01)));
             Assert.That(report.BankruptDate, Is.EqualTo(new DateTime(2026, 09, 01)));

@@ -16,13 +16,13 @@ namespace ServiceLayer.Controllers
         {
             _retirement = retirement;
         }
-        
-        [HttpPost("Report")]
-        public async Task<RetirementReportDto> Report([FromBody] string body)
+
+        [HttpGet("Report")]
+        public async Task<RetirementReportDto> Report([FromQuery] string criteria)
         {
             var options = new JsonSerializerOptions {PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
-            var request = JsonSerializer.Deserialize<RetirementReportRequestDto>(body, options);
-            return await _retirement.RetirementReportForAsync(request.TargetRetirementAge, request.EmergencyFund, request.SpendingSteps, request.Persons);
+            var request = JsonSerializer.Deserialize<RetirementReportRequestDto>(criteria, options);
+            return await _retirement.RetirementReportForAsync(request);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+// ReSharper disable All
 
 namespace ServiceLayer.Models.DTO
 {
@@ -6,6 +7,6 @@ namespace ServiceLayer.Models.DTO
     {
         public DateTime? Date { get; set; }
         public int Age { get; set; }
-        public int Amount { get; set; }
+        public string Amount { get; set; }
     }
 }

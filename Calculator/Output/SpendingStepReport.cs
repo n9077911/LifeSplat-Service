@@ -6,9 +6,9 @@ namespace Calculator.Output
     {
         public DateTime StartDate { get; }
         public DateTime EndDate { get; }
-        public int Spending { get; }
+        public Money Spending { get; }
 
-        public SpendingStepReport(DateTime startDate, DateTime endDate, int spending)
+        public SpendingStepReport(DateTime startDate, DateTime endDate, Money spending)
         {
             StartDate = startDate;
             EndDate = endDate;
