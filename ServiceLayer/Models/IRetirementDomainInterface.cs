@@ -6,6 +6,6 @@ namespace ServiceLayer.Models
 {
     public interface IRetirementDomainInterface
     {
-        Task<RetirementReportDto> RetirementReportForAsync(int? targetRetirementAge, string emergencyFund, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons);
+        Task<RetirementReportDto> RetirementReportForAsync(RetirementReportRequestDto requestDto);
     }
 }

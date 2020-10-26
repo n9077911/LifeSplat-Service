@@ -21,46 +21,52 @@ namespace ServiceLayer.Models
             _retirementCalculator = retirementCalculator;
         }
 
-        public async Task<RetirementReportDto> RetirementReportForAsync(int? targetRetirementAge, string emergencyFund, IEnumerable<SpendingStepInputDto> spendingSteps, IEnumerable<PersonDto> persons)
+        public async Task<RetirementReportDto> RetirementReportForAsync(RetirementReportRequestDto requestDto)
         {
-            var emergencyFundSpec = new EmergencyFundSpec(emergencyFund);
-            var personList = persons.ToList();
+            var emergencyFundSpec = new EmergencyFundSpec(requestDto.EmergencyFund);
+            var personList = requestDto.Persons.ToList();
             if (personList.Count == 2)
                 emergencyFundSpec = emergencyFundSpec.SplitInTwo();
 
             var person = personList.Select(p => PersonStatus(p, emergencyFundSpec));
-            var spendingStepInputs = spendingSteps.Select(dto => new SpendingStep(dto.Date ?? person.First().Dob.AddYears(dto.Age), dto.Amount));
+            var spendingStepInputs = new List<SpendingStep> {new SpendingStep(DateTime.Now.Date, Money.Create(requestDto.Spending))};
+            spendingStepInputs.AddRange(requestDto.SpendingSteps.Select(dto => new SpendingStep(dto.Date ?? person.First().Dob.AddYears(dto.Age), Money.Create(dto.Amount))));
 
-            var retirementReport = await _retirementCalculator.ReportForTargetAgeAsync(person, spendingStepInputs, targetRetirementAge);
+            var retirementReport = await _retirementCalculator.ReportForTargetAgeAsync(person, spendingStepInputs, Age.Create(requestDto.TargetRetirementAge));
 
             return new RetirementReportDto(retirementReport);
         }
 
         private static Person PersonStatus(PersonDto dto, EmergencyFundSpec emergencyFundSpec)
         {
-            var rentalInfos = dto.RentalInfo.Select(infoDto => new RentalInfo()
+            var rentalInfos = dto.Rental == null ? new List<RentalInfo>() : dto.Rental.Select(infoDto => new RentalInfo()
             {
-                CurrentValue = infoDto.CurrentValue, Expenses = infoDto.Expenses, GrossIncome = infoDto.GrossIncome,
-                Repayment = infoDto.Repayment, MortgagePayments = infoDto.MortgagePayments, OutstandingMortgage = infoDto.OutstandingMortgage, 
+                CurrentValue = Money.Create(infoDto.CurrentValue),
+                Expenses = Money.Create(infoDto.Expenses),
+                GrossIncome = Money.Create(infoDto.GrossIncome),
+                Repayment = infoDto.Repayment,
+                MortgagePayments = Money.Create(infoDto.MortgagePayments),
+                OutstandingMortgage = Money.Create(infoDto.OutstandingMortgage), 
                 RemainingTerm = infoDto.RemainingTerm
             });
 
-            var personStatus = new Person
+            var person = new Person
             {
                 Dob = DateTime.Parse(dto.Dob),
-                Salary = dto.Salary,
+                Salary = Money.Create(dto.Salary),
                 Sex = dto.Female ? Sex.Female : Sex.Male,
                 EmergencyFundSpec = emergencyFundSpec,
-                ExistingSavings = dto.Savings,
-                ExistingPrivatePension = dto.Pension,
-                EmployerContribution = dto.EmployerContribution / 100m,
-                EmployeeContribution = dto.EmployeeContribution / 100m,
-                NiContributingYears = dto.NiContributingYears,
-                RentalPortfolio = new RentalPortfolio(rentalInfos.ToList()),
-                Children = dto.ChildrenDobs,
-            };
+                ExistingSavings = Money.Create(dto.Savings),
+                ExistingPrivatePension = Money.Create(dto.Pension),
+                EmployerContribution = PensionContribution.Create(dto.EmployerContribution),
+                EmployeeContribution = PensionContribution.Create(dto.EmployeeContribution),
+                NiContributingYears = string.IsNullOrWhiteSpace(dto.NiContributingYears) ? (int?)null : Convert.ToInt32(dto.NiContributingYears),
+                RentalPortfolio = new RentalPortfolio(rentalInfos.ToList()), 
+                Children = dto.Children ?? new List<DateTime>(), 
+            }; 
             
-            return personStatus;
+            return person;  
         }
-    }
+    } 
+
 }

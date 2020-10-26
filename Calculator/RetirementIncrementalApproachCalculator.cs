@@ -7,6 +7,7 @@ using Calculator.Input;
 using Calculator.Output;
 using Calculator.StatePensionCalculator;
 using Calculator.TaxSystem;
+using CSharpFunctionalExtensions;
 
 namespace Calculator
 {
@@ -18,7 +19,6 @@ namespace Calculator
         private readonly IAssumptions _assumptions;
         private readonly IPensionAgeCalc _pensionAgeCalc;
         private readonly IStatePensionAmountCalculator _statePensionAmountCalculator;
-        private readonly decimal _monthly = 12;
         private readonly DateTime _now;
         private IncomeTaxCalculator _incomeTaxCalculator;
 
@@ -32,9 +32,9 @@ namespace Calculator
             _now = dateProvider.Now();
         }
 
-        public async Task<IRetirementReport> ReportForTargetAgeAsync(IEnumerable<Person> personStatus, IEnumerable<SpendingStep> spendingStepInputs, int? retirementAge = null)
+        public async Task<IRetirementReport> ReportForTargetAgeAsync(IEnumerable<Person> personStatus, IEnumerable<SpendingStep> spendingStepInputs, Maybe<Age> retirementAge)
         {
-            var retirementDate = retirementAge.HasValue && retirementAge.Value != 0 ? personStatus.First().Dob.AddYears(retirementAge.Value) : (DateTime?) null;
+            var retirementDate = retirementAge.HasValue ? retirementAge.Value.DateFrom(personStatus.First().Dob) : (DateTime?) null;
             return await ReportForAsync(new Family(personStatus, spendingStepInputs), retirementDate);
         }
 

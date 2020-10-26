@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Calculator.Input;
 using Calculator.Output;
+using CSharpFunctionalExtensions;
 
 namespace Calculator.ExternalInterface
 {
@@ -11,6 +12,6 @@ namespace Calculator.ExternalInterface
     /// </summary>
     public interface IRetirementCalculator
     {
-        Task<IRetirementReport> ReportForTargetAgeAsync(IEnumerable<Person> personStatus, IEnumerable<SpendingStep> spendingStepInputs, int? retirementAge = null);
+        Task<IRetirementReport> ReportForTargetAgeAsync(IEnumerable<Person> personStatus, IEnumerable<SpendingStep> spendingStepInputs, Maybe<Age> retirementAge);
     }
 }
