@@ -30,7 +30,7 @@ namespace ServiceLayer.Models
 
             var person = personList.Select(p => PersonStatus(p, emergencyFundSpec));
             var spendingStepInputs = new List<SpendingStep> {new SpendingStep(DateTime.Now.Date, Money.Create(requestDto.Spending))};
-            spendingStepInputs.AddRange(requestDto.SpendingSteps.Select(dto => new SpendingStep(dto.Date ?? person.First().Dob.AddYears(dto.Age), Money.Create(dto.Amount))));
+            spendingStepInputs.AddRange(requestDto.SpendingSteps.Select(dto => new SpendingStep(dto.Date ?? person.First().Dob.AddYears(Convert.ToInt32(dto.Age)), Money.Create(dto.Amount))));
 
             var retirementReport = await _retirementCalculator.ReportForTargetAgeAsync(person, spendingStepInputs, Age.Create(requestDto.TargetRetirementAge));
 
