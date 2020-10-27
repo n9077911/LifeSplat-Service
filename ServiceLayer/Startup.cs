@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +12,10 @@ using Calculator.ExternalInterface;
 using Calculator.Input;
 using Calculator.StatePensionCalculator;
 using Calculator.TaxSystem;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using ServiceLayer.Misc;
 using ServiceLayer.Models;
 
@@ -30,6 +37,7 @@ namespace ServiceLayer
             CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
             CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
             
+            services.AddApplicationInsightsTelemetry("5df2bfe9-d72c-4622-9fed-adbee51c0a02");
             
             services.AddControllers(options => { options.InputFormatters.Insert(0, new TextPlainInputFormatter()); });
             services.AddControllers().AddNewtonsoftJson();
@@ -43,15 +51,32 @@ namespace ServiceLayer
             services.AddTransient<IAssumptions>(x => Assumptions.SafeWithdrawalNoInflationTake25Assumptions());
             services.AddSingleton<IRetirementCalculator, RetirementIncrementalApproachCalculator>();
             services.AddSingleton<IRetirementDomainInterface, RetirementDomainInterface>();
+            
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            // var telemetryClient = app.ApplicationServices.GetService<TelemetryClient>();
+            
+            // app.UseExceptionHandler(errorApp =>
+            // {
+            //     errorApp.Run(async context =>
+            //     {
+            //         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+            //         telemetryClient.TrackException(exceptionHandlerPathFeature.Error, new Dictionary<string, string> {{"Env", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}});
+            //     });
+            // });
+            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
+                app.UseHsts();
             }
 
             app.UseHttpsRedirection();
@@ -77,6 +102,7 @@ namespace ServiceLayer
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            
         }
     }
 }
