@@ -15,13 +15,14 @@ namespace ServiceLayer.Models.DTO
         public bool Female { get; set; }
         public List<RentalInfoDto> Rental { get; set; }
         public List<DateTime> Children { get; set; }
+        public List<SalaryStepInputDto> SalarySteps { get; set; }
     }
 
     public class RentalInfoDto
     {
-        public string GrossIncome { get; set; }
+        public string GrossRent { get; set; }
         public string Expenses { get; set; }
-        public string MortgagePayments { get; set; }
+        public string MortgageCosts { get; set; }
         public string OutstandingMortgage { get; set; }
         public bool Repayment { get; set; }
         public bool RemainingTerm { get; set; }

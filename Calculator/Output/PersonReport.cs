@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Calculator.ExternalInterface;
 using Calculator.Input;
@@ -14,7 +15,8 @@ namespace Calculator.Output
         private bool _pensionCrystallised = false;
         private readonly bool _take25 = false;
 
-        public PersonReport(IPensionAgeCalc pensionAgeCalc, IIncomeTaxCalculator incomeTaxCalculator, Person person, DateTime now, DateTime? givenRetirementDate, IAssumptions assumptions, decimal monthlySpending)
+        public PersonReport(IPensionAgeCalc pensionAgeCalc, IIncomeTaxCalculator incomeTaxCalculator, Person person, DateTime now, DateTime? givenRetirementDate, IAssumptions assumptions,
+            decimal monthlySpending, ITaxSystem taxSystem)
         {
             Person = person;
             StatePensionDate = pensionAgeCalc.StatePensionDate(person.Dob, person.Sex);
@@ -23,29 +25,44 @@ namespace Calculator.Output
             var salaryAfterDeductions = person.EmployeeContribution.SubtractContribution(person.Salary);
             var taxResult = incomeTaxCalculator.TaxFor(salaryAfterDeductions);
             var taxResultWithRental = incomeTaxCalculator.TaxFor(salaryAfterDeductions, rentalIncome: person.RentalPortfolio.RentalIncome());
-            MonthlySalaryAfterDeductions = salaryAfterDeductions / Monthly;
 
             NationalInsuranceBill = Convert.ToInt32(taxResult.NationalInsurance);
             IncomeTaxBill = Convert.ToInt32(taxResult.IncomeTax);
             RentalTaxBill = Convert.ToInt32(taxResultWithRental.TotalTaxFor(IncomeType.RentalIncome));
             TakeHomeSalary = Convert.ToInt32(taxResult.AfterTaxIncome);
             TakeHomeRentalIncome = Convert.ToInt32(person.RentalPortfolio.TotalNetIncome() - RentalTaxBill);
-            
-            StepReport = givenRetirementDate.HasValue 
-                ? new StepsReport(person, StepType.GivenDate, now, assumptions, monthlySpending, PrivatePensionDate) 
-                : new StepsReport(person, StepType.CalcMinimum, now, assumptions, monthlySpending, PrivatePensionDate);
+
+            SalarySteps = SetupSalarySteps(person, now).ToList();
+
+            var niContributingYearsSoFar = NiContributingYearsCalc.CalculateContributingYearsSoFar(person, MonthlySalaryAfterDeductionsAt(now), now, taxSystem);
+
+            var mode = givenRetirementDate.HasValue ? StepType.GivenDate : StepType.CalcMinimum;
+            StepReport = new StepsReport(person, niContributingYearsSoFar, mode, now, assumptions, monthlySpending, PrivatePensionDate, taxSystem);
 
             _take25 = assumptions.Take25;
         }
 
-        private PersonReport(Person person, in DateTime statePensionDate, in DateTime privatePensionDate, DateTime? targetRetirementDate, in decimal monthlySalaryAfterDeductions, 
-            in int nationalInsuranceBill, in int incomeTaxBill, in int rentalTaxBill, in int takeHomeSalary, in int takeHomeRentalIncome, in bool take25, in bool pensionCrystallised, StepsReport stepReport)
+        private static IEnumerable<SalaryStepReport> SetupSalarySteps(Person person, DateTime now)
+        {
+            var salaryStepInputs = new List<SalaryStep> {new SalaryStep(now, person.Salary)};
+            salaryStepInputs.AddRange(person.SalaryStepInputs);
+            salaryStepInputs = salaryStepInputs.OrderBy(input => input.Date).ToList();
+
+            for (int i = 0; i < salaryStepInputs.Count; i++)
+            {
+                var endDate = i < salaryStepInputs.Count - 1 ? salaryStepInputs[i + 1].Date : person.Dob.AddYears(100);
+                yield return new SalaryStepReport(salaryStepInputs[i].Date, endDate.AddDays(-1), salaryStepInputs[i].NewAmount);
+            }
+        }
+
+        private PersonReport(Person person, in DateTime statePensionDate, in DateTime privatePensionDate, DateTime? targetRetirementDate,
+            in int nationalInsuranceBill, in int incomeTaxBill, in int rentalTaxBill, in int takeHomeSalary, in int takeHomeRentalIncome, in bool take25, in bool pensionCrystallised,
+            StepsReport stepReport, List<SalaryStepReport> salaryStepReports)
         {
             Person = person;
             StatePensionDate = statePensionDate;
             PrivatePensionDate = privatePensionDate;
             TargetRetirementDate = targetRetirementDate;
-            MonthlySalaryAfterDeductions = monthlySalaryAfterDeductions;
             NationalInsuranceBill = nationalInsuranceBill;
             IncomeTaxBill = incomeTaxBill;
             RentalTaxBill = rentalTaxBill;
@@ -54,23 +71,30 @@ namespace Calculator.Output
             _take25 = take25;
             _pensionCrystallised = pensionCrystallised;
             StepReport = stepReport;
+            SalarySteps = salaryStepReports;
         }
 
         public IPersonReport CopyFormCalcMinimumMode()
         {
-            var personReport = new PersonReport(Person, StatePensionDate, PrivatePensionDate, TargetRetirementDate, 
-                MonthlySalaryAfterDeductions, NationalInsuranceBill, IncomeTaxBill, RentalTaxBill, TakeHomeSalary, 
-                TakeHomeRentalIncome, _take25, _pensionCrystallised, StepReport.CopyFromCurrent());
-            
+            var personReport = new PersonReport(Person, StatePensionDate, PrivatePensionDate, TargetRetirementDate, NationalInsuranceBill, IncomeTaxBill, RentalTaxBill, TakeHomeSalary,
+                TakeHomeRentalIncome, _take25, _pensionCrystallised, StepReport.CopyFromCurrent(), SalarySteps);
+
             return personReport;
         }
 
+        public decimal MonthlySalaryAfterDeductionsAt(DateTime date)
+        {
+            var salaryStep = SalarySteps.FirstOrDefault(step => date.Date >= step.StartDate.Date && date.Date <= step.EndDate.Date) ?? SalarySteps.Last();
+            var salaryAfterDeductions = Person.EmployeeContribution.SubtractContribution(salaryStep.Salary);
+            return salaryAfterDeductions / Monthly;
+        }
+
+        private List<SalaryStepReport> SalarySteps { get; } = new List<SalaryStepReport>();
 
         public Person Person { get; }
 
         public StepsReport StepReport { get; }
 
-        public decimal MonthlySalaryAfterDeductions { get; }
         public int NationalInsuranceBill { get; }
         public int IncomeTaxBill { get; }
         public int RentalTaxBill { get; }

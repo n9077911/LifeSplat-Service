@@ -12,7 +12,7 @@ namespace Calculator.StatePensionCalculator
             _amount = amount;
         }
 
-        public StatePensionResult Calculate(Person person, DateTime futureDate)
+        public StatePensionResult Calculate(int niContributingYears)
         {
             return new StatePensionResult(35, _amount);
         }

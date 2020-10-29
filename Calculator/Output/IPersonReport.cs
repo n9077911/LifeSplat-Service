@@ -8,7 +8,6 @@ namespace Calculator.Output
     {
         Person Person { get; }
         StepsReport StepReport { get; }
-        decimal MonthlySalaryAfterDeductions { get; }
         int NationalInsuranceBill { get; }
         int IncomeTaxBill { get; }
         int RentalTaxBill { get; }
@@ -48,5 +47,6 @@ namespace Calculator.Output
         void CrystallisePension();
         void UpdateWithConclusions(IAssumptions assumptions, DateTime bankruptDate);
         IPersonReport CopyFormCalcMinimumMode();
+        decimal MonthlySalaryAfterDeductionsAt(DateTime date);
     }
 }

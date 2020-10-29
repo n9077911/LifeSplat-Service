@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Calculator;
 using Calculator.Input;
 using Calculator.StatePensionCalculator;
+using Calculator.TaxSystem;
 using CalculatorTests.Utilities;
 using NUnit.Framework;
 
@@ -15,8 +16,9 @@ namespace CalculatorTests.RetirementCalculatorTests
         private readonly IStatePensionAmountCalculator _statePensionCalculator = new FixedStatePensionAmountCalculator(10_000);
         private readonly IAssumptions _assumptions = Assumptions.SafeWithdrawalNoInflationTake25Assumptions();
         private readonly StubPensionAgeCalc _pensionAgeCalc = new StubPensionAgeCalc(new DateTime(2049, 05, 30));
-        
-        
+        private TwentyTwentyTaxSystem _taxSystem = new TwentyTwentyTaxSystem();
+
+
         [TestCase]
         public async Task KnowsWhenTwoComplexPeopleCanRetire_WithRentalIncome()
         {
@@ -41,7 +43,7 @@ namespace CalculatorTests.RetirementCalculatorTests
                 .WithRental(1, 10_000, 3_000, 2000)
                 .Family();
 
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var report = await calc.ReportForAsync(twoComplexPeople, targetRetirement);
 

@@ -10,19 +10,24 @@ namespace CalculatorTests.Utilities
             var person1 = GetPerson1();
             var person2 = GetPerson2();
             
-            return new FamilyBuilder(){Persons = new []{person1, person2}, Spending = new []{new SpendingStep(now, spending)}};
+            return new FamilyBuilder {Persons = new []{person1, person2}, Spending = new []{new SpendingStep(now, spending)}};
         }
 
+        public static FamilyBuilder OnePerson(DateTime now, int spending)
+        {
+            return new FamilyBuilder {Persons = new []{GetPerson1()}, Spending = new []{new SpendingStep(now, spending)}};
+        }
+        
         private static Person GetPerson2()
         {
             return new Person {Salary = 50_000, Dob = new DateTime(1985, 12, 1), ExistingSavings = 50_000, ExistingPrivatePension = 50_000, 
-                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
+                EmployeeContribution = 5m, EmployerContribution = 3m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
         }
 
         private static Person GetPerson1()
         {
             return new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000,
-                EmployeeContribution = 0.05m, EmployerContribution = 0.03m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
+                EmployeeContribution = 5m, EmployerContribution = 3m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
         }
 
         public static FamilyBuilder TwoComplexPeople_WithPension(DateTime now, int spending, int total)
@@ -34,5 +39,6 @@ namespace CalculatorTests.Utilities
             
             return new FamilyBuilder(){Persons = new []{person1, person2}, Spending = new []{new SpendingStep(now, spending)}};
         }
+
     }
 }

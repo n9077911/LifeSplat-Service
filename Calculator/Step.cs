@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using Calculator.Input;
 using Calculator.Output;
 using Calculator.StatePensionCalculator;
@@ -20,6 +21,7 @@ namespace Calculator
         private readonly IAssumptions _assumptions;
         private readonly DateTime _privatePensionDate;
         private readonly DateTime? _givenRetirementDate;
+        private readonly ITaxSystem _taxSystem;
         private decimal _monthly = 12m;
 
         private decimal _preTaxSalary = 0;
@@ -29,24 +31,27 @@ namespace Calculator
         private MoneyPots Pots { get; }
 
         public Step(Step previousStep, DateTime stepStepDate, Person person, bool calcdMinimum, IAssumptions assumptions,
-            DateTime privatePensionDate, decimal spending, DateTime? givenRetirementDate = null, MoneyPots pots = null)
+            DateTime privatePensionDate, decimal spending, ITaxSystem taxSystem, DateTime? givenRetirementDate = null, MoneyPots pots = null)
         {
             StepDate = stepStepDate;
             PrivatePensionAmount = previousStep.PrivatePensionAmount;
             Spending = spending;
+            NiContributingYears = previousStep.NiContributingYears;
             _previousStep = previousStep;
             _person = person;
             _calcdMinimum = calcdMinimum;
             _assumptions = assumptions;
             _privatePensionDate = privatePensionDate;
             _givenRetirementDate = givenRetirementDate;
+            _taxSystem = taxSystem;
             Pots = pots ?? MoneyPots.From(previousStep.Pots, _person.EmergencyFundSpec.RequiredEmergencyFund(Spending));
         }
 
-        private Step(DateTime now, int existingSavings, int existingPrivatePension, EmergencyFundSpec emergencyFundSpec, decimal personMonthlySpending)
+        private Step(DateTime now, int niContributingYearsSoFar, int existingSavings, int existingPrivatePension, EmergencyFundSpec emergencyFundSpec, decimal personMonthlySpending)
         {
             StepDate = now;
 
+            NiContributingYears = niContributingYearsSoFar;
             var requiredCashSavings = emergencyFundSpec.RequiredEmergencyFund(personMonthlySpending);
             Pots = new MoneyPots(requiredCashSavings);
             Pots.AssignIncome(existingSavings);
@@ -55,10 +60,16 @@ namespace Calculator
             Spending = personMonthlySpending;
         }
 
+        public static Step CreateInitialStep(DateTime now, int niContributingYearsSoFar, int existingSavings, int existingPrivatePension, EmergencyFundSpec emergencyFundSpec,
+            decimal personMonthlySpending)
+        {
+            return new Step(now, niContributingYearsSoFar, existingSavings, existingPrivatePension, emergencyFundSpec, personMonthlySpending);
+        }
+
         private Step(Step previousStep, in DateTime stepDate, Person person, in bool calcdMinimum, IAssumptions assumptions, in DateTime privatePensionDate, in decimal spending, DateTime? 
             givenRetirementDate, MoneyPots pots, in decimal predictedStatePensionAnnual, in int niContributingYears, in decimal growth, in decimal childBenefit, in decimal afterTaxSalary, 
             in decimal afterTaxRentalIncome, in decimal afterTaxStatePension, in decimal afterTaxPrivatePensionIncome, in decimal privatePensionAmount,
-            decimal preTaxSalary, decimal annualPreTaxPrivatePensionIncome, decimal monthlyPreTaxPrivatePensionIncome, decimal preTaxStatePensionIncome)
+            decimal preTaxSalary, decimal annualPreTaxPrivatePensionIncome, decimal monthlyPreTaxPrivatePensionIncome, decimal preTaxStatePensionIncome, ITaxSystem taxSystem)
         {
             StepDate = stepDate;
             Spending = spending;
@@ -82,18 +93,14 @@ namespace Calculator
             _annualPreTaxPrivatePensionIncome = annualPreTaxPrivatePensionIncome;
             _monthlyPreTaxPrivatePensionIncome = monthlyPreTaxPrivatePensionIncome;
             _preTaxStatePensionIncome = preTaxStatePensionIncome;
+            _taxSystem = taxSystem;
         }
 
-        public static Step CreateInitialStep(DateTime now, int existingSavings, int existingPrivatePension, EmergencyFundSpec emergencyFundSpec, decimal personMonthlySpending)
-        {
-            return new Step(now, existingSavings, existingPrivatePension, emergencyFundSpec, personMonthlySpending);
-        }
-        
         public Step CopyForCalcMinimumMode()
         {
             return new Step(_previousStep, StepDate, _person, _calcdMinimum, _assumptions, _privatePensionDate, Spending, _givenRetirementDate, Pots.Copy(), 
                 PredictedStatePensionAnnual, NiContributingYears, Growth, ChildBenefit, AfterTaxSalary, AfterTaxRentalIncome, AfterTaxStatePension, AfterTaxPrivatePensionIncome, PrivatePensionAmount,
-                _preTaxSalary, _annualPreTaxPrivatePensionIncome, _monthlyPreTaxPrivatePensionIncome, _preTaxStatePensionIncome); 
+                _preTaxSalary, _annualPreTaxPrivatePensionIncome, _monthlyPreTaxPrivatePensionIncome, _preTaxStatePensionIncome, _taxSystem); 
         }
 
         public DateTime StepDate { get; private set; }
@@ -111,7 +118,7 @@ namespace Calculator
         public decimal Investments => Pots.Investments;
         public decimal EmergencyFund => Pots.EmergencyFund;
 
-        public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate)
+        public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate, Money monthlySalary, DateTime now)
         {
             if (PersonHasQuitWork())
             {
@@ -120,8 +127,9 @@ namespace Calculator
             }
             else
             {
-                var predictedStatePensionAnnual = statePensionAmountCalculator.Calculate(_person, StepDate);
-                NiContributingYears = predictedStatePensionAnnual.ContributingYears;
+                if (NiContributingYearsCalc.IsThisAContributingDate(now, StepDate, monthlySalary, _person, _taxSystem) && NiContributingYears < 35)
+                    NiContributingYears++;
+                var predictedStatePensionAnnual = statePensionAmountCalculator.Calculate(NiContributingYears);
                 PredictedStatePensionAnnual = Convert.ToInt32(predictedStatePensionAnnual.Amount);
             }
 
@@ -156,7 +164,9 @@ namespace Calculator
             if (!PersonHasQuitWork())
             {
                 var monthlySalary = _person.Salary / _monthly;
-                PrivatePensionAmount += _person.EmployeeContribution.Amount(monthlySalary) + _person.EmployerContribution.Amount(monthlySalary);
+                var amount = _person.EmployeeContribution.Amount(monthlySalary);
+                var money = _person.EmployerContribution.Amount(monthlySalary);
+                PrivatePensionAmount += amount + money;
             }
         }
 
