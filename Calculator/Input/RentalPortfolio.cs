@@ -23,12 +23,12 @@ namespace Calculator.Input
 
         private int Expenses()
         {
-            return _rentalInfos.Select(info => info.Expenses).Sum();
+            return _rentalInfos.Select(info => (int)info.Expenses).Sum();
         }
 
         private int GrossIncome()
         {
-            return _rentalInfos.Select(info => info.GrossIncome).Sum();
+            return _rentalInfos.Select(info => (int)info.GrossIncome).Sum();
         }
 
         public decimal TotalNetIncome()

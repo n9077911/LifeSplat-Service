@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -12,7 +13,7 @@ namespace Calculator
         }
     }
 
-
+    [DebuggerDisplay("{" + nameof(Value) + "}")]
     public class Money
     {
         private Money(in decimal number)
@@ -57,9 +58,9 @@ namespace Calculator
         public decimal Value { get; }
 
         public static implicit operator decimal(Money m) => m.Value;
-        public static implicit operator int(Money m) => (int)m.Value; //Loss of precision. Not deemed significant.
         public static implicit operator Money(int m) => Create(m);
         public static implicit operator Money(decimal m) => Create(m);
+        public static explicit operator int(Money m) => (int)m.Value; //Loss of precision. hence explicit only.
 
     }
 

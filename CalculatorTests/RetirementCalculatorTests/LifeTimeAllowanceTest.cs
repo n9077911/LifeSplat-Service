@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Calculator;
 using Calculator.Input;
 using Calculator.StatePensionCalculator;
+using Calculator.TaxSystem;
 using CalculatorTests.Utilities;
 using NUnit.Framework;
 
@@ -15,11 +16,13 @@ namespace CalculatorTests.RetirementCalculatorTests
         private readonly IStatePensionAmountCalculator _statePensionCalculator = new FixedStatePensionAmountCalculator(10_000);
         private readonly IAssumptions _assumptions = Assumptions.SafeWithdrawalNoInflationTake25Assumptions();
         private readonly IPensionAgeCalc _pensionAgeCalc = new PensionAgeCalc();
+        private TwentyTwentyTaxSystem _taxSystem;
 
         [Test]
         public async Task KnowsWhenTwoComplexPeopleCanRetire_GivenTheyAreAboveTheLTA()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
+            _taxSystem = new TwentyTwentyTaxSystem();
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var family = TestPersons.TwoComplexPeople_WithPension(_fixedDateProvider.Now(), 50_000, 1000_000).Family();
             var report = await calc.ReportForAsync(family);
@@ -43,7 +46,7 @@ namespace CalculatorTests.RetirementCalculatorTests
         [Test]
         public async Task KnowsWhenTwoComplexPeopleCanRetire_GivenTheyAreBelowTheLTA()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var family = TestPersons.TwoComplexPeople_WithPension(_fixedDateProvider.Now(), 50_000, 0).Family();
             var report = await calc.ReportForAsync(family);

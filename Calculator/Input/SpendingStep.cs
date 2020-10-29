@@ -13,4 +13,16 @@ namespace Calculator.Input
             NewAmount = newAmount;
         }
     }
+    
+    public class SalaryStep
+    {
+        public DateTime Date { get; }
+        public Money NewAmount { get; }
+
+        public SalaryStep(DateTime date, Money newAmount)
+        {
+            Date = date;
+            NewAmount = newAmount;
+        }
+    }
 }

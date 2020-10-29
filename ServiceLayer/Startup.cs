@@ -58,17 +58,6 @@ namespace ServiceLayer
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // var telemetryClient = app.ApplicationServices.GetService<TelemetryClient>();
-            
-            // app.UseExceptionHandler(errorApp =>
-            // {
-            //     errorApp.Run(async context =>
-            //     {
-            //         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
-            //         telemetryClient.TrackException(exceptionHandlerPathFeature.Error, new Dictionary<string, string> {{"Env", Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}});
-            //     });
-            // });
-            
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

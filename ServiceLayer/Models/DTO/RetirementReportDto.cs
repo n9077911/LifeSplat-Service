@@ -26,7 +26,7 @@ namespace ServiceLayer.Models.DTO
             TargetRetirementAge = retirementReport.TargetRetirementAge;
             TargetRetirementDate = retirementReport.TargetRetirementDate;
             BankruptDate = retirementReport.BankruptDate;
-            SpendingSteps = retirementReport.SpendingSteps.Select(s => new SpendingStepDto{StartDate = s.StartDate, EndDate = s.EndDate, Spending = s.Spending}).ToList();
+            SpendingSteps = retirementReport.SpendingSteps.Select(s => new SpendingStepDto{StartDate = s.StartDate, EndDate = s.EndDate, Spending = (int)s.Spending}).ToList();
             SavingsCombinedAtFinancialIndependenceAge = retirementReport.SavingsCombinedAtFinancialIndependenceAge;
             PrivatePensionCombinedAtFinancialIndependenceAge = retirementReport.PrivatePensionCombinedAtFinancialIndependenceAge;
             SavingsCombinedAtTargetRetirementAge = retirementReport.SavingsCombinedAtTargetRetirementAge;

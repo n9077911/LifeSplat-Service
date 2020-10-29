@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Calculator;
 using Calculator.Input;
 using Calculator.StatePensionCalculator;
+using Calculator.TaxSystem;
 using CalculatorTests.Utilities;
 using NUnit.Framework;
 
@@ -15,17 +16,18 @@ namespace CalculatorTests.RetirementCalculatorTests
         private readonly IStatePensionAmountCalculator _statePensionCalculator = new FixedStatePensionAmountCalculator(10_000);
         private readonly IAssumptions _assumptions = Assumptions.SafeWithdrawalNoInflationTake25Assumptions();
         private readonly IPensionAgeCalc _pensionAgeCalc = new PensionAgeCalc();
-        
+        private TwentyTwentyTaxSystem _taxSystem = new TwentyTwentyTaxSystem();
+
         [Test]
         public async Task KnowsWhenPeopleCanRetire_ConsideringKids()
         {
-            var family = TestPersons.TwoComplexPeople(_fixedDateProvider.Now(), 30_000)
+            var family =  TestPersons.TwoComplexPeople(_fixedDateProvider.Now(), 30_000)
                 .WithSalary(50_000, 30_000)
                 .WithEmployeePension(0, 0)
                 .WithChild(new DateTime(2015, 1, 1))
                 .Family();
 
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var report = await calc.ReportForAsync(family);
 
@@ -38,11 +40,11 @@ namespace CalculatorTests.RetirementCalculatorTests
         {
             var family = TestPersons.TwoComplexPeople(_fixedDateProvider.Now(), 30_000)
                 .WithSalary(100_000, 30_000)
-                .WithEmployeePension(.5m, 0) //50_000 minus 50% pension is only 30_000
+                .WithEmployeePension(50m, 0) //50_000 minus 50% pension is only 30_000
                 .WithChild(new DateTime(2015, 1, 1))
                 .Family();
 
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var report = await calc.ReportForAsync(family);
 
@@ -55,11 +57,11 @@ namespace CalculatorTests.RetirementCalculatorTests
         {
             var family = TestPersons.TwoComplexPeople(_fixedDateProvider.Now(), 30_000)
                 .WithSalary(30_000, 100_000)
-                .WithEmployeePension(0, 0) //50_000 minus 50% pension is only 30_000
+                .WithEmployeePension(50, 0) //50_000 minus 50% pension is only 30_000
                 .WithChild(new DateTime(2015, 1, 1))
                 .Family();
 
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var report = await calc.ReportForAsync(family);
 

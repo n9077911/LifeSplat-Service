@@ -19,16 +19,18 @@ namespace Calculator
         private readonly IAssumptions _assumptions;
         private readonly IPensionAgeCalc _pensionAgeCalc;
         private readonly IStatePensionAmountCalculator _statePensionAmountCalculator;
+        private readonly ITaxSystem _taxSystem;
         private readonly DateTime _now;
         private IncomeTaxCalculator _incomeTaxCalculator;
 
         public RetirementIncrementalApproachCalculator(IDateProvider dateProvider,
             IAssumptions assumptions, IPensionAgeCalc pensionAgeCalc,
-            IStatePensionAmountCalculator statePensionAmountCalculator)
+            IStatePensionAmountCalculator statePensionAmountCalculator, ITaxSystem taxSystem)
         {
             _assumptions = assumptions;
             _pensionAgeCalc = pensionAgeCalc;
             _statePensionAmountCalculator = statePensionAmountCalculator;
+            _taxSystem = taxSystem;
             _now = dateProvider.Now();
         }
 
@@ -68,7 +70,7 @@ namespace Calculator
         private IRetirementReport ReportFor(Family family, bool exitOnceMinCalcd = false, DateTime? givenRetirementDate = null)
         {
             _incomeTaxCalculator = new IncomeTaxCalculator();
-            var result = new RetirementReport(_pensionAgeCalc, _incomeTaxCalculator, family, _now, givenRetirementDate, _assumptions);
+            var result = new RetirementReport(_pensionAgeCalc, _incomeTaxCalculator, family, _now, givenRetirementDate, _assumptions, _taxSystem);
 
             var calcdMinimum = false;
 
@@ -121,11 +123,13 @@ namespace Calculator
                 if (person.Retired(calcdMinimum, person.StepReport.CurrentStep.StepDate, givenRetirementDate))
                     person.CrystallisePension();
 
+                var salary = person.MonthlySalaryAfterDeductionsAt(person.StepReport.CurrentStep.StepDate);
+
                 person.StepReport.UpdateSpending();
                 person.StepReport.UpdatePrivatePension();
                 person.StepReport.UpdateGrowth();
-                person.StepReport.UpdateStatePensionAmount(_statePensionAmountCalculator, person.StatePensionDate);
-                person.StepReport.UpdateSalary(person.MonthlySalaryAfterDeductions);
+                person.StepReport.UpdateStatePensionAmount(_statePensionAmountCalculator, person.StatePensionDate, salary);
+                person.StepReport.UpdateSalary(salary);
                 person.StepReport.ProcessTaxableIncomeIntoSavings();
             }
 

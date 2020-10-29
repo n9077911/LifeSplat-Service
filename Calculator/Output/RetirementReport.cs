@@ -4,6 +4,7 @@ using System.Linq;
 using Calculator.ExternalInterface;
 using Calculator.Input;
 using Calculator.StatePensionCalculator;
+using Calculator.TaxSystem;
 
 namespace Calculator.Output
 {
@@ -13,7 +14,7 @@ namespace Calculator.Output
         private readonly IAssumptions _assumptions;
         private readonly List<IPersonReport> _persons = new List<IPersonReport>();
 
-        public RetirementReport(IPensionAgeCalc pensionAgeCalc, IIncomeTaxCalculator incomeTaxCalculator, Family family, DateTime now, DateTime? givenRetirementDate, IAssumptions assumptions)
+        public RetirementReport(IPensionAgeCalc pensionAgeCalc, IIncomeTaxCalculator incomeTaxCalculator, Family family, DateTime now, DateTime? givenRetirementDate, IAssumptions assumptions, ITaxSystem taxSystem)
         {
             _family = family;
             _assumptions = assumptions;
@@ -29,7 +30,7 @@ namespace Calculator.Output
             
             var monthlySpending = MonthlySpendingAt(now)/family.Persons.Count;
             foreach (var person in family.Persons)
-                Persons.Add(new PersonReport(pensionAgeCalc, incomeTaxCalculator, person, now, givenRetirementDate, _assumptions, monthlySpending));
+                 Persons.Add(new PersonReport(pensionAgeCalc, incomeTaxCalculator, person, now, givenRetirementDate, _assumptions, monthlySpending, taxSystem));
         }
 
         private RetirementReport(Family family, IAssumptions assumptions, DateAmount timeToRetirement, DateTime? targetRetirementDate, List<SpendingStepReport> spendingSteps, List<IPersonReport> personReports)

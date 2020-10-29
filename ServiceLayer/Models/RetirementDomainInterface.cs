@@ -43,17 +43,25 @@ namespace ServiceLayer.Models
             {
                 CurrentValue = Money.Create(infoDto.CurrentValue),
                 Expenses = Money.Create(infoDto.Expenses),
-                GrossIncome = Money.Create(infoDto.GrossIncome),
+                GrossIncome = Money.Create(infoDto.GrossRent),
                 Repayment = infoDto.Repayment,
-                MortgagePayments = Money.Create(infoDto.MortgagePayments),
+                MortgagePayments = Money.Create(infoDto.MortgageCosts),
                 OutstandingMortgage = Money.Create(infoDto.OutstandingMortgage), 
                 RemainingTerm = infoDto.RemainingTerm
             });
 
+            var dob = DateTime.Parse(dto.Dob);
+            
+            var salaryStepInputs = new List<SalaryStep>();
+            var salarySteps = dto.SalarySteps.Where(step => !string.IsNullOrWhiteSpace(step.Age) && !string.IsNullOrWhiteSpace(step.Amount))
+                .Select(step => new SalaryStep(step.Date ?? dob.AddYears(Convert.ToInt32(step.Age)), Money.Create(step.Amount)));
+            salaryStepInputs.AddRange(salarySteps);
+            
             var person = new Person
             {
-                Dob = DateTime.Parse(dto.Dob),
+                Dob = dob,
                 Salary = Money.Create(dto.Salary),
+                SalaryStepInputs = salaryStepInputs, 
                 Sex = dto.Female ? Sex.Female : Sex.Male,
                 EmergencyFundSpec = emergencyFundSpec,
                 ExistingSavings = Money.Create(dto.Savings),

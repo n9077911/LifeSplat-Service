@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Calculator.Input;
 using Calculator.StatePensionCalculator;
+using Calculator.TaxSystem;
 
 namespace Calculator.Output
 {
@@ -14,23 +16,30 @@ namespace Calculator.Output
     {
         private readonly Person _person;
         private readonly StepType _stepType;
+        private readonly DateTime _now;
         private readonly IAssumptions _assumptions;
+        private readonly ITaxSystem _taxSystem;
         private readonly DateTime _privatePensionDate;
 
-        public StepsReport(Person person, StepType stepType, DateTime now, IAssumptions assumptions, decimal monthlySpendingNow, DateTime privatePensionDate)
+        public StepsReport(Person person, int niContributingYearsSoFar, StepType stepType, DateTime now, IAssumptions assumptions, decimal monthlySpendingNow, DateTime privatePensionDate,
+            ITaxSystem taxSystem)
         {
             _person = person;
             _stepType = stepType;
+            _now = now;
             _assumptions = assumptions;
+            _taxSystem = taxSystem;
             _privatePensionDate = privatePensionDate;
-            Steps.Add(Step.CreateInitialStep(now, person.ExistingSavings, person.ExistingPrivatePension, person.EmergencyFundSpec, monthlySpendingNow));
+            Steps.Add(Step.CreateInitialStep(now, niContributingYearsSoFar, (int)person.ExistingSavings, (int)person.ExistingPrivatePension, person.EmergencyFundSpec, monthlySpendingNow));
         }
 
-        private StepsReport(Person person, StepType stepType, IAssumptions assumptions, in DateTime privatePensionDate, Step step)
+        private StepsReport(Person person, StepType stepType, IAssumptions assumptions, in DateTime privatePensionDate, Step step, ITaxSystem taxSystem, DateTime now)
         {
             _person = person;
             _stepType = stepType;
             _assumptions = assumptions;
+            _taxSystem = taxSystem;
+            _now = now;
             _privatePensionDate = privatePensionDate;
             Steps.Add(step);
         }
@@ -46,18 +55,18 @@ namespace Calculator.Output
             var spending = spendingForDate.MonthlySpendingAt(newStepDate)/numberOfPersons;
                 
             Steps.Add(_stepType == StepType.CalcMinimum 
-            ? new Step(CurrentStep, newStepDate, _person, calcdMinimum, _assumptions, _privatePensionDate, spending) 
-            : new Step(CurrentStep, newStepDate, _person, false, _assumptions, _privatePensionDate, spending, givenRetirementDate)); 
+            ? new Step(CurrentStep, newStepDate, _person, calcdMinimum, _assumptions, _privatePensionDate, spending, _taxSystem) 
+            : new Step(CurrentStep, newStepDate, _person, false, _assumptions, _privatePensionDate, spending, _taxSystem, givenRetirementDate)); 
         }
 
         public StepsReport CopyFromCurrent()
         {
-            return new StepsReport(_person, _stepType, _assumptions, _privatePensionDate, CurrentStep.CopyForCalcMinimumMode());
+            return new StepsReport(_person, _stepType, _assumptions, _privatePensionDate, CurrentStep.CopyForCalcMinimumMode(), _taxSystem, _now);
         }
 
-        public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate)
+        public void UpdateStatePensionAmount(IStatePensionAmountCalculator statePensionAmountCalculator, DateTime personStatePensionDate, Money salary)
         {
-            CurrentStep.UpdateStatePensionAmount(statePensionAmountCalculator, personStatePensionDate);
+            CurrentStep.UpdateStatePensionAmount(statePensionAmountCalculator, personStatePensionDate, salary, _now);
         }
 
         public void UpdateGrowth()

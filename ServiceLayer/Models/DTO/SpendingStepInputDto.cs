@@ -9,4 +9,11 @@ namespace ServiceLayer.Models.DTO
         public string Age { get; set; }
         public string Amount { get; set; }
     }
+    
+    public class SalaryStepInputDto
+    {
+        public DateTime? Date { get; set; }
+        public string Age { get; set; }
+        public string Amount { get; set; }
+    }
 }
