@@ -43,5 +43,12 @@ namespace CalculatorTests
             Assert.That(new PensionAgeCalc().StatePensionDate(now.AddYears(1), Sex.Female), Is.EqualTo(now.AddYears(69)));
             Assert.That(new PensionAgeCalc().StatePensionDate(now.AddYears(1), Sex.Male), Is.EqualTo(now.AddYears(69)));
         }
+
+        [Test]
+        public void CalculatesPrivatePensionAgeBasedOn2028CutOff()
+        {
+            Assert.That(new PensionAgeCalc().PrivatePensionDate(DateTime.MinValue.AddYears(10), new DateTime(1973, 1, 1)), Is.EqualTo(DateTime.MinValue));
+            Assert.That(new PensionAgeCalc().PrivatePensionDate(DateTime.MinValue.AddYears(10), new DateTime(1972, 12, 31)), Is.EqualTo(new DateTime(2027, 12, 31)));
+        }
     }
 }
