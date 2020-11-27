@@ -20,7 +20,7 @@ namespace CalculatorTests.Utilities
             return _statePensionAge;
         }
 
-        public DateTime PrivatePensionDate(DateTime statePensionAge)
+        public DateTime PrivatePensionDate(DateTime statePensionAge, DateTime dob)
         {
             return _privatePensionAge ?? _statePensionAge.AddYears(-10);
         }

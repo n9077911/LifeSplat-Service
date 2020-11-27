@@ -20,7 +20,7 @@ namespace Calculator.Output
         {
             Person = person;
             StatePensionDate = pensionAgeCalc.StatePensionDate(person.Dob, person.Sex);
-            PrivatePensionDate = pensionAgeCalc.PrivatePensionDate(StatePensionDate);
+            PrivatePensionDate = pensionAgeCalc.PrivatePensionDate(StatePensionDate, person.Dob);
             TargetRetirementDate = givenRetirementDate;
             var salaryAfterDeductions = person.EmployeeContribution.SubtractContribution(person.Salary);
             var taxResult = incomeTaxCalculator.TaxFor(salaryAfterDeductions);

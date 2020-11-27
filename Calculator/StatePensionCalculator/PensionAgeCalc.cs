@@ -134,8 +134,12 @@ namespace Calculator.StatePensionCalculator
             return null;
         }
 
-        public DateTime PrivatePensionDate(DateTime statePensionDate)
+        public DateTime PrivatePensionDate(DateTime statePensionDate, DateTime dob)
         {
+            if (AgeCalc.Age(dob, new DateTime(2027, 12, 31)) >= 55) //how this switch from 55 to 57 works is not yet known.
+                return dob.AddYears(55);   //I've taken the worst possible assumption here - 1st jan 2028 - but could be 5th April or 5th Oct when state pension hits 67.
+
+                                                               
             //There is a legal question mark as to whether this blanket rule applies.
             //For those with a state pension age of 68 its not been confirmed that the private pension age is 58.
             return statePensionDate.AddYears(-10);
