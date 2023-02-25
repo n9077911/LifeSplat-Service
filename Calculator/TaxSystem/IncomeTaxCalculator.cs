@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Calculator.ExternalInterface;
@@ -22,20 +23,13 @@ namespace Calculator.TaxSystem
 
         private static void AddNationalInsurance(decimal payeSalary, TaxResult result)
         {
-            int lowerBound = 9_500;
-            int midBound = 50_000;
-            int upperBound = Int32.MaxValue;
+            var taxBands = new TaxBands();
 
-            if (payeSalary > lowerBound)
+            foreach (var band in taxBands.NationalInsuranceBands)
             {
-                var lowerRatePay = Math.Min(midBound, payeSalary);
-                result.AddNationalInsurance(((lowerRatePay - lowerBound) * .12m), IncomeType.Salary);
-            }
-
-            if (payeSalary > midBound)
-            {
-                var midRatePay = Math.Min(upperBound, payeSalary);
-                result.AddNationalInsurance(((midRatePay - midBound) * .02m), IncomeType.Salary);
+                var taxable = Math.Min(payeSalary, band.UpperBound) - band.LowerBound;
+                if (taxable > 0)
+                    result.AddNationalInsurance(taxable * band.Rate, IncomeType.Salary);
             }
         }
 
@@ -92,6 +86,25 @@ namespace Calculator.TaxSystem
             }
 
             return taxBandTracker.Subtract(incomeToCalcTaxOn);
+        }
+    }
+
+    internal class TaxBands
+    {
+        public IList<TaxBand> NationalInsuranceBands { get; } = new[] {new TaxBand(Int32.MaxValue, 50_000, .02m),  new TaxBand(50_000, 9_500, .12m) };
+    }
+
+    internal class TaxBand
+    {
+        public int UpperBound { get; }
+        public int LowerBound { get; }
+        public decimal Rate { get; }
+
+        public TaxBand(int upperBound, int lowerBound, decimal rate)
+        {
+            UpperBound = upperBound;
+            LowerBound = lowerBound;
+            Rate = rate;
         }
     }
 }
