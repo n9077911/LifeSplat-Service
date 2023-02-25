@@ -41,7 +41,7 @@ namespace Calculator.TaxSystem
 
         private static void AddIncomeTax(decimal payeSalary, decimal privatePension, decimal statePension, RentalIncomeForTax rentalIncome, TaxResult result)
         {
-            var taxBands = TaxBands.InitialEngland2020();
+            var taxBands = TaxBandTracker.InitialEngland2020();
             
             taxBands.UpdatePersonalAllowance(payeSalary, privatePension, statePension, rentalIncome?.GetIncomeToPayTaxOn() ?? 0);
             taxBands = UpdateTaxResultWithIncome(result, payeSalary, IncomeType.Salary, taxBands);
@@ -51,7 +51,7 @@ namespace Calculator.TaxSystem
                 rentalIncome?.TaxDeductibleFinancingCosts() ?? 0);
         }
 
-        private static TaxBands UpdateTaxResultWithIncome(TaxResult result, decimal incomeToCalcTaxOn, IncomeType incomeType, TaxBands taxBands, decimal? incomeToRecord = null, decimal financingCosts = 0)
+        private static TaxBandTracker UpdateTaxResultWithIncome(TaxResult result, decimal incomeToCalcTaxOn, IncomeType incomeType, TaxBandTracker taxBandTracker, decimal? incomeToRecord = null, decimal financingCosts = 0)
         {
             decimal incomeTracker = incomeToCalcTaxOn;
             
@@ -61,25 +61,25 @@ namespace Calculator.TaxSystem
                 result.AddIncomeFor(incomeTracker, incomeType);
             
             decimal totalTaxPaid = 0;
-            if (incomeTracker > taxBands.ExtraHighBand)
+            if (incomeTracker > taxBandTracker.ExtraHighBand)
             {
-                var extraHighBand = (incomeTracker - taxBands.ExtraHighBand) * .45m;
+                var extraHighBand = (incomeTracker - taxBandTracker.ExtraHighBand) * .45m;
                 totalTaxPaid += extraHighBand;
                 result.AddIncomeTax(extraHighBand, incomeType);
-                incomeTracker = taxBands.ExtraHighBand;
+                incomeTracker = taxBandTracker.ExtraHighBand;
             }
 
-            if (incomeTracker > taxBands.HigherBand)
+            if (incomeTracker > taxBandTracker.HigherBand)
             {
-                var higherBandTax = (incomeTracker - taxBands.HigherBand) * .4m;
+                var higherBandTax = (incomeTracker - taxBandTracker.HigherBand) * .4m;
                 totalTaxPaid = higherBandTax;
                 result.AddIncomeTax(higherBandTax, incomeType);
-                incomeTracker = taxBands.HigherBand;
+                incomeTracker = taxBandTracker.HigherBand;
             }
 
-            if (incomeTracker > taxBands.PersonalAllowance)
+            if (incomeTracker > taxBandTracker.PersonalAllowance)
             {
-                var lowerBandTax = (incomeTracker - taxBands.PersonalAllowance) * .2m;
+                var lowerBandTax = (incomeTracker - taxBandTracker.PersonalAllowance) * .2m;
                 totalTaxPaid += lowerBandTax;
                 result.AddIncomeTax(lowerBandTax, incomeType);
             }
@@ -91,7 +91,7 @@ namespace Calculator.TaxSystem
                 result.AddRentalTaxCredit(usableTaxCredit);
             }
 
-            return taxBands.Subtract(incomeToCalcTaxOn);
+            return taxBandTracker.Subtract(incomeToCalcTaxOn);
         }
     }
 }

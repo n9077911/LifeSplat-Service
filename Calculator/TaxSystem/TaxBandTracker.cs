@@ -7,7 +7,7 @@ namespace Calculator.TaxSystem
     /// <summary>
     /// Tracks how much of the given tax bands have been used up e.g. if someone earns 5k they have used 5k of the 12_500 tax free allowance
     /// </summary>
-    internal class TaxBands
+    internal class TaxBandTracker
     {
         private readonly decimal _lowerBandLimit;
         private readonly int _personalAllowanceWithdrawalLimit;
@@ -16,7 +16,7 @@ namespace Calculator.TaxSystem
         public decimal HigherBand => PersonalAllowance + _lowerBandLimit;
         public decimal ExtraHighBand { get; }
 
-        private TaxBands(decimal personalAllowance, decimal lowerBandLimit, decimal extraHighBand, int personalAllowanceWithdrawalLimit)
+        private TaxBandTracker(decimal personalAllowance, decimal lowerBandLimit, decimal extraHighBand, int personalAllowanceWithdrawalLimit)
         {
             PersonalAllowance = personalAllowance;
             _lowerBandLimit = lowerBandLimit;
@@ -24,9 +24,9 @@ namespace Calculator.TaxSystem
             _personalAllowanceWithdrawalLimit = personalAllowanceWithdrawalLimit;
         }
 
-        public static TaxBands InitialEngland2020()
+        public static TaxBandTracker InitialEngland2020()
         {
-            return new TaxBands(12_509, 37_500, 150_000, 100_000);
+            return new TaxBandTracker(12_509, 37_500, 150_000, 100_000);
         }
 
         public void UpdatePersonalAllowance(decimal payeSalary, decimal privatePension, decimal statePension, decimal rentalIncome)
@@ -38,9 +38,9 @@ namespace Calculator.TaxSystem
             }
         }
 
-        public TaxBands Subtract(decimal income)
+        public TaxBandTracker Subtract(decimal income)
         {
-            return new TaxBands(Math.Max(0, PersonalAllowance - income), Math.Max(0, _lowerBandLimit - income), Math.Max(0, ExtraHighBand - income), _personalAllowanceWithdrawalLimit);
+            return new TaxBandTracker(Math.Max(0, PersonalAllowance - income), Math.Max(0, _lowerBandLimit - income), Math.Max(0, ExtraHighBand - income), _personalAllowanceWithdrawalLimit);
         }
     }
 }
