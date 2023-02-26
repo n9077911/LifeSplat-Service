@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Calculator.TaxSystem
 {
@@ -9,26 +7,23 @@ namespace Calculator.TaxSystem
     /// </summary>
     internal class TaxBandTracker
     {
-        private readonly decimal _lowerBandLimit;
+        private readonly decimal _basicRateBand;
         private readonly int _personalAllowanceWithdrawalLimit;
 
-        public decimal PersonalAllowance { get; private set; }
-        public decimal HigherBand => PersonalAllowance + _lowerBandLimit;
-        public decimal ExtraHighBand { get; }
-
-        private TaxBandTracker(decimal personalAllowance, decimal lowerBandLimit, decimal extraHighBand, int personalAllowanceWithdrawalLimit)
+        private TaxBandTracker(decimal personalAllowance, decimal basicRateBand, decimal higherRateUpperBound, int personalAllowanceWithdrawalLimit)
         {
             PersonalAllowance = personalAllowance;
-            _lowerBandLimit = lowerBandLimit;
-            ExtraHighBand = extraHighBand;
+            _basicRateBand = basicRateBand;
+            HigherRateUpperBound = higherRateUpperBound;
             _personalAllowanceWithdrawalLimit = personalAllowanceWithdrawalLimit;
         }
+        
+        public decimal PersonalAllowance { get; private set; }
 
-        public static TaxBandTracker InitialEngland2020()
-        {
-            return new TaxBandTracker(12_509, 37_500, 150_000, 100_000);
-        }
-
+        public decimal HigherBand => PersonalAllowance + _basicRateBand;
+        
+        public decimal HigherRateUpperBound { get; }
+        
         public void UpdatePersonalAllowance(decimal payeSalary, decimal privatePension, decimal statePension, decimal rentalIncome)
         {
             var totalIncome = payeSalary + privatePension + statePension + rentalIncome;
@@ -40,7 +35,16 @@ namespace Calculator.TaxSystem
 
         public TaxBandTracker Subtract(decimal income)
         {
-            return new TaxBandTracker(Math.Max(0, PersonalAllowance - income), Math.Max(0, _lowerBandLimit - income), Math.Max(0, ExtraHighBand - income), _personalAllowanceWithdrawalLimit);
+            return new TaxBandTracker(Math.Max(0, PersonalAllowance - income), 
+                Math.Max(0, _basicRateBand - income), 
+                Math.Max(0, HigherRateUpperBound - income), 
+                _personalAllowanceWithdrawalLimit);
+        }
+
+        public static TaxBandTracker For(ITaxSystem taxSystem)
+        {
+            return new TaxBandTracker(taxSystem.PersonalAllowance, taxSystem.BasicRateBand,
+                taxSystem.HigherRateUpperBound, taxSystem.PersonalAllowanceTaperPoint);
         }
     }
 }

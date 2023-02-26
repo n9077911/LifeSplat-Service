@@ -42,7 +42,7 @@ namespace ServiceLayer
             services.AddControllers(options => { options.InputFormatters.Insert(0, new TextPlainInputFormatter()); });
             services.AddControllers().AddNewtonsoftJson();
             
-            services.AddSingleton<ITaxSystem, TwentyTwentyTaxSystem>();
+            services.AddSingleton<ITaxSystem, England2020TaxSystem>();
             services.AddSingleton<IIncomeTaxCalculator, IncomeTaxCalculator>();
             services.AddSingleton<ITaxCalculatorDomainInterface, TaxCalculatorDomainInterface>();
             services.AddSingleton<IDateProvider, DateProvider>();

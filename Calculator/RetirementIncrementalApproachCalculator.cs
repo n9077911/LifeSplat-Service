@@ -25,7 +25,8 @@ namespace Calculator
 
         public RetirementIncrementalApproachCalculator(IDateProvider dateProvider,
             IAssumptions assumptions, IPensionAgeCalc pensionAgeCalc,
-            IStatePensionAmountCalculator statePensionAmountCalculator, ITaxSystem taxSystem)
+            IStatePensionAmountCalculator statePensionAmountCalculator, 
+            ITaxSystem taxSystem)
         {
             _assumptions = assumptions;
             _pensionAgeCalc = pensionAgeCalc;
@@ -69,7 +70,7 @@ namespace Calculator
 
         private IRetirementReport ReportFor(Family family, bool exitOnceMinCalcd = false, DateTime? givenRetirementDate = null)
         {
-            _incomeTaxCalculator = new IncomeTaxCalculator();
+            _incomeTaxCalculator = new IncomeTaxCalculator(_taxSystem);
             var result = new RetirementReport(_pensionAgeCalc, _incomeTaxCalculator, family, _now, givenRetirementDate, _assumptions, _taxSystem);
 
             var calcdMinimum = false;
