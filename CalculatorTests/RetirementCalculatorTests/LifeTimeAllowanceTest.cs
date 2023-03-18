@@ -16,12 +16,12 @@ namespace CalculatorTests.RetirementCalculatorTests
         private readonly IStatePensionAmountCalculator _statePensionCalculator = new FixedStatePensionAmountCalculator(10_000);
         private readonly IAssumptions _assumptions = Assumptions.SafeWithdrawalNoInflationTake25Assumptions();
         private readonly IPensionAgeCalc _pensionAgeCalc = new PensionAgeCalc();
-        private TwentyTwentyTaxSystem _taxSystem;
+        private England2020TaxSystem _taxSystem;
 
         [Test]
         public async Task KnowsWhenTwoComplexPeopleCanRetire_GivenTheyAreAboveTheLTA()
         {
-            _taxSystem = new TwentyTwentyTaxSystem();
+            _taxSystem = new England2020TaxSystem();
             var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var family = TestPersons.TwoComplexPeople_WithPension(_fixedDateProvider.Now(), 50_000, 1000_000).Family();
