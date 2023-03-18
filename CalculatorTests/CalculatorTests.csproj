@@ -17,4 +17,8 @@
     <ProjectReference Include="..\Calculator\Calculator.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="testhost.runtimeconfig.json" />
+  </ItemGroup>
+
 </Project>
