@@ -24,6 +24,12 @@
     <ProjectReference Include="..\Calculator\Calculator.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="SCTaxCalcService.PublishSettings">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 
 </Project>
 
