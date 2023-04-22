@@ -33,7 +33,7 @@ steps:
     inputs:
       testSelector: 'testAssemblies'
       testAssemblyVer2: |
-             **\*tests.dll
+             **\bin\**\*tests.dll
       platform: '$(buildPlatform)'
       configuration: '$(buildConfiguration)'
 

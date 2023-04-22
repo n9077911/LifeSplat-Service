@@ -17,7 +17,7 @@ namespace CalculatorTests.RetirementCalculatorTests
     public class RetirementIncrementalApproachCalculatorTest
     {
         private readonly FixedDateProvider _fixedDateProvider = new FixedDateProvider(new DateTime(2020, 1, 1));
-        private readonly ITaxSystem _taxSystem = new TwentyTwentyTaxSystem();
+        private readonly ITaxSystem _taxSystem = new England2020TaxSystem();
         private readonly StatePensionAmountCalculator _statePensionCalculator = new StatePensionAmountCalculator();
         private readonly IAssumptions _assumptions = Assumptions.SafeWithdrawalNoInflationAssumptions();
         private readonly StubPensionAgeCalc _pensionAgeCalc = new StubPensionAgeCalc(new DateTime(2049, 05, 30));

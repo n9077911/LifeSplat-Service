@@ -209,8 +209,8 @@ namespace Calculator
         {
             //Simplification - calculate tax for the whole year then divide it for the month
             //this will not be accurate on years where someone quits work or starts receiving a pension.
-            //In that case the fact they work\receive pension for a partial year would mean their real tax bill is less that calculated here
-            var incomeTaxCalculator = new IncomeTaxCalculator();
+            //In that case the fact they work/receive pension for a partial year would mean their real tax bill is less that calculated here
+            var incomeTaxCalculator = new IncomeTaxCalculator(_taxSystem);
             var afterTax = incomeTaxCalculator.TaxFor(_preTaxSalary * 12, _annualPreTaxPrivatePensionIncome, _preTaxStatePensionIncome * 12, _person.RentalPortfolio.RentalIncome());
             AfterTaxSalary = afterTax.AfterTaxIncomeFor(IncomeType.Salary) / 12;
             AfterTaxPrivatePensionIncome = _monthlyPreTaxPrivatePensionIncome - (afterTax.TotalTaxFor(IncomeType.PrivatePension) / 12);

@@ -18,7 +18,7 @@ namespace CalculatorTests.RetirementCalculatorTests
         private readonly StatePensionAmountCalculator _statePensionCalculator = new StatePensionAmountCalculator();
         private readonly IAssumptions _assumptions = Assumptions.SafeWithdrawalNoInflationTake25Assumptions();
         private readonly StubPensionAgeCalc _pensionAgeCalc = new StubPensionAgeCalc(new DateTime(2049, 05, 30));
-        private static TwentyTwentyTaxSystem _taxSystem = new TwentyTwentyTaxSystem();
+        private static England2020TaxSystem _taxSystem = new();
 
         [Test]
         public async Task KnowsWhenTwoComplexWorkingPeopleCanRetire_NoGivenRetirementDate_RetirementAfterPrivatePensionAge()
