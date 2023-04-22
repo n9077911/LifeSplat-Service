@@ -4,6 +4,9 @@ namespace Calculator.TaxSystem
 {
     public interface ITaxSystem
     {
+        /// <summary>
+        /// Lower earnings limit - defines how much someone must earn to receive a NI stamp towards their pension
+        /// </summary>
         int LowerEarningsLimit { get; }
         IEnumerable<TaxBand> NationalInsuranceBands { get; }
         int PersonalAllowance { get; }
