@@ -118,15 +118,5 @@ namespace Calculator.Output
         {
             CurrentStep.CalculateChildBenefit(partner);
         }
-
-        public decimal CalcLtaCharge()
-        {
-            return CurrentStep.CalcLtaCharge();
-        }
-
-        public void PayLtaCharge(in decimal ltaCharge)
-        {
-            CurrentStep.PayLtaCharge(ltaCharge);
-        }
     }
 }

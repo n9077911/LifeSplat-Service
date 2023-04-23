@@ -40,7 +40,6 @@ namespace Calculator.Output
         int PrivatePensionPotAtCrystallisationAge { get; }
         int PrivatePensionPotBeforeCrystallisation { get; }
         int Take25LumpSum { get; }
-        int LifeTimeAllowanceTaxCharge { get; }
         
         bool Retired(in bool calcdMinimum, in DateTime now, DateTime? givenRetirementDate);
         void UpdateFinancialIndependenceDate(in DateTime minimumPossibleRetirementDate);

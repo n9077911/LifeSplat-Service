@@ -78,7 +78,6 @@ namespace ServiceLayer.Models.DTO
                     PrivatePensionPotBeforeCrystallisation = personReport.PrivatePensionPotBeforeCrystallisation,
                     PrivatePensionSafeWithdrawal = personReport.PrivatePensionSafeWithdrawal,
                     Take25LumpSum = personReport.Take25LumpSum,
-                    LifeTimeAllowanceTaxCharge = personReport.LifeTimeAllowanceTaxCharge,
                     AfterTaxSalary = personReport.TakeHomeSalary,
                     PensionContributions = personReport.PensionContributions,
                     TakeHomeRentalIncome = personReport.TakeHomeRentalIncome,
@@ -112,7 +111,6 @@ namespace ServiceLayer.Models.DTO
         public int PrivatePensionPotBeforeCrystallisation { get; set;}
         public int PrivatePensionSafeWithdrawal { get; set;}
         public int Take25LumpSum { get; set;}
-        public int LifeTimeAllowanceTaxCharge { get; set;}
         public int NationalInsuranceBill { get; set;}
         public int IncomeTaxBill { get; set;}
         public int RentalTaxBill { get; set;}
