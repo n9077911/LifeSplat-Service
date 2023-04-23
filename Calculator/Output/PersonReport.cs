@@ -146,10 +146,6 @@ namespace Calculator.Output
         {
             PrivatePensionPotBeforeCrystallisation = Convert.ToInt32(StepReport.CurrentStep.PrivatePensionAmount);
 
-            var ltaCharge = StepReport.CalcLtaCharge();
-            StepReport.PayLtaCharge(ltaCharge);
-            LifeTimeAllowanceTaxCharge = Convert.ToInt32(ltaCharge);
-
             if (_take25)
             {
                 var take25Result = StepReport.CalcTake25();

@@ -12,7 +12,7 @@ namespace Calculator.TaxSystem
 
         public IncomeTaxCalculator()
         {
-            _taxSystem = new England2020TaxSystem();
+            _taxSystem = new EnglandTaxSystem2223();
         }
         
         public IncomeTaxCalculator(ITaxSystem taxSystem)

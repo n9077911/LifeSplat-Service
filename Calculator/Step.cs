@@ -233,15 +233,5 @@ namespace Calculator
             Pots.AssignIncome(take25Result.TaxFreeAmount);
             PrivatePensionAmount = take25Result.NewPensionPot;
         }
-
-        public decimal CalcLtaCharge()
-        {
-            return LtaChargeRule.Calc(PrivatePensionAmount, _assumptions.LifeTimeAllowance);
-        }
-
-        public void PayLtaCharge(decimal ltaCharge)
-        {
-            PrivatePensionAmount -= ltaCharge;
-        }
     }
 }

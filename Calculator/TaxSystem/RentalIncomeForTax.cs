@@ -7,7 +7,7 @@ namespace Calculator.TaxSystem
         private readonly decimal _grossIncome;
         private readonly decimal _expenses;
         private readonly decimal _financingCosts;
-        private readonly int _allowance = 1000;
+        private readonly int _allowance = 1000; //todo: Move this to the TaxSystem
 
         public RentalIncomeForTax(decimal grossIncome, decimal expenses, decimal financingCosts)
         {
