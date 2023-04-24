@@ -6,19 +6,23 @@ namespace Calculator
     public class Assumptions : IAssumptions
     {
         public int EstimatedDeathAge { get; set; }
-        public decimal AnnualGrowthRate { get; set; }
+        public decimal AnnualGrowthRate { get; private init; }
         public decimal MonthlyGrowthRate => ConvertAnnualRateToMonthly(AnnualGrowthRate);
         public bool Take25 { get; set; }
-        public int LifeTimeAllowance { get; } = 1_073_100;
+        public int LifeTimeAllowance => 1_073_100;
 
-        public static Assumptions SafeWithdrawalNoInflationAssumptions()
+        private Assumptions()
         {
-            return new Assumptions {EstimatedDeathAge = 100, AnnualGrowthRate = 0.04m, Take25 = false};
+        }
+
+        public static Assumptions SafeWithdrawalNoInflationAssumptions(decimal annualGrowthRate = 0.04m)
+        {
+            return new Assumptions {EstimatedDeathAge = 100, AnnualGrowthRate = annualGrowthRate, Take25 = false};
         }
         
-        public static Assumptions SafeWithdrawalNoInflationTake25Assumptions()
+        public static Assumptions SafeWithdrawalNoInflationTake25Assumptions(decimal annualGrowthRate = 0.04m)
         {
-            return new Assumptions {EstimatedDeathAge = 100, AnnualGrowthRate = 0.04m, Take25 = true};
+            return new Assumptions {EstimatedDeathAge = 100, AnnualGrowthRate = annualGrowthRate, Take25 = true};
         }
         
         private static decimal ConvertAnnualRateToMonthly(decimal rate)

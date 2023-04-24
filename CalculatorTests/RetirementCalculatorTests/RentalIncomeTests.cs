@@ -43,9 +43,9 @@ namespace CalculatorTests.RetirementCalculatorTests
                 .WithRental(1, 10_000, 3_000, 2000)
                 .Family();
 
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
-            var report = await calc.ReportForAsync(twoComplexPeople, targetRetirement);
+            var report = await calc.ReportForAsync(twoComplexPeople, _assumptions, targetRetirement);
 
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(minimumPossible));
             Assert.That(report.SavingsAt100, Is.EqualTo(savings));

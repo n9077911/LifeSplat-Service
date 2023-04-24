@@ -29,10 +29,17 @@ namespace ServiceLayer.Models
                 emergencyFundSpec = emergencyFundSpec.SplitInTwo();
 
             var person = personList.Select(p => PersonStatus(p, emergencyFundSpec));
-            var spendingStepInputs = new List<SpendingStep> {new SpendingStep(DateTime.Now.Date, Money.Create(requestDto.Spending))};
+            var spendingStepInputs = new List<SpendingStep> {new(DateTime.Now.Date, Money.Create(requestDto.Spending))};
             spendingStepInputs.AddRange(requestDto.SpendingSteps.Select(dto => new SpendingStep(dto.Date ?? person.First().Dob.AddYears(Convert.ToInt32(dto.Age)), Money.Create(dto.Amount))));
 
-            var retirementReport = await _retirementCalculator.ReportForTargetAgeAsync(person, spendingStepInputs, Age.Create(requestDto.TargetRetirementAge));
+            IAssumptions assumptions = Assumptions.SafeWithdrawalNoInflationTake25Assumptions();
+            if (!string.IsNullOrWhiteSpace(requestDto.AnnualGrowthRate))
+            {
+                var annualGrowthRate = decimal.Parse(requestDto.AnnualGrowthRate);
+                assumptions = Assumptions.SafeWithdrawalNoInflationTake25Assumptions(annualGrowthRate);
+            }
+
+            var retirementReport = await _retirementCalculator.ReportForTargetAgeAsync(person, spendingStepInputs, Age.Create(requestDto.TargetRetirementAge), assumptions);
 
             return new RetirementReportDto(retirementReport);
         }

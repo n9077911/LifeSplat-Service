@@ -9,5 +9,6 @@ namespace ServiceLayer.Models.DTO
         public IEnumerable<PersonDto> Persons { get; set; }
         public IEnumerable<SpendingStepInputDto> SpendingSteps { get; set; }
         public string Spending { get; set; }
+        public string AnnualGrowthRate { get; set; }
     }
 }
