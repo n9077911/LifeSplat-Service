@@ -27,9 +27,9 @@ namespace CalculatorTests.RetirementCalculatorTests
                 .WithSalaryStep(1, 50, 50_000)
                 .Family();    
             
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
-            var report = await calc.ReportForAsync(family);
+            var report = await calc.ReportForAsync(family, _assumptions);
 
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2025, 9, 1)));
             Assert.That(report.SavingsAt100, Is.EqualTo(151_343));
@@ -45,9 +45,9 @@ namespace CalculatorTests.RetirementCalculatorTests
                 .Family();
 
             var realStatePensionCalculator = new StatePensionAmountCalculator();
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, realStatePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, realStatePensionCalculator, _taxSystem);
 
-            var report = await calc.ReportForAsync(family);
+            var report = await calc.ReportForAsync(family, _assumptions);
 
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2066, 2, 1)));
             Assert.That(report.Persons[0].NiContributingYears, Is.EqualTo(35));

@@ -12,6 +12,6 @@ namespace Calculator.ExternalInterface
     /// </summary>
     public interface IRetirementCalculator
     {
-        Task<IRetirementReport> ReportForTargetAgeAsync(IEnumerable<Person> personStatus, IEnumerable<SpendingStep> spendingStepInputs, Maybe<Age> retirementAge);
+        Task<IRetirementReport> ReportForTargetAgeAsync(IEnumerable<Person> personStatus, IEnumerable<SpendingStep> spendingStepInputs, Maybe<Age> retirementAge, IAssumptions assumptions);
     }
 }

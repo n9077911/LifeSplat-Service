@@ -23,7 +23,7 @@ namespace CalculatorTests.RetirementCalculatorTests
         [Test]
         public async Task KnowsWhenTwoComplexWorkingPeopleCanRetire_NoGivenRetirementDate_RetirementAfterPrivatePensionAge()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000,
                 EmployeeContribution = 5m, EmployerContribution = 3m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
@@ -32,7 +32,7 @@ namespace CalculatorTests.RetirementCalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> stepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 70_000)};
-            var report = await calc.ReportForAsync(new Family(personStatuses, stepInputs));
+            var report = await calc.ReportForAsync(new Family(personStatuses, stepInputs), _assumptions);
             
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2055, 02, 01)));
             Assert.That(report.FinancialIndependenceAge, Is.EqualTo(73));
@@ -42,7 +42,7 @@ namespace CalculatorTests.RetirementCalculatorTests
         [Test]
         public async Task KnowsWhenTwoComplexWorkingPeopleCanRetire_NoGivenRetirementDate_RetirementBeforePrivatePensionAge()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000,
                 EmployeeContribution = 5m, EmployerContribution = 3m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
@@ -51,7 +51,7 @@ namespace CalculatorTests.RetirementCalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 50_000)};
-            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs));
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs), _assumptions);
             
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2037, 03, 01)));
             Assert.That(report.FinancialIndependenceAge, Is.EqualTo(55));
@@ -61,7 +61,7 @@ namespace CalculatorTests.RetirementCalculatorTests
         [Test]
         public async Task KnowsWhenTwoComplexWorkingPeopleCanRetire_WithGivenRetirementDate_RetirementAfterPrivatePensionAge()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000,
                 EmployeeContribution = 5m, EmployerContribution = 3m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
@@ -70,7 +70,7 @@ namespace CalculatorTests.RetirementCalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 50_000)};
-            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs), new DateTime(2050, 03, 01));
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs), _assumptions, new DateTime(2050, 03, 01));
             
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2037, 03, 01)));
             Assert.That(report.FinancialIndependenceAge, Is.EqualTo(55));
@@ -80,7 +80,7 @@ namespace CalculatorTests.RetirementCalculatorTests
         [Test]
         public async Task KnowsWhenTwoComplexWorkingPeopleCanRetire_WithGivenRetirementDate_RetirementBeforePrivatePensionAge()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var person1 = new Person {Salary = 50_000, Dob = new DateTime(1981, 05, 30), ExistingSavings = 50_000, ExistingPrivatePension = 50_000,
                 EmployeeContribution = 5m, EmployerContribution = 3m, EmergencyFundSpec = new EmergencyFundSpec("50000")};
@@ -89,7 +89,7 @@ namespace CalculatorTests.RetirementCalculatorTests
 
             IEnumerable<Person> personStatuses = new[] {person1, person2};
             IEnumerable<SpendingStep> spendingStepInputs = new []{new SpendingStep(_fixedDateProvider.Now(), 41_000)};
-            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs), new DateTime(2035, 03, 01));
+            var report = await calc.ReportForAsync(new Family(personStatuses, spendingStepInputs), _assumptions, new DateTime(2035, 03, 01));
             
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2032, 08, 01)));
             Assert.That(report.SavingsAt100, Is.EqualTo(1_462_789));

@@ -27,9 +27,9 @@ namespace CalculatorTests.RetirementCalculatorTests
                 .WithChild(new DateTime(2015, 1, 1))
                 .Family();
 
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
-            var report = await calc.ReportForAsync(family);
+            var report = await calc.ReportForAsync(family, _assumptions);
 
             Assert.That(report.Persons[0].StepReport.Steps[1].ChildBenefit, Is.EqualTo(92).Within(1));
             Assert.That(report.Persons[1].StepReport.Steps[1].ChildBenefit, Is.EqualTo(0));
@@ -44,9 +44,9 @@ namespace CalculatorTests.RetirementCalculatorTests
                 .WithChild(new DateTime(2015, 1, 1))
                 .Family();
 
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
-            var report = await calc.ReportForAsync(family);
+            var report = await calc.ReportForAsync(family, _assumptions);
 
             Assert.That(report.Persons[0].StepReport.Steps[1].ChildBenefit, Is.EqualTo(92).Within(1));
             Assert.That(report.Persons[1].StepReport.Steps[1].ChildBenefit, Is.EqualTo(0));
@@ -61,9 +61,9 @@ namespace CalculatorTests.RetirementCalculatorTests
                 .WithChild(new DateTime(2015, 1, 1))
                 .Family();
 
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
-            var report = await calc.ReportForAsync(family);
+            var report = await calc.ReportForAsync(family, _assumptions);
 
             Assert.That(report.Persons[0].StepReport.Steps[1].ChildBenefit, Is.EqualTo(0));
             Assert.That(report.Persons[1].StepReport.Steps[1].ChildBenefit, Is.EqualTo(0));

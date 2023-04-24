@@ -22,10 +22,10 @@ namespace CalculatorTests.RetirementCalculatorTests
         public async Task KnowsWhenTwoComplexPeopleCanRetire_GivenTheyAreAboveTheLTA()
         {
             _taxSystem = new England2020TaxSystem();
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var family = TestPersons.TwoComplexPeople_WithPension(_fixedDateProvider.Now(), 50_000, 1000_000).Family();
-            var report = await calc.ReportForAsync(family);
+            var report = await calc.ReportForAsync(family, _assumptions);
 
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2031, 11, 01)));
             Assert.That(report.Persons[0].PrivatePensionPotCrystallisationDate, Is.EqualTo(new DateTime(2039, 06, 01)));
@@ -44,10 +44,10 @@ namespace CalculatorTests.RetirementCalculatorTests
         [Test]
         public async Task KnowsWhenTwoComplexPeopleCanRetire_GivenTheyAreBelowTheLTA()
         {
-            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _assumptions, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
+            var calc = new RetirementIncrementalApproachCalculator(_fixedDateProvider, _pensionAgeCalc, _statePensionCalculator, _taxSystem);
 
             var family = TestPersons.TwoComplexPeople_WithPension(_fixedDateProvider.Now(), 50_000, 0).Family();
-            var report = await calc.ReportForAsync(family);
+            var report = await calc.ReportForAsync(family, _assumptions);
 
             Assert.That(report.FinancialIndependenceDate, Is.EqualTo(new DateTime(2039, 05, 01)));
             Assert.That(report.Persons[0].PrivatePensionPotCrystallisationDate, Is.EqualTo(new DateTime(2039, 06, 01)));

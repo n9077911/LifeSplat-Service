@@ -16,37 +16,35 @@ namespace Calculator
     /// </summary>
     public class RetirementIncrementalApproachCalculator : IRetirementCalculator
     {
-        private readonly IAssumptions _assumptions;
         private readonly IPensionAgeCalc _pensionAgeCalc;
         private readonly IStatePensionAmountCalculator _statePensionAmountCalculator;
         private readonly ITaxSystem _taxSystem;
         private readonly DateTime _now;
         private IncomeTaxCalculator _incomeTaxCalculator;
 
-        public RetirementIncrementalApproachCalculator(IDateProvider dateProvider,
-            IAssumptions assumptions, IPensionAgeCalc pensionAgeCalc,
+        public RetirementIncrementalApproachCalculator(IDateProvider dateProvider, IPensionAgeCalc pensionAgeCalc,
             IStatePensionAmountCalculator statePensionAmountCalculator, 
             ITaxSystem taxSystem)
         {
-            _assumptions = assumptions;
             _pensionAgeCalc = pensionAgeCalc;
             _statePensionAmountCalculator = statePensionAmountCalculator;
             _taxSystem = taxSystem;
             _now = dateProvider.Now();
         }
 
-        public async Task<IRetirementReport> ReportForTargetAgeAsync(IEnumerable<Person> personStatus, IEnumerable<SpendingStep> spendingStepInputs, Maybe<Age> retirementAge)
+        public async Task<IRetirementReport> ReportForTargetAgeAsync(IEnumerable<Person> personStatus,
+            IEnumerable<SpendingStep> spendingStepInputs, Maybe<Age> retirementAge, IAssumptions assumptions)
         {
             var retirementDate = retirementAge.HasValue ? retirementAge.Value.DateFrom(personStatus.First().Dob) : (DateTime?) null;
-            return await ReportForAsync(new Family(personStatus, spendingStepInputs), retirementDate);
+            return await ReportForAsync(new Family(personStatus, spendingStepInputs), assumptions, retirementDate);
         }
 
-        public async Task<IRetirementReport> ReportForAsync(Family family, DateTime? givenRetirementDate = null)
+        public async Task<IRetirementReport> ReportForAsync(Family family, IAssumptions assumptions, DateTime? givenRetirementDate = null)
         {
             if (givenRetirementDate != null)
             {
-                var retirementDateTask = Task.Run(() => ReportFor(family, false, givenRetirementDate));
-                var earliestPossibleTask = Task.Run(() => ReportFor(family, true));
+                var retirementDateTask = Task.Run(() => ReportFor(family, assumptions, false, givenRetirementDate));
+                var earliestPossibleTask = Task.Run(() => ReportFor(family, assumptions, true));
 
                 await retirementDateTask;
                 await earliestPossibleTask;
@@ -61,21 +59,21 @@ namespace Calculator
                 return retirementDateResult;
             }
 
-            var report = ReportFor(family);
+            var report = ReportFor(family, assumptions);
             
             report.ProcessResults(_now);
             
             return report;
         }
 
-        private IRetirementReport ReportFor(Family family, bool exitOnceMinCalcd = false, DateTime? givenRetirementDate = null)
+        private IRetirementReport ReportFor(Family family, IAssumptions assumptions, bool exitOnceMinCalcd = false, DateTime? givenRetirementDate = null)
         {
             _incomeTaxCalculator = new IncomeTaxCalculator(_taxSystem);
-            var result = new RetirementReport(_pensionAgeCalc, _incomeTaxCalculator, family, _now, givenRetirementDate, _assumptions, _taxSystem);
+            var result = new RetirementReport(_pensionAgeCalc, _incomeTaxCalculator, family, _now, givenRetirementDate, assumptions, _taxSystem);
 
             var calcdMinimum = false;
 
-            var monthsToDeath = MonthsToDeath(family.PrimaryPerson.Dob, _now);
+            var monthsToDeath = MonthsToDeath(family.PrimaryPerson.Dob, _now, assumptions.EstimatedDeathAge);
             for (var month = 1; month <= monthsToDeath; month++)
             {
                 ProgressTheResultBy1Month(family, givenRetirementDate, result, calcdMinimum);
@@ -144,9 +142,9 @@ namespace Calculator
             result.BalanceSavings();
         }
 
-        private int MonthsToDeath(DateTime dob, DateTime now)
+        private int MonthsToDeath(DateTime dob, DateTime now, int estimatedDeathAge)
         {
-            var dateAmount = new DateAmount(now, dob.AddYears(_assumptions.EstimatedDeathAge));
+            var dateAmount = new DateAmount(now, dob.AddYears(estimatedDeathAge));
             return dateAmount.TotalMonths();
         }
     }
